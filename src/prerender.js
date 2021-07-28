@@ -4,14 +4,30 @@ import fse from 'fs-extra';
 import { join } from 'path';
 import path from 'path';
 
-import { Renderer } from './lib/renderer.js';
-import { getPages } from './lib/utils.js';
-import Template from '../src/__index.svelte';
+import { Renderer } from './renderer.js';
+import { getPages } from './utils.js';
+// const getPages = () => {}
+// Dynamic import
 
-const template = Template.render();
-const renderer = new Renderer(template.html);
+const config = {
+  projectRoot: 'test'
+}
+
+
+
+const root = process.cwd();
 
 async function main() {
+  
+  const Template = (await import('../.cayo/prerender/__index.svelte')).default;
+  
+  // import Template from '../test/__index.svelte';
+
+  const template = Template.render();
+  const renderer = new Renderer(template.html);
+  console.log(renderer);
+
+
   // const templatePath = join(process.cwd(), 'src', 'index.template')
   const publicPath = join(process.cwd(), '.cayo/');
   const componentsToHydrate  = [];
@@ -21,7 +37,8 @@ async function main() {
   // TODO: get css from template and app, and concat in a new bundle
 
 
-  const pages = getPages('svelte');
+  const pages = await getPages('svelte');
+  console.log('pages', pages);
 
   if (!existsSync(publicPath)) {
     await fs.mkdir(publicPath)
@@ -46,4 +63,34 @@ async function main() {
   
 }
 
-main()
+// fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte', err => {
+//   if (err) return console.log(err);
+//   console.log('rip');
+
+//   // const files = [] // files, directories, symlinks, etc
+//   // klaw(`${config.projectRoot}/src/pages`)
+//   //   .on('data', file => files.push(item.path))
+//   //   .on('end', () => console.dir(files)) // => [ ... array of files]
+//   // for await (const file of klaw(`${config.projectRoot}/src/pages`)) {
+//   //   console.log(file)
+//   // }
+//   // main()
+// });
+
+
+// TODO: this prob needs to be put into a separate script and run entirely before prerender bc of import dependencies
+async function prep() {
+  try {
+    await fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte');
+    let temp = await fse.readFile('./src/templates/importMetaGlobEager.template', 'utf8');
+    temp = temp.replace('%PATH%', `../../${config.projectRoot}/src/pages/**/*.svelte`);
+    await fse.outputFile('./.cayo/prerender/getPagesUtility.js', temp);
+    main();
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+
+prep();
+// main();

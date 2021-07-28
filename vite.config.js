@@ -6,6 +6,7 @@ import sveltePreprocess from 'svelte-preprocess'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // root: './test',
   plugins: [svelte({
     preprocess: sveltePreprocess({ preserve: ['json'] }),
     compilerOptions: {

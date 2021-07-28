@@ -1,6 +1,11 @@
+import modules from '../.cayo/prerender/getPagesUtility.js';
+console.log(modules);
+
 export function getPages(ext) {
   // TODO: build path from config
-  const modules = import.meta.globEager(`../../src/pages/**/*.svelte`);
+
+  // const modules = import.meta.globEager(`/src/pages/**/*.svelte`);
+  // const modules = import.meta.globEager(`/Users/matthewia/cayo/test/src/pages/**/*.svelte`);
   // TODO: make dynamically build from ext by adding \. to each and delimiting with |
   const extRegex = new RegExp(String.raw`(\.${ext})$`);
 
@@ -20,4 +25,11 @@ export function getPages(ext) {
     }
     return pages
   }, {})
+}
+
+async function findPages(pages) {
+
+  for (let p of pages) {
+
+  }
 }
