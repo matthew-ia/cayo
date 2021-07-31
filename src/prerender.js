@@ -1,7 +1,6 @@
 // require('svelte/register');
 import { existsSync, promises as fs } from 'fs';
 import fse from 'fs-extra';
-import { join } from 'path';
 import path from 'path';
 
 import { Renderer } from './renderer.js';
@@ -12,14 +11,37 @@ import { getPages } from './utils.js';
 const config = {
   projectRoot: 'test'
 }
-
-import loadTemplate from '../.cayo/prerender/template.js';
-
-
-
 const root = process.cwd();
 
-async function main() {
+// import { loadTemplate, loadPages } from '../.cayo/generated/dynamicImports.js';
+
+
+
+
+// async function prep() {
+//   try {
+//     // await fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte');
+
+//     const resolvedProjectRoot = path.resolve(process.cwd(), config.projectRoot);
+//     const loadTemplate = `export async function loadTemplate() {
+//       return (await import('${resolvedProjectRoot}/src/__index.svelte')).default;
+//     }`;
+//     const loadPages = `export async function loadPages() {
+//       return import.meta.globEager('${resolvedProjectRoot}/src/pages/**/*.svelte');
+//     }`;
+//     await fse.outputFile(`${path.resolve(process.cwd(), '.cayo')}/generated/dynamicImports.js`, `${loadTemplate}\n${loadPages}`);
+//     // await fse.outputFile(`${path.resolve(process.cwd(), '.cayo')}/generated/template.js`, importPagesStr);
+
+//   } catch (err) {
+//     console.error(err)
+//   }
+// }
+
+// prep();
+
+
+export async function prerender() {
+  const { loadTemplate, loadPages } = await import('../.cayo/generated/dynamicImports.js');
   const Template = await loadTemplate();
   // import Template from '../.cayo/prerender/template.js';
 
@@ -34,7 +56,7 @@ async function main() {
 
 
   // const templatePath = join(process.cwd(), 'src', 'index.template')
-  const publicPath = join(process.cwd(), '.cayo/');
+  const publicPath = path.join(process.cwd(), '.cayo/');
   const componentsToHydrate  = [];
 
   // const template = await fs.readFile(templatePath)
@@ -65,7 +87,6 @@ async function main() {
     //   // template.toString().replace('%cayo.head%', page.head).replace('%cayo.body%', page.html)
     // )
   });
-  
 }
 
 // fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte', err => {
@@ -82,20 +103,14 @@ async function main() {
 //   // main()
 // });
 
+// let temp = await fse.readFile('./src/templates/importMetaGlobEager.template', 'utf8');
+    // temp = temp.replace('%PATH%', `../../${config.projectRoot}/src/pages/**/*.svelte`);
 
-// TODO: this prob needs to be put into a separate script and run entirely before prerender bc of import dependencies
-// async function prep() {
-//   try {
-//     await fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte');
-//     let temp = await fse.readFile('./src/templates/importMetaGlobEager.template', 'utf8');
-//     temp = temp.replace('%PATH%', `../../${config.projectRoot}/src/pages/**/*.svelte`);
-//     await fse.outputFile('./.cayo/prerender/getPagesUtility.js', temp);
-//     main();
-//   } catch (err) {
-//     console.error(err)
-//   }
-// }
-main();
+// Do some prep work that creates dependencies for main, because of rollup weirdness with dynamic imports specifically regarding .svelte files
+// e.g. TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".svelte"
+
+
+// main();
 
 // prep();
 // main();

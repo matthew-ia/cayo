@@ -6,20 +6,20 @@ export async function getPages(ext, path) {
   // TODO: build path from config
 
   const filePaths = [] // files, directories, symlinks, etc
-  const modules = [];
+  // const modules = [];
   // klaw(`${path}/src/pages`)
   //   .on('data', file => filePaths.push(file.path))
   //   .on('end', () => {
   //     console.log('end', filePaths);
   //   })
-  for await (const file of klaw(`${path}/src/pages`)) {
-    if (file.path.includes('.svelte')) {
-      console.log(file.path);
-      // let pageModule = ;
-      modules.push(await import(file.path));
-      console.log('pageModule', pageModule);
-    }
-  } 
+  // for await (const file of klaw(`${path}/src/pages`)) {
+  //   if (file.path.includes('.svelte')) {
+  //     console.log(file.path);
+  //     // let pageModule = ;
+  //     modules.push(await import(file.path));
+  //     console.log('pageModule', pageModule);
+  //   }
+  // } 
   // for (let p of filePaths) {
     
   // }
