@@ -13,13 +13,18 @@ const config = {
   projectRoot: 'test'
 }
 
+import loadTemplate from '../.cayo/prerender/template.js';
+
 
 
 const root = process.cwd();
 
 async function main() {
-  
-  const Template = (await import('../.cayo/prerender/__index.svelte')).default;
+  const Template = await loadTemplate();
+  // import Template from '../.cayo/prerender/template.js';
+
+  // const Template = (await import('../test/src/__index.svelte')).default;
+  console.log(Template);
   
   // import Template from '../test/__index.svelte';
 
@@ -37,7 +42,7 @@ async function main() {
   // TODO: get css from template and app, and concat in a new bundle
 
 
-  const pages = await getPages('svelte');
+  const pages = await getPages('svelte', path.resolve(root, config.projectRoot));
   console.log('pages', pages);
 
   if (!existsSync(publicPath)) {
@@ -45,7 +50,7 @@ async function main() {
   }
 
   Object.entries(pages).forEach(([pathname, page]) => {
-    // console.log(page.name, page.meta);
+    console.log(page.name, page.meta);
     const { html, css } = renderer.render(pathname, page);
     const filePath = `${page.name}.html`;
     fse.outputFileSync(path.resolve(publicPath, filePath), html);
@@ -79,18 +84,18 @@ async function main() {
 
 
 // TODO: this prob needs to be put into a separate script and run entirely before prerender bc of import dependencies
-async function prep() {
-  try {
-    await fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte');
-    let temp = await fse.readFile('./src/templates/importMetaGlobEager.template', 'utf8');
-    temp = temp.replace('%PATH%', `../../${config.projectRoot}/src/pages/**/*.svelte`);
-    await fse.outputFile('./.cayo/prerender/getPagesUtility.js', temp);
-    main();
-  } catch (err) {
-    console.error(err)
-  }
-}
+// async function prep() {
+//   try {
+//     await fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte');
+//     let temp = await fse.readFile('./src/templates/importMetaGlobEager.template', 'utf8');
+//     temp = temp.replace('%PATH%', `../../${config.projectRoot}/src/pages/**/*.svelte`);
+//     await fse.outputFile('./.cayo/prerender/getPagesUtility.js', temp);
+//     main();
+//   } catch (err) {
+//     console.error(err)
+//   }
+// }
+main();
 
-
-prep();
+// prep();
 // main();
