@@ -1,12 +1,13 @@
 // import fse from 'fs-extra';
 // import path from 'path';
 
-const loadConfigFile = require('rollup/dist/loadConfigFile');
-const path = require('path');
-const fse = require('fs-extra');
-const rollup = require('rollup');
-const fg = require('fast-glob');
-const crypto = require('crypto');
+import loadConfigFile from 'rollup/dist/loadConfigFile.js';
+import path from 'path';
+const __dirname = path.resolve();
+import fse from 'fs-extra';
+import * as rollup from 'rollup';
+import fg from 'fast-glob';
+import crypto from 'crypto';
 
 // load the config file next to the current script;
 // the provided config object has the same effect as passing "--format es"
@@ -65,8 +66,11 @@ async function createTemplateImport() {
 //   // console.log()
 // });
 
-async function build() {
-  return await loadConfigFile(path.resolve(__dirname, 'rollup.config.js'), { format: 'es' }).then(rollupBuild);
+// async function build() {
+//   return await loadConfigFile(path.resolve(__dirname, 'rollup.config.js'), { format: 'es' }).then(rollupBuild);
+// }
+function build() {
+  loadConfigFile(path.resolve(__dirname, 'rollup.config.js'), { format: 'es' }).then(rollupBuild);
 }
 
 async function rollupBuild({ options, warnings }) {
@@ -89,6 +93,24 @@ async function rollupBuild({ options, warnings }) {
   }
 
   const watcher = rollup.watch(options);
+
+  watcher.on('event', async (event) => {
+    // console.log(event.code);
+    if (event.code === 'END') {
+      await import(`./dist/prerender.js?v=${hash()}}`).then(({ prerender }) => prerender() );
+    }
+  })
+  watcher.on('change', (path) => {
+    // if (path.endsWith('.svelte')) {
+    //   if (path.endsWith('__index.svelte')) {
+    //     createTemplateImport();
+    //   } else {
+    //     createPageImports();
+    //   }
+    // }
+    console.log('> watch:change', path);
+  })
+
   watcher.on('event', ({ result }) => {
     if (result) {
       console.log('closing bundle');
@@ -103,7 +125,7 @@ async function rollupBuild({ options, warnings }) {
   // You can also pass this directly to "rollup.watch"
 }
 
-const chokidar = require('chokidar');
+import chokidar from 'chokidar';
 
 // One-liner for current directory
 const watcher = chokidar.watch(`${resolvedProjectRoot}/src`);
@@ -111,9 +133,23 @@ const watcher = chokidar.watch(`${resolvedProjectRoot}/src`);
 //   console.log('watch:', event, path);
 // });
 
-watcher.on('change', (path) => {
-  console.log('watch:change', path);
-  createPageImports();
-  createTemplateImport();
-  build();
+watcher.on('add', async (path) => {
+  console.log('watch:add', path);
+  // TODO: maybe improve this by programmatically spawning this entire script
+  // and watch for these files in an external chokidar instance
+  if (path.endsWith('.svelte')) {
+    if (path.endsWith('__index.svelte')) {
+      createTemplateImport();
+    } else {
+      createPageImports();
+    }
+  }
+  
+  // await build().then(async ()=>{
+  //   await import(`./dist/prerender.js?v=${hash()}}`).then(({ prerender }) => prerender() );
+  // });
 })
+
+createPageImports();
+createTemplateImport();
+build();

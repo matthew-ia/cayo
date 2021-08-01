@@ -15,7 +15,7 @@ export async function prerender() {
 
   const template = Template.render();
   const renderer = new Renderer(template.html);
-  console.log(renderer);
+  // console.log(renderer);
 
   const dotPath = path.join(process.cwd(), '.cayo/');
 
@@ -25,7 +25,7 @@ export async function prerender() {
   // TODO: get css from template and app, and concat in a new bundle
 
   const pages = await getPages('svelte');
-  console.log('pages', pages);
+  console.log(`Rendering ${Object.keys(pages).length} ${Object.keys(pages).length === 1 ? 'page' : 'pages'}...`);
 
   if (!fs.existsSync(dotPath)) {
     await fs.mkdir(dotPath)
@@ -48,6 +48,5 @@ export async function prerenderPage(renderer, rootPath, pathname, page) {
   if (css.code !== '') {
     await fs.outputFile(path.resolve(rootPath, `${page.filePath}index.css`), css.code)
       .then(() => console.log('🎨  CSS output for', `${page.filePath}.html`));
-    
   }
 }

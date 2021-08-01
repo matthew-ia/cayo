@@ -1,13 +1,8 @@
-// import modules from '../.cayo/prerender/getPagesUtility.js';
-// console.log(modules);
-import klaw from 'klaw';
-import { pages as _pages } from '../.cayo/generated/pages.js';
 
 export async function getPages(ext) {
   // TODO: build path from config
+  const { pages: _pages } = await import('../.cayo/generated/pages.js');
 
-  // const modules = import.meta.globEager(`/src/pages/**/*.svelte`);
-  // const modules = import.meta.globEager(`/Users/matthewia/cayo/test/src/pages/**/*.svelte`);
   const extRegex = new RegExp(String.raw`(\.${ext})$`);
 
   return Object.entries(_pages).reduce((pages, [modulePath, page]) => {
