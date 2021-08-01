@@ -1,116 +1,53 @@
-// require('svelte/register');
-import { existsSync, promises as fs } from 'fs';
-import fse from 'fs-extra';
+// import { existsSync, promises as fs } from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 
 import { Renderer } from './renderer.js';
 import { getPages } from './utils.js';
-// const getPages = () => {}
-// Dynamic import
 
 const config = {
   projectRoot: 'test'
 }
 const root = process.cwd();
 
-// import { loadTemplate, loadPages } from '../.cayo/generated/dynamicImports.js';
-
-
-
-
-// async function prep() {
-//   try {
-//     // await fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte');
-
-//     const resolvedProjectRoot = path.resolve(process.cwd(), config.projectRoot);
-//     const loadTemplate = `export async function loadTemplate() {
-//       return (await import('${resolvedProjectRoot}/src/__index.svelte')).default;
-//     }`;
-//     const loadPages = `export async function loadPages() {
-//       return import.meta.globEager('${resolvedProjectRoot}/src/pages/**/*.svelte');
-//     }`;
-//     await fse.outputFile(`${path.resolve(process.cwd(), '.cayo')}/generated/dynamicImports.js`, `${loadTemplate}\n${loadPages}`);
-//     // await fse.outputFile(`${path.resolve(process.cwd(), '.cayo')}/generated/template.js`, importPagesStr);
-
-//   } catch (err) {
-//     console.error(err)
-//   }
-// }
-
-// prep();
-
-
 export async function prerender() {
-  const { loadTemplate, loadPages } = await import('../.cayo/generated/dynamicImports.js');
-  const Template = await loadTemplate();
-  // import Template from '../.cayo/prerender/template.js';
-
-  // const Template = (await import('../test/src/__index.svelte')).default;
-  console.log(Template);
-  
-  // import Template from '../test/__index.svelte';
+  const { Template } = await import('../.cayo/generated/template.js');
 
   const template = Template.render();
   const renderer = new Renderer(template.html);
   console.log(renderer);
 
+  const dotPath = path.join(process.cwd(), '.cayo/');
 
-  // const templatePath = join(process.cwd(), 'src', 'index.template')
-  const publicPath = path.join(process.cwd(), '.cayo/');
+  // TODO: get component code
   const componentsToHydrate  = [];
 
-  // const template = await fs.readFile(templatePath)
-  // const app = App.render();
   // TODO: get css from template and app, and concat in a new bundle
 
-
-  const pages = await getPages('svelte', path.resolve(root, config.projectRoot));
+  const pages = await getPages('svelte');
   console.log('pages', pages);
 
-  if (!existsSync(publicPath)) {
-    await fs.mkdir(publicPath)
+  if (!fs.existsSync(dotPath)) {
+    await fs.mkdir(dotPath)
   }
 
   Object.entries(pages).forEach(([pathname, page]) => {
-    console.log(page.name, page.meta);
-    const { html, css } = renderer.render(pathname, page);
-    const filePath = `${page.name}.html`;
-    fse.outputFileSync(path.resolve(publicPath, filePath), html);
-    console.log('🖨   Prerendered', filePath);
-    if (css.code !== '') {
-      fse.outputFileSync(path.resolve(publicPath, `${page.name}.css`), css.code);
-      console.log('🎨  CSS output for', `${page.name}.css`)
-    }
-    // await fs.writeFile(
-    //   join(publicPath, 'index.html'),
-    //   page.html
-    //   // template.toString().replace('%cayo.head%', page.head).replace('%cayo.body%', page.html)
-    // )
+    prerenderPage(renderer, dotPath, pathname, page);
   });
 }
 
-// fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte', err => {
-//   if (err) return console.log(err);
-//   console.log('rip');
+export async function prerenderPage(renderer, rootPath, pathname, page) {
+  // console.log(page.filePath, page.meta);
+  const { html, css } = renderer.render(pathname, page);
 
-//   // const files = [] // files, directories, symlinks, etc
-//   // klaw(`${config.projectRoot}/src/pages`)
-//   //   .on('data', file => files.push(item.path))
-//   //   .on('end', () => console.dir(files)) // => [ ... array of files]
-//   // for await (const file of klaw(`${config.projectRoot}/src/pages`)) {
-//   //   console.log(file)
-//   // }
-//   // main()
-// });
+  const filePath = page.urlPath === '/' ? 'index.html' : `${page.filePath}/index.html`;
 
-// let temp = await fse.readFile('./src/templates/importMetaGlobEager.template', 'utf8');
-    // temp = temp.replace('%PATH%', `../../${config.projectRoot}/src/pages/**/*.svelte`);
+  await fs.outputFile(path.resolve(rootPath, `${filePath}`), html)
+    .then(() => console.log('🖨   Prerendered', `${filePath}`));
 
-// Do some prep work that creates dependencies for main, because of rollup weirdness with dynamic imports specifically regarding .svelte files
-// e.g. TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".svelte"
-
-
-// main();
-
-// prep();
-// main();
+  if (css.code !== '') {
+    await fs.outputFile(path.resolve(rootPath, `${page.filePath}index.css`), css.code)
+      .then(() => console.log('🎨  CSS output for', `${page.filePath}.html`));
+    
+  }
+}

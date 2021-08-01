@@ -6,7 +6,10 @@ import livereload from 'rollup-plugin-livereload';
 // import { sass } from 'svelte-preprocess-sass';
 
 
-
+// TODO: make this dynamic
+const cayoConfig = {
+	rootPath: 'test',
+}
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -56,13 +59,14 @@ export default {
 
 		// Watch the `public` directory and refresh the
 		// browser on changes when not in production
-		!production && livereload('public'), // (4)
+		!production && livereload('dist'), // (4)
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
 		// production && terser(),
 	],
 	watch: {
+		include: `${cayoConfig.rootPath}/src/**/*`,
 		clearScreen: false
 	}
 };

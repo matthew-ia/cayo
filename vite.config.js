@@ -6,30 +6,30 @@ import sveltePreprocess from 'svelte-preprocess'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // root: './test',
-  plugins: [svelte({
-    preprocess: sveltePreprocess({ preserve: ['json'] }),
-    compilerOptions: {
-      generate: 'ssr',
-      hydratable: true,
-      // we'll extract any component CSS out into
-      // a separate file - better for performance
-      css: css => {
-        css.write('dist/bundle.css'); // (3)
-      },
-    },
-  })],
+  root: './.cayo/',
+  // plugins: [svelte({
+  //   preprocess: sveltePreprocess({ preserve: ['json'] }),
+  //   compilerOptions: {
+  //     // generate: 'ssr',
+  //     // hydratable: true,
+  //     // we'll extract any component CSS out into
+  //     // a separate file - better for performance
+  //     css: css => {
+  //       css.write('dist/bundle.css'); // (3)
+  //     },
+  //   },
+  // })],
   
-  build: {
-    target: 'node16',
-    rollupOptions: {
-      output: {
-        sourcemap: true,
-        format: 'esm',
-      }
-    }
-  },
-  ssr: {
-    target: 'node',
-  }
+  // build: {
+  //   target: 'node16',
+  //   rollupOptions: {
+  //     output: {
+  //       sourcemap: true,
+  //       format: 'esm',
+  //     }
+  //   }
+  // },
+  // ssr: {
+  //   target: 'node',
+  // }
 })
