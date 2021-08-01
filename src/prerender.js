@@ -12,7 +12,6 @@ const root = process.cwd();
 
 export async function prerender() {
   const { Template } = await import('../.cayo/generated/template.js');
-
   const template = Template.render();
   const renderer = new Renderer(template.html);
   console.log(renderer);
@@ -24,30 +23,37 @@ export async function prerender() {
 
   // TODO: get css from template and app, and concat in a new bundle
 
-  const pages = await getPages('svelte');
+  const pages = getPages('svelte');
   console.log('pages', pages);
 
   if (!fs.existsSync(dotPath)) {
     await fs.mkdir(dotPath)
   }
 
-  Object.entries(pages).forEach(([pathname, page]) => {
-    prerenderPage(renderer, dotPath, pathname, page);
+
+  let results = [];
+  Object.entries(pages).forEach( async ([pathname, page]) => {
+    const result = renderer.render(pathname, page);
+    // const result = await prerenderPage(renderer, dotPath, pathname, page);
+    await writePage(page, result, dotPath);
+    results.push(result);
   });
 }
 
-export async function prerenderPage(renderer, rootPath, pathname, page) {
+export async function writePage(page, content = { html: '', css: '' }, distPath) {
   // console.log(page.filePath, page.meta);
-  const { html, css } = renderer.render(pathname, page);
+  // const { html, css } = renderer.render(pathname, page);
 
   const filePath = page.urlPath === '/' ? 'index.html' : `${page.filePath}/index.html`;
-
-  await fs.outputFile(path.resolve(rootPath, `${filePath}`), html)
+  try {
+    await fs.outputFile(path.resolve(distPath, `${filePath}`), content.html)
     .then(() => console.log('🖨   Prerendered', `${filePath}`));
 
-  if (css.code !== '') {
-    await fs.outputFile(path.resolve(rootPath, `${page.filePath}index.css`), css.code)
-      .then(() => console.log('🎨  CSS output for', `${page.filePath}.html`));
-    
+    if (content.css.code !== '') {
+      await fs.outputFile(path.resolve(distPath, `${page.filePath}index.css`), content.css.code)
+        .then(() => console.log('🎨  CSS output for', `${page.filePath}.html`));
+    }
+  } catch(err) {
+    console.error(err);
   }
 }

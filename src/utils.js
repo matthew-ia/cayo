@@ -1,9 +1,9 @@
 // import modules from '../.cayo/prerender/getPagesUtility.js';
 // console.log(modules);
-import klaw from 'klaw';
-import { pages as _pages } from '../.cayo/generated/pages.js';
+// import klaw from 'klaw';
+// import { pages as _pages } from '../.cayo/generated/pages.js';
 
-export async function getPages(ext) {
+export function getPages(ext, _pages = _pages) {
   // TODO: build path from config
 
   // const modules = import.meta.globEager(`/src/pages/**/*.svelte`);
@@ -14,8 +14,15 @@ export async function getPages(ext) {
     // Make these paths actually useful
     // /^(.+)\/pages/
     // /^(\/\w+)*\/pages/
-    const filePath = modulePath.replace(/^(.+)\/pages\//, '').replace(extRegex, '')
-    const urlPath = filePath === 'index' ? filePath.replace(/index$/, '/') : `${filePath}/`
+    const filePath = modulePath.replace(/^(.+)\/pages/, '').replace(extRegex, '')
+    const urlPath = filePath === '/index' 
+      ? filePath.replace(/index$/, '') 
+      : `${filePath}/`
+      // : filePath[0] !== '/' 
+      //   ? `/${filePath}/`
+      //   : `${filePath}/`;
+      
+    console.log('> getPages.urlPath', urlPath);
     // name = name.split('.', 1)[0];
     pages[urlPath] = {
       Component: page.default,
@@ -26,4 +33,8 @@ export async function getPages(ext) {
     }
     return pages
   }, {})
+}
+
+export function getDistPath() {
+  // TODO: write function that returns built dist path based on env and config root path
 }
