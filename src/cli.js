@@ -2,6 +2,12 @@ import { loadConfig } from './config.js';
 import yargs from 'yargs-parser';
 import { devServer } from './dev.js';
 import { build } from './build.js';
+import fs from 'fs-extra';
+
+// TODO: move this elsewhere
+if (!fs.existsSync(dotPath)) {
+  await fs.mkdir(dotPath)
+}
 
 // Load config
 

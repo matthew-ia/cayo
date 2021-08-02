@@ -1,7 +1,3 @@
-// require('svelte/register');
-import { existsSync, promises as fs } from 'fs';
-import { join } from 'path';
-// const svelte = require('svelte/compiler');
 
 export class Renderer {
 

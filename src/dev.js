@@ -1,35 +1,29 @@
-const fs = require('fs')
-const path = require('path')
-const express = require('express')
-const { createServer: createViteServer } = require('vite')
 
-async function createServer() {
-  const app = express()
-  const vite = await createViteServer({
-    server: { middlewareMode: 'ssr' }
-  })
-  app.use(vite.middlewares)
+import { getPages } from './utils.js';
+import { Renderer } from './renderer.js';
+import { prerender } from './prerender.js';
+import path from 'path';
 
-  app.use('*', async (req, res) => {
-    const { pathname } = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`)
+export async function dev(modulePath) {
 
-    try {
-      const template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8')
-      const transformedTemplate = await vite.transformIndexHtml(pathname, template)
-      const { Renderer } = await vite.ssrLoadModule('./src/renderer.js')
-      const renderer = new Renderer(transformedTemplate)
-      const { status, type, body } = renderer.render(pathname)
-      res.status(status).set({ 'Content-Type': type }).end(body)
-    } catch (e) {
-      vite.ssrFixStacktrace(e)
-      console.error(e)
-      res.status(500).end(e.message)
-    }
-  })
+  const dotPath = path.join(process.cwd(), '.cayo/');
+  const { Template } = await import('../.cayo/generated/template.js');
+  const template = Template.render();
+  const renderer = new Renderer(template.html);
+  const pages = await getPages();
 
-  app.listen(5000)
-
-  console.log('View in browser: http://localhost:5000')
+  if (modulePath) {
+    const ext = 'svelte';
+    const extRegex = new RegExp(String.raw`(\.${ext})$`);
+    const filePath = modulePath.replace(/^(.+)\/pages\//, '').replace(extRegex, '')
+    const urlPath = filePath === 'index' ? filePath.replace(/index$/, '/') : `${filePath}/`
+    prerender(renderer, urlPath, pages[urlPath], dotPath);
+  } else {
+    console.log(`Rendering ${Object.keys(pages).length} ${Object.keys(pages).length === 1 ? 'page' : 'pages'}...`);
+    Object.entries(pages).forEach(([pathname, page]) => {
+      prerender(renderer, pathname, page, dotPath);
+    });
+  }
 }
 
-createServer()
+

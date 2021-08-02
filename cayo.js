@@ -1,155 +1,111 @@
-// import fse from 'fs-extra';
-// import path from 'path';
 
-import loadConfigFile from 'rollup/dist/loadConfigFile.js';
+// Run createPageImports (initial)
+// Run createTemplateImport (initial)
+
+import { hash, viteBuildScript } from './dist/utils.js';
+import yargs from 'yargs-parser';
+import fs from 'fs-extra';
+import chokidar from 'chokidar';
 import path from 'path';
-const __dirname = path.resolve();
-import fse from 'fs-extra';
-import * as rollup from 'rollup';
-import fg from 'fast-glob';
-import crypto from 'crypto';
-
-// load the config file next to the current script;
-// the provided config object has the same effect as passing "--format es"
-// on the command line and will override the format of all outputs
-
-function hash() {
-  return crypto.randomBytes(5).toString('hex');
-}
+import { createPageImports, createTemplateImport } from './src/utils.js';
+import { dev } from './src/dev.js';
 
 const config = {
   projectRoot: 'test'
 }
 
 const resolvedProjectRoot = path.resolve(process.cwd(), config.projectRoot);
-/*
-const modules = {
-  './dir/foo.js': () => import('./dir/foo.js'),
-  './dir/bar.js': () => import('./dir/bar.js')
-}
-*/
-
-async function createPageImports() {
-  const pagePaths = await fg([`${resolvedProjectRoot}/src/pages/**/*.svelte`]);
-  let importPages = '';
-  pagePaths.forEach((path, i) => {
-    importPages += `import * as page_${i} from '${path}'\n`;
-  }); 
-  importPages += 'export const pages = {\n';
-  pagePaths.forEach((path, i) => {
-    importPages += `  '${path}': page_${i},\n`;
-  })
-  importPages += '}\n';
-  return await fse.outputFile(`${path.resolve(process.cwd(), '.cayo')}/generated/pages.js`, importPages);
-}
-
-async function createTemplateImport() {
-  let importTemplate = `export { default as Template } from '${resolvedProjectRoot}/src/__index.svelte';`;
-  await fse.outputFile(`${path.resolve(process.cwd(), '.cayo')}/generated/template.js`, importTemplate);
-}
-
-// async function prep() {
-//   try {
+const dotPath = path.join(process.cwd(), '.cayo/');
 
 
-//   } catch (err) {
-//     console.error(err)
-//   }
+// / Handle arguments
+function resolveArgs(argv) {
 
-//   // await import('./dist/prerender.js').then(({ prerender }) => prerender());
-// }
-
-
-// ).then(async () => {
-  
-//   // await import('./dist/prerender.js').then(() => console.log('done'));
-//   // console.log()
-// });
-
-// async function build() {
-//   return await loadConfigFile(path.resolve(__dirname, 'rollup.config.js'), { format: 'es' }).then(rollupBuild);
-// }
-function build() {
-  loadConfigFile(path.resolve(__dirname, 'rollup.config.js'), { format: 'es' }).then(rollupBuild);
-}
-
-async function rollupBuild({ options, warnings }) {
-  // "warnings" wraps the default `onwarn` handler passed by the CLI.
-  // This prints all warnings up to this point:
-  console.log(`We currently have ${warnings.count} warnings`);
-
-  // This prints all deferred warnings
-  warnings.flush();
-
-  // options is an array of "inputOptions" objects with an additional "output"
-  // property that contains an array of "outputOptions".
-  // The following will generate all outputs for all inputs, and write them to disk the same
-  // way the CLI does it:
-  for (const optionsObj of options) {
-    console.log('bundling...');
-    const bundle = await rollup.rollup(optionsObj);
-    await Promise.all(optionsObj.output.map(bundle.write));
-    // await bundle.close();
+  const cmd = argv._[2]
+  const options = {
+    //TODO: support options from command line
   }
 
-  const watcher = rollup.watch(options);
+  switch (cmd) {
+    case 'dev':
+      return { cmd: 'dev', options };
+    case 'build':
+      return { cmd: 'build', options };
+    default:
+      return { cmd: 'help', options };
+  }
+}
 
-  watcher.on('event', async (event) => {
-    // console.log(event.code);
-    if (event.code === 'END') {
-      await import(`./dist/prerender.js?v=${hash()}}`).then(({ prerender }) => prerender() );
-    }
-  })
-  watcher.on('change', (path) => {
-    // if (path.endsWith('.svelte')) {
-    //   if (path.endsWith('__index.svelte')) {
-    //     createTemplateImport();
-    //   } else {
-    //     createPageImports();
-    //   }
-    // }
+function printHelp() {
+  // TODO: help info
+  console.log('help');
+}
+
+// Run
+export async function cli(args) {
+  const argv = yargs(args);
+  const command = resolveArgs(argv);
+  // TODO: do something with options
+
+  switch(command.cmd) {
+    case 'dev':
+      // run server
+      console.log('hey');
+      runDev();
+      break;
+    case 'build':
+      // run build
+      build();
+      break;
+    case 'help':
+    default:
+      printHelp();
+  }
+}
+
+async function runDev() {
+// > watch src/**/*.svelte 
+//   > if === template
+//     > createTemplateImport => rebuild 'dev' => run 'dev' on changed page
+//   > else if === a new page
+//     > createPageImports => rebuild 'dev' => run 'dev' on changed page
+//   > else 
+//     > rebuild 'dev' => run 'dev' on changed page
+
+  createTemplateImport(resolvedProjectRoot, dotPath);
+  createPageImports(resolvedProjectRoot, dotPath);
+  await viteBuildScript('dev')
+    .then(async () => {
+      return await import(`./dist/dev.js?v=${hash()}}`)
+    }).then(({ dev }) => dev());
+
+  const watcher = chokidar.watch(`${resolvedProjectRoot}/src`);
+
+  watcher.on('change', async (path) => {
     console.log('> watch:change', path);
-  })
-
-  watcher.on('event', ({ result }) => {
-    if (result) {
-      console.log('closing bundle');
-      result.close();
+    if (path.endsWith('.svelte')) {
+      if (path.endsWith('__index.svelte')) {
+        createTemplateImport()
+          .then(async () => {
+            return await viteBuildScript('dev')
+          }).then(async () => {
+            return await import(`./dist/dev.js?v=${hash()}}`)
+          }).then(({ dev }) => dev(path));
+      } else {
+        await viteBuildScript('dev')
+          .then(async () => {
+            return await import(`./dist/dev.js?v=${hash()}}`)
+          }).then(({ dev }) => dev(path));
+      }
     }
   });
-  watcher.close();
 
-  // const { prerender } = await import('./dist/prerender.js');
-  // prerender();
-
-  // You can also pass this directly to "rollup.watch"
 }
 
-import chokidar from 'chokidar';
+function runBuild() {
+// > Run build 'build' script
+// > Run 'build' script 
+// > Done
+}
 
-// One-liner for current directory
-const watcher = chokidar.watch(`${resolvedProjectRoot}/src`);
-// watcher.on('all', (event, path) => {
-//   console.log('watch:', event, path);
-// });
-
-watcher.on('add', async (path) => {
-  console.log('watch:add', path);
-  // TODO: maybe improve this by programmatically spawning this entire script
-  // and watch for these files in an external chokidar instance
-  if (path.endsWith('.svelte')) {
-    if (path.endsWith('__index.svelte')) {
-      createTemplateImport();
-    } else {
-      createPageImports();
-    }
-  }
-  
-  // await build().then(async ()=>{
-  //   await import(`./dist/prerender.js?v=${hash()}}`).then(({ prerender }) => prerender() );
-  // });
-})
-
-createPageImports();
-createTemplateImport();
-build();
+cli(process.argv);
