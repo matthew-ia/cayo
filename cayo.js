@@ -1,22 +1,27 @@
-
-// Run createPageImports (initial)
-// Run createTemplateImport (initial)
-
-import { hash, viteBuildScript } from './dist/utils.js';
 import yargs from 'yargs-parser';
-import fs from 'fs-extra';
 import chokidar from 'chokidar';
 import path from 'path';
-import { createPageImports, createTemplateImport } from './src/utils.js';
-import { dev } from './src/dev.js';
+import { createServer } from 'vite';
+const __dirname = path.resolve();
+
+import { 
+  hash, 
+  viteBuildScript, 
+  getPageModulePaths,
+  createPageImports, 
+  createTemplateImport 
+} from './dist/utils.js';
 
 const config = {
   projectRoot: 'test'
 }
 
+const options = {
+  outDir: path.join(process.cwd(), '.cayo/'),
+}
+
 const resolvedProjectRoot = path.resolve(process.cwd(), config.projectRoot);
 const dotPath = path.join(process.cwd(), '.cayo/');
-
 
 // / Handle arguments
 function resolveArgs(argv) {
@@ -49,13 +54,8 @@ export async function cli(args) {
 
   switch(command.cmd) {
     case 'dev':
-      // run server
-      console.log('hey');
-      runDev();
-      break;
     case 'build':
-      // run build
-      build();
+      run(command);
       break;
     case 'help':
     default:
@@ -63,49 +63,73 @@ export async function cli(args) {
   }
 }
 
-async function runDev() {
-// > watch src/**/*.svelte 
-//   > if === template
-//     > createTemplateImport => rebuild 'dev' => run 'dev' on changed page
-//   > else if === a new page
-//     > createPageImports => rebuild 'dev' => run 'dev' on changed page
-//   > else 
-//     > rebuild 'dev' => run 'dev' on changed page
+async function run({ cmd }) {
+  const main = createTemplateImport(resolvedProjectRoot, dotPath)
+    .then(() => createPageImports(resolvedProjectRoot, dotPath))
+    .then(() => refreshPrerender())
+    .then(({ prerender }) => prerender(options))
+    .then(() => {
+      if (cmd === 'dev') {
+        watch();
+        serve();
+      }     
+    });
+  
+  // if (cmd === 'dev') {
+  //   watch();
+  //   serve();
+  // } 
+}
 
-  createTemplateImport(resolvedProjectRoot, dotPath);
-  createPageImports(resolvedProjectRoot, dotPath);
-  await viteBuildScript('dev')
-    .then(async () => {
-      return await import(`./dist/dev.js?v=${hash()}}`)
-    }).then(({ dev }) => dev());
+async function refreshPrerender() {
+  return viteBuildScript('prerender').then(async () => {
+    return await import(`./dist/prerender.js?v=${hash()}}`)
+  });
+}
 
-  const watcher = chokidar.watch(`${resolvedProjectRoot}/src`);
+async function refreshTemplate() {
+  return createTemplateImport()
+    .then(() => refreshPrerender())
+}
 
+async function refreshPages() {
+  return createPageImports()
+    .then(() => refreshPrerender());
+}
+
+function watch() {
+  const watcher = chokidar.watch(`${resolvedProjectRoot}/src`, {
+    // awaitWriteFinish: {
+    //   stabilityThreshold: 1,
+    //   pollInterval: 250
+    // },
+  });
   watcher.on('change', async (path) => {
-    console.log('> watch:change', path);
+    console.log('> watch:change', path); 
     if (path.endsWith('.svelte')) {
       if (path.endsWith('__index.svelte')) {
-        createTemplateImport()
-          .then(async () => {
-            return await viteBuildScript('dev')
-          }).then(async () => {
-            return await import(`./dist/dev.js?v=${hash()}}`)
-          }).then(({ dev }) => dev(path));
+        console.log('> watch:change : refreshing template & rerendering'); 
+        refreshTemplate().then(({ prerender }) => prerender(options));
       } else {
-        await viteBuildScript('dev')
-          .then(async () => {
-            return await import(`./dist/dev.js?v=${hash()}}`)
-          }).then(({ dev }) => dev(path));
+        console.log('> watch:change : rerendering'); 
+        refreshPrerender().then(({ prerender }) => prerender(options));
       }
     }
   });
-
+  // watcher.close();
 }
 
-function runBuild() {
-// > Run build 'build' script
-// > Run 'build' script 
-// > Done
+async function serve() {
+  const server = await createServer({
+    // any valid user config options, plus `mode` and `configFile`
+    configFile: false,
+    clearScreen: false,
+    root: '.cayo',
+    server: {
+      port: 5000
+    }
+  })
+  await server.listen()
 }
 
 cli(process.argv);

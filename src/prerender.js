@@ -1,16 +1,28 @@
-// import { existsSync, promises as fs } from 'fs';
+
+import { getPages } from './utils.js';
+import { handlePageDeps } from './deps.js';
+import { Renderer } from './renderer.js';
 import fs from 'fs-extra';
 import path from 'path';
 
-function generateComponentHyrdator() {
+const development = import.meta.env.DEV;
 
+export async function prerender(options) {
+  const { Template } = await import('../.cayo/generated/template.js');
+  const template = Template.render();
+  const renderer = new Renderer(template.html);
+  const pages = await getPages();
+
+  console.log(`Rendering ${Object.keys(pages).length} ${Object.keys(pages).length === 1 ? 'page' : 'pages'}...`);
+  Object.entries(pages).forEach(([pathname, page]) => {
+    const { html } = prerenderPage(renderer, pathname, page, options.outDir);
+    handlePageDeps(html);
+  });
 }
 
-export async function prerender(renderer, pathname, page, rootPath) {
- 
-  const { html, css } = renderer.render(pathname, page);
-
+export async function prerenderPage(renderer, pathname, page, rootPath) {
   const filePath = page.urlPath === '/' ? 'index.html' : `${page.filePath}/index.html`;
+  const { html, css } = renderer.render(pathname, page);
 
   await fs.outputFile(path.resolve(rootPath, `${filePath}`), html)
     .then(() => console.log('🖨   Prerendered', `${filePath}`));
@@ -22,3 +34,5 @@ export async function prerender(renderer, pathname, page, rootPath) {
 
   return { html, css };
 }
+
+

@@ -41,13 +41,16 @@ export async function viteBuildScript(moduleName) {
   ];
   
   return new Promise((resolve, reject) => {
-    const process = spawn(cmd, args, { shell: true, stdio: 'inherit' });
+    // { shell: true, stdio: 'inherit' }
+    const process = spawn(cmd, args);
     // Resolve promise
     process.on('close', (code) => {
       resolve(code)
     });
     // Reject promise
     process.on('error', (err) => {
+      console.error(`Error building module: src/${moduleName}.js`);
+      console.error(err);
       reject(err)
     });
   });
@@ -57,8 +60,12 @@ export function hash(bytes = 5) {
   return crypto.randomBytes(bytes).toString('hex');
 }
 
+export async function getPageModulePaths(resolvedProjectRoot) {
+  return await fg([`${resolvedProjectRoot}/src/pages/**/*.svelte`]);
+}
+
 export async function createPageImports(resolvedProjectRoot, dotPath) {
-  const pagePaths = await fg([`${resolvedProjectRoot}/src/pages/**/*.svelte`]);
+  const pagePaths = await getPageModulePaths(resolvedProjectRoot);
   let importPages = '';
   pagePaths.forEach((path, i) => {
     importPages += `import * as page_${i} from '${path}'\n`;
@@ -73,5 +80,5 @@ export async function createPageImports(resolvedProjectRoot, dotPath) {
 
 export async function createTemplateImport(resolvedProjectRoot, dotPath) {
   let importTemplate = `export { default as Template } from '${resolvedProjectRoot}/src/__index.svelte';`;
-  await fs.outputFile(`${dotPath}/generated/template.js`, importTemplate);
+  return await fs.outputFile(`${dotPath}/generated/template.js`, importTemplate);
 }

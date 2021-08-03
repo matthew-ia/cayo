@@ -21,6 +21,7 @@ export default async function viteBuildScript(moduleName) {
     });
     // Reject promise
     process.on('error', (err) => {
+      console.error(`Couldn't build module: src/${moduleName}.js`);
       reject(err)
     });
   });
