@@ -3,13 +3,13 @@ import { spawn } from 'child_process';
 import fs from 'fs-extra';
 import fg from 'fast-glob';
 
-export async function getPages(ext = 'svelte') {
+export function getPages(modules, ext = 'svelte') {
   // TODO: build path from config
-  const { pages: _pages } = await import('../.cayo/generated/pages.js');
 
+  console.log(modules);
   const extRegex = new RegExp(String.raw`(\.${ext})$`);
 
-  return Object.entries(_pages).reduce((pages, [modulePath, page]) => {
+  return Object.entries(modules).reduce((pages, [modulePath, page]) => {
     // Make these paths actually useful
     // /^(.+)\/pages/
     // /^(\/\w+)*\/pages/
@@ -27,7 +27,7 @@ export async function getPages(ext = 'svelte') {
   }, {})
 }
 
-export async function viteBuildScript(moduleName) {
+export async function viteBuildScript(moduleName, verbose) {
   const cmd = 'vite';
   const args = [
     'build', 
@@ -39,10 +39,11 @@ export async function viteBuildScript(moduleName) {
     // File to build (output is runnable in node env)
     '--ssr', `src/${moduleName}.js`
   ];
+
+  const options = verbose ? { shell: true, stdio: 'inherit' } : {}
   
   return new Promise((resolve, reject) => {
-    // { shell: true, stdio: 'inherit' }
-    const process = spawn(cmd, args);
+    const process = spawn(cmd, args, options);
     // Resolve promise
     process.on('close', (code) => {
       resolve(code)

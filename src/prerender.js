@@ -8,10 +8,11 @@ import path from 'path';
 const development = import.meta.env.DEV;
 
 export async function prerender(options) {
-  const { Template } = await import('../.cayo/generated/template.js');
+  const { Template } = await import(`../.cayo/generated/template.js`);
   const template = Template.render();
   const renderer = new Renderer(template.html);
-  const pages = await getPages();
+  const pages = await import(`../.cayo/generated/pages.js`)
+    .then(({ pages }) => getPages(pages));
 
   console.log(`Rendering ${Object.keys(pages).length} ${Object.keys(pages).length === 1 ? 'page' : 'pages'}...`);
   Object.entries(pages).forEach(([pathname, page]) => {
