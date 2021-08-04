@@ -49,9 +49,7 @@ export class Renderer {
         .replace('%cayo.title%', !head.includes('<title>') ? `<title>${title}</title>` : '')
         .replace('%cayo.head%', processedHead)
         .replace('%cayo.body%', processedBody)
-        .replace('%cayo.script%', `<script type="module" src="/main.js"></script>`)
-        // TODO: parse script src from string first, then build script tag
-        .replace('%cayo.script:/src/main.js%', `<script type="module" src="/index.js"></script>`),
+        .replace('%cayo.script%', `<script type="module" src="./index.js"></script>`),
       css: css,
     }
   }
