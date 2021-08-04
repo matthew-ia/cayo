@@ -1,96 +1,132 @@
-// require('svelte/register');
-import { existsSync, promises as fs } from 'fs';
-import fse from 'fs-extra';
-import { join } from 'path';
-import path from 'path';
 
-import { Renderer } from './renderer.js';
 import { getPages } from './utils.js';
-// const getPages = () => {}
-// Dynamic import
+import { handlePageDeps } from './deps.js';
+import { Renderer } from './renderer.js';
+import fs from 'fs-extra';
+import path from 'path';
+import * as cheerio from 'cheerio';
 
-const config = {
-  projectRoot: 'test'
-}
+const development = import.meta.env.DEV;
 
-
-
-const root = process.cwd();
-
-async function main() {
-  
-  const Template = (await import('../.cayo/prerender/__index.svelte')).default;
-  
-  // import Template from '../test/__index.svelte';
-
+export async function prerender(options) {
+  const { Template } = await import(`../.cayo/generated/template.js`);
   const template = Template.render();
   const renderer = new Renderer(template.html);
-  console.log(renderer);
+  let pages = await import(`../.cayo/generated/pages.js`)
+    .then(({ pages }) => getPages(pages));
 
+  console.log(`Rendering ${Object.keys(pages).length} ${Object.keys(pages).length === 1 ? 'page' : 'pages'}...`);
 
-  // const templatePath = join(process.cwd(), 'src', 'index.template')
-  const publicPath = join(process.cwd(), '.cayo/');
-  const componentsToHydrate  = [];
+  // Get all the rendered content
+  // const renderedContent = {};
+  const deps = {};
+  const componentList = new Set();
 
-  // const template = await fs.readFile(templatePath)
-  // const app = App.render();
-  // TODO: get css from template and app, and concat in a new bundle
+  // Render page, parse html, and save its deps
+  Object.entries(pages).forEach(async ([pathname, page]) => {
 
+    // Render page
+    const content = renderer.render(pathname, page);
+    // Postprocess the content, get deps and inject dep references
+    const { html, css, js, components } = handlePageDeps(content, page.modulePath);
 
-  const pages = await getPages('svelte');
-  console.log('pages', pages);
-
-  if (!existsSync(publicPath)) {
-    await fs.mkdir(publicPath)
-  }
-
-  Object.entries(pages).forEach(([pathname, page]) => {
-    // console.log(page.name, page.meta);
-    const { html, css } = renderer.render(pathname, page);
-    const filePath = `${page.name}.html`;
-    fse.outputFileSync(path.resolve(publicPath, filePath), html);
-    console.log('🖨   Prerendered', filePath);
-    if (css.code !== '') {
-      fse.outputFileSync(path.resolve(publicPath, `${page.name}.css`), css.code);
-      console.log('🎨  CSS output for', `${page.name}.css`)
+    for (let component of components) {
+      componentList.add(component);
     }
-    // await fs.writeFile(
-    //   join(publicPath, 'index.html'),
-    //   page.html
-    //   // template.toString().replace('%cayo.head%', page.head).replace('%cayo.body%', page.html)
-    // )
+
+    await writeContent({ html , css, js }, page, options.outDir);
   });
-  
+
+  // Do something with componentList
 }
 
-// fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte', err => {
-//   if (err) return console.log(err);
-//   console.log('rip');
+async function writeContent(content, page, outDir) {
+  const { html, css } = content;
+  
+  const htmlPath = page.urlPath === '/' ? 'index.html' : `${page.filePath}/index.html`;
+  await fs.outputFile(path.resolve(outDir, `${htmlPath}`), html)
+    .then(() => console.log('🖨   Prerendered', `${htmlPath}`));
 
-//   // const files = [] // files, directories, symlinks, etc
-//   // klaw(`${config.projectRoot}/src/pages`)
-//   //   .on('data', file => files.push(item.path))
-//   //   .on('end', () => console.dir(files)) // => [ ... array of files]
-//   // for await (const file of klaw(`${config.projectRoot}/src/pages`)) {
-//   //   console.log(file)
-//   // }
-//   // main()
-// });
-
-
-// TODO: this prob needs to be put into a separate script and run entirely before prerender bc of import dependencies
-async function prep() {
-  try {
-    await fse.copy(`${config.projectRoot}/src/__index.svelte`, './.cayo/prerender/__index.svelte');
-    let temp = await fse.readFile('./src/templates/importMetaGlobEager.template', 'utf8');
-    temp = temp.replace('%PATH%', `../../${config.projectRoot}/src/pages/**/*.svelte`);
-    await fse.outputFile('./.cayo/prerender/getPagesUtility.js', temp);
-    main();
-  } catch (err) {
-    console.error(err)
+  if (css.code !== '') {
+    await fs.outputFile(path.resolve(outDir, `${page.filePath}index.css`), css.code)
+      .then(() => console.log('🎨  CSS output for', `${page.filePath}.html`));
   }
 }
 
 
-prep();
-// main();
+
+
+
+/*
+
+import MyComponent from './MyComponent.svelte';
+
+window.MyComponent = function (options) {
+    return new MyComponent(options);
+};
+
+document.addEventListener("DOMContentLoaded", function (event) {
+  new MyComponent({
+      target: document.getElementById("my-component"),
+      hydrate: true,
+      props: { ... },
+  });
+});
+
+
+*/
+
+
+// Derive JS dependencies from the html
+export function handlePageDeps(content, path) {
+  // use cheerio
+  // find script.src, 
+  // copy over the corresponding file from users src folder
+  // 
+  // find components
+  // 
+  const $ = cheerio.load(content.html, options, false);
+
+  // Get Components
+  let cayoIds = [];
+  $('[cayo-id]').each(() => cayoIds.push(this.data().cayoId));
+  const componentNameRegex = /(?<name>\w+)-/; // Foo-{hash}
+  const components = cayoIds.map(id => id.match(componentNameRegex).groups.name);
+
+  // Build Entry JS
+
+  // Get entry file name
+  let userEntryFile = $('script[data-type="module"][src]')[0].src;
+
+  // if no JS needed, remove entry point
+  let js = '';
+  if (cayoIds.length === 0 && !userEntryFile) {
+    $('script[type="module"][src="./index.js"]').remove();
+  } else {
+    // define contents of ./index.js
+    // components => import statements 
+    for (let component of components) {
+      js += `import ${component} from '/components/${component}.js';\n`;
+    }
+    // Read entry contents
+    // then append it to js
+    // + entry contents
+  }
+
+  return { html, css, js, components };
+}
+
+// Build the dep content (string) to be written later
+function createDepContent(deps, entry) {
+
+}
+
+function addComponentImport() {
+
+}
+
+// Get entry file contents
+function getEntryContent() {
+
+}
+

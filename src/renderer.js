@@ -1,7 +1,3 @@
-// require('svelte/register');
-import { existsSync, promises as fs } from 'fs';
-import { join } from 'path';
-// const svelte = require('svelte/compiler');
 
 export class Renderer {
 
@@ -12,7 +8,7 @@ export class Renderer {
 
   render(pathname, page) {
     const { Component } = page;
-    if (!pathname.endsWith('/')) pathname = `${pathname}/`;
+    // if (!pathname.endsWith('/')) pathname = `${pathname}/`;
     const { html, css, head } = Component.render();
     // console.log(head);
     // console.log(css);
@@ -53,8 +49,7 @@ export class Renderer {
         .replace('%cayo.title%', !head.includes('<title>') ? `<title>${title}</title>` : '')
         .replace('%cayo.head%', processedHead)
         .replace('%cayo.body%', processedBody)
-        // TODO: parse script src from string first, then build script tag
-        .replace('%cayo.script:/src/main.js%', `<script type="module" src="/index.js"></script>`),
+        .replace('%cayo.script%', `<script type="module" src="./index.js"></script>`),
       css: css,
     }
   }

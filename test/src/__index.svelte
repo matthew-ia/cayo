@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Svelte + Vite App</title>
-    %cayo.head%
     %cayo.title%
+    %cayo.head%
   </head>
   <body>
     %cayo.body%
+    %cayo.script%
+    <!-- <script data-type="module" src="./main.js"></script> -->
     <!-- <script type="module" src="./main.js"></script> -->
   </body>
 </html>
