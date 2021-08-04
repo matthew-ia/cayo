@@ -67,7 +67,7 @@ async function run({ cmd }) {
   const main = createTemplateImport(resolvedProjectRoot, dotPath)
     .then(() => createPageImports(resolvedProjectRoot, dotPath))
     .then(() => refreshPrerender())
-    .then(({ prerender }) => prerender(options))
+    .then(({ prerender }) => prerender(options, resolvedProjectRoot))
     .then(() => {
       if (cmd === 'dev') {
         watch();
@@ -109,10 +109,10 @@ function watch() {
     if (path.endsWith('.svelte')) {
       if (path.endsWith('__index.svelte')) {
         console.log('> watch:change : refreshing template & rerendering'); 
-        refreshTemplate().then(({ prerender }) => prerender(options));
+        refreshTemplate().then(({ prerender }) => prerender(options, resolvedProjectRoot));
       } else {
         console.log('> watch:change : rerendering'); 
-        refreshPrerender().then(({ prerender }) => prerender(options));
+        refreshPrerender().then(({ prerender }) => prerender(options, resolvedProjectRoot));
       }
     }
   });

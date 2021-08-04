@@ -1,6 +1,5 @@
 
 import { getComponentModulePaths } from './utils.js';
-import { handlePageDeps } from './deps.js';
 import { Renderer } from './renderer.js';
 import fs from 'fs-extra';
 import path from 'path';
@@ -8,7 +7,7 @@ import * as cheerio from 'cheerio';
 
 const development = import.meta.env.DEV;
 
-export async function prerender(options) {
+export async function prerender(options, resolvedProjectRoot) {
   const { Template } = await import(`../.cayo/generated/template.js`);
   const template = Template.render();
   const renderer = new Renderer(template.html);
@@ -28,17 +27,15 @@ export async function prerender(options) {
     // Render page
     const content = renderer.render(pathname, page);
     // Postprocess the content, get deps and inject dep references
-    const { html, css, js, components } = handlePageDeps(content, page.modulePath);
+    const { html, css, js, components } = await handlePageDeps(content, page);
 
-    for (let component of components) {
-      componentList.add(component);
-    }
+    Object.keys(components).forEach(component => componentList.add(component))
 
     await writeContent({ html , css, js }, page, options.outDir);
   });
 
   // Do something with componentList
-  writeComponentFiles(componentList);
+  writeComponentFiles(componentList, resolvedProjectRoot);
 }
 
 async function writeContent(content, page, outDir) {
@@ -50,12 +47,13 @@ async function writeContent(content, page, outDir) {
 
   if (css.code !== '') {
     await fs.outputFile(path.resolve(outDir, `${page.filePath}index.css`), css.code)
-      .then(() => console.log('🎨  CSS output for', `${page.filePath}.html`));
+      .then(() => console.log('🎨   CSS output for', `${page.filePath}.html`));
   }
 
   if (js !== '') {
-    await fs.outputFile(path.resolve(outDir, `${page.filePath}index.js`), js)
-      .then(() => console.log('🛠 JS output for', `${page.filePath}.html`));
+    let jsPath = page.urlPath === '/' ? 'index.js' : `${page.filePath}/index.js`;
+    await fs.outputFile(path.resolve(outDir, jsPath), js)
+      .then(() => console.log('🛠   JS output for', `${page.filePath}.html`));
   }
 }
 
@@ -83,7 +81,7 @@ export function getPages(modules, ext = 'svelte') {
   }, {})
 }
 
-export async function getComponents() {
+export async function getComponents(resolvedProjectRoot) {
   const componentPaths = await getComponentModulePaths(resolvedProjectRoot);
   const componentNameRegex = /\/(?<name>\w+)\.svelte/; // Foo-{hash}
   const componentNamesFromPaths = componentPaths.map(path => path.match(componentNameRegex).groups.name);
@@ -117,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
 
 // Derive JS dependencies from the html
-export function handlePageDeps(content, page) {
+export async function handlePageDeps(content, page) {
   const { modulePath } = page;
   // use cheerio
   // find script.src, 
@@ -125,7 +123,8 @@ export function handlePageDeps(content, page) {
   // 
   // find components
   // 
-  const $ = cheerio.load(content.html, options, false);
+  // let options = null;
+  const $ = cheerio.load(content.html);
 
   // Get Components
   let cayoIds = [];
@@ -146,7 +145,9 @@ export function handlePageDeps(content, page) {
   // Build Entry JS
 
   // Get entry file name
-  let userEntryFile = $('script[data-type="module"][src]')[0].src;
+  let entryScriptEl = $('[data-cayo-entry-src]');
+  console.log(entryScriptEl.length !== 0 ? entryScriptEl.first().data().cayoEntrySrc : 'no entry');
+  let userEntryFile = entryScriptEl.length !== 0 ? entryScriptEl.first().data().cayoEntrySrc : '';
 
   // if no JS needed, remove entry point
   let js = '';
@@ -179,25 +180,29 @@ export function handlePageDeps(content, page) {
     
 
     // Read entry contents
+    let path = modulePath.replace(/\/(\w+)\.svelte/, '');
+    console.log('path to entry: ', path);
     try {
-      let path = modulePath.replace(/\/(.+)\.svelte/, '');
-      console.log(path);
       const entryContent = await fs.promises.readFile(`${path}/${userEntryFile}`, 'utf8');
-      
       // then append it to js
       js += entryContent;
     } catch (err) {
-      console.error(`Can't read entry file ${userEntryFile}\n referenced in ${page.modulePath}\n\n`, err);
+      console.error(`Can't read entry file ${userEntryFile}\nReference: ${page.modulePath}\n\n`, err);
     }
   }
 
-  return { html, css, js, components };
+  return { 
+    html: $.root().html(), 
+    css: content.css, 
+    js, 
+    components 
+  };
 }
 
-async function writeComponentFiles(components, outDir) {
-  const componentPaths = await getComponents();
+async function writeComponentFiles(components, outDir, resolvedProjectRoot) {
+  const componentPaths = await getComponents(resolvedProjectRoot);
 
-  Object.keys(components).forEach(name => {
+  Object.keys(components).forEach(async (name) => {
     let content = `export { default as ${name} } from '${componentPaths[name]}'`;
 
     await fs.outputFile(path.resolve(outDir, `./components.js`, content))

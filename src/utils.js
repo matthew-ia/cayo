@@ -65,6 +65,10 @@ export async function getPageModulePaths(resolvedProjectRoot) {
   return await fg([`${resolvedProjectRoot}/src/pages/**/*.svelte`]);
 }
 
+export async function getComponentModulePaths(resolvedProjectRoot) {
+  return await fg([`${resolvedProjectRoot}/src/components/**/*.svelte`]);
+}
+
 export async function createPageImports(resolvedProjectRoot, dotPath) {
   const pagePaths = await getPageModulePaths(resolvedProjectRoot);
   let importPages = '';
