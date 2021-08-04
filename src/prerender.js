@@ -1,5 +1,5 @@
 
-import { getPages } from './utils.js';
+import { getComponentModulePaths } from './utils.js';
 import { handlePageDeps } from './deps.js';
 import { Renderer } from './renderer.js';
 import fs from 'fs-extra';
@@ -38,10 +38,11 @@ export async function prerender(options) {
   });
 
   // Do something with componentList
+  writeComponentFiles(componentList);
 }
 
 async function writeContent(content, page, outDir) {
-  const { html, css } = content;
+  const { html, css, js } = content;
   
   const htmlPath = page.urlPath === '/' ? 'index.html' : `${page.filePath}/index.html`;
   await fs.outputFile(path.resolve(outDir, `${htmlPath}`), html)
@@ -51,9 +52,47 @@ async function writeContent(content, page, outDir) {
     await fs.outputFile(path.resolve(outDir, `${page.filePath}index.css`), css.code)
       .then(() => console.log('🎨  CSS output for', `${page.filePath}.html`));
   }
+
+  if (js !== '') {
+    await fs.outputFile(path.resolve(outDir, `${page.filePath}index.js`), js)
+      .then(() => console.log('🛠 JS output for', `${page.filePath}.html`));
+  }
 }
 
+export function getPages(modules, ext = 'svelte') {
+  // TODO: build path from config
 
+  console.log(modules);
+  const extRegex = new RegExp(String.raw`(\.${ext})$`);
+
+  return Object.entries(modules).reduce((pages, [modulePath, page]) => {
+    // Make these paths actually useful
+    // /^(.+)\/pages/
+    // /^(\/\w+)*\/pages/
+    const filePath = modulePath.replace(/^(.+)\/pages\//, '').replace(extRegex, '')
+    const urlPath = filePath === 'index' ? filePath.replace(/index$/, '/') : `${filePath}/`
+    // name = name.split('.', 1)[0];
+    pages[urlPath] = {
+      Component: page.default,
+      meta: page.meta ? page.meta : {},
+      filePath,
+      modulePath,
+      urlPath
+    }
+    return pages
+  }, {})
+}
+
+export async function getComponents() {
+  const componentPaths = await getComponentModulePaths(resolvedProjectRoot);
+  const componentNameRegex = /\/(?<name>\w+)\.svelte/; // Foo-{hash}
+  const componentNamesFromPaths = componentPaths.map(path => path.match(componentNameRegex).groups.name);
+
+  const paths = {};
+  componentNamesFromPaths.forEach((name, i) => modules[name] = componentPaths[i]);
+
+  return paths;
+}
 
 
 
@@ -78,7 +117,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
 
 // Derive JS dependencies from the html
-export function handlePageDeps(content, path) {
+export function handlePageDeps(content, page) {
+  const { modulePath } = page;
   // use cheerio
   // find script.src, 
   // copy over the corresponding file from users src folder
@@ -89,9 +129,19 @@ export function handlePageDeps(content, path) {
 
   // Get Components
   let cayoIds = [];
-  $('[cayo-id]').each(() => cayoIds.push(this.data().cayoId));
+  $('[data-cayo-id]').each(() => cayoIds.push(this.data().cayoId));
   const componentNameRegex = /(?<name>\w+)-/; // Foo-{hash}
-  const components = cayoIds.map(id => id.match(componentNameRegex).groups.name);
+  const components = {};
+  cayoIds.forEach(id => {
+    let name = id.match(componentNameRegex).groups.name;
+    if (!components[name]) {
+      components[name] = { id }
+    }
+  });
+  // const components = cayoIds.map(id => {
+  //   let name = id.match(componentNameRegex).groups.name;
+  //   return { id, name };
+  // });
 
   // Build Entry JS
 
@@ -101,32 +151,85 @@ export function handlePageDeps(content, path) {
   // if no JS needed, remove entry point
   let js = '';
   if (cayoIds.length === 0 && !userEntryFile) {
+    // Remove the entry point script tag if the page doesn't need any JS
     $('script[type="module"][src="./index.js"]').remove();
   } else {
     // define contents of ./index.js
-    // components => import statements 
-    for (let component of components) {
-      js += `import ${component} from '/components/${component}.js';\n`;
+    if (Object.keys(components).length !== 0) {
+      // Add getProps helper for runtime
+      js += `import { getProps } from 'cayo-utils.js';`;
+
+      // Add component dependencies
+      // TODO: make this be constructred properly using page.filePath
+      let componentPath = '..';
+      Object.entries(components).forEach(([componentName]) => {
+        js += `import { ${componentName} } from '${componentPath}/components.js';\n`;
+      });
+
+      // Add component instances
+      let instances = '';
+      Object.entries(components).forEach(([name, { id }]) => {
+        instances += genComponentInstance(id, name);
+      });
+
+      js += genComponentInstanceWrapper(instances);
+
+      await writeComponentFiles(components);
     }
+    
+
     // Read entry contents
-    // then append it to js
-    // + entry contents
+    try {
+      let path = modulePath.replace(/\/(.+)\.svelte/, '');
+      console.log(path);
+      const entryContent = await fs.promises.readFile(`${path}/${userEntryFile}`, 'utf8');
+      
+      // then append it to js
+      js += entryContent;
+    } catch (err) {
+      console.error(`Can't read entry file ${userEntryFile}\n referenced in ${page.modulePath}\n\n`, err);
+    }
   }
 
   return { html, css, js, components };
 }
 
-// Build the dep content (string) to be written later
-function createDepContent(deps, entry) {
+async function writeComponentFiles(components, outDir) {
+  const componentPaths = await getComponents();
 
+  Object.keys(components).forEach(name => {
+    let content = `export { default as ${name} } from '${componentPaths[name]}'`;
+
+    await fs.outputFile(path.resolve(outDir, `./components.js`, content))
+      .then(() => console.log(`Wrote file {outDir}/components/${name}.js`));
+  });
 }
 
-function addComponentImport() {
-
+function genComponentInstanceWrapper(contents) {
+  return (
+`
+document.addEventListener('DOMContentLoaded', function() {
+${contents}
+});
+`
+  );
 }
 
-// Get entry file contents
-function getEntryContent() {
-
+function genComponentInstance(cayoId, componentName) {
+  return (
+` 
+  new ${componentName}({
+    target: document.querySelector('[data-cayo-id="${cayoId}"]'),
+    hydrate: true,
+    props: { getProps('${cayoId}') },
+  });
+`
+  );
 }
+
+// function getProps(el) {
+//   const data = el.text();
+//   el.remove();
+//   return data;
+// }
 

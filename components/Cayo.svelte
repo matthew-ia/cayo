@@ -17,7 +17,7 @@
   props.cayoInstanceId = `${name}-${HASH}`;
 </script>
 
-<div cayo-id={props.cayoInstanceId}></div>
+<div data-cayo-id={props.cayoInstanceId}></div>
 {@html `<!-- %cayo.data:${json}% -->`}
 <slot/>
 

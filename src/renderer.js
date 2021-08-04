@@ -35,7 +35,7 @@ export class Renderer {
     for (const dataId in cayoData) {
       const data = JSON.parse(cayoData[dataId]);
       cayoDataHead += 
-        `<script daya-cayo-data-for="${data.cayoInstanceId}" type="application/json">`
+        `<script data-cayo-data-for="${data.cayoInstanceId}" type="application/json">`
         + cayoData[dataId]
         + '</script>\n'
     }
