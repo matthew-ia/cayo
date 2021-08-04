@@ -1,17 +1,21 @@
 
-import { getComponentModulePaths } from './utils.js';
+
+
+  
+import { getComponentModulePaths, hash } from './utils.js';
 import { Renderer } from './renderer.js';
 import fs from 'fs-extra';
 import path from 'path';
 import * as cheerio from 'cheerio';
 
-const development = import.meta.env.DEV;
+const development = true;
 
 export async function prerender(options, resolvedProjectRoot) {
-  const { Template } = await import(`../.cayo/generated/template.js`);
+  let t = 'template';
+  const { Template } = await import(`../.cayo/generated/${t}.js?v=${hash()}`);
   const template = Template.render();
   const renderer = new Renderer(template.html);
-  let pages = await import(`../.cayo/generated/pages.js`)
+  let pages = await import(`../.cayo/generated/pages.js?v=${hash()}`)
     .then(({ pages }) => getPages(pages));
 
   console.log(`Rendering ${Object.keys(pages).length} ${Object.keys(pages).length === 1 ? 'page' : 'pages'}...`);
@@ -31,7 +35,7 @@ export async function prerender(options, resolvedProjectRoot) {
 
     Object.keys(components).forEach(component => componentList.add(component))
 
-    await writeContent({ html , css, js }, page, options.outDir);
+    writeContent({ html , css, js }, page, options.outDir);
   });
 
   // Do something with componentList
@@ -60,7 +64,6 @@ async function writeContent(content, page, outDir) {
 export function getPages(modules, ext = 'svelte') {
   // TODO: build path from config
 
-  console.log(modules);
   const extRegex = new RegExp(String.raw`(\.${ext})$`);
 
   return Object.entries(modules).reduce((pages, [modulePath, page]) => {
@@ -145,9 +148,8 @@ export async function handlePageDeps(content, page) {
   // Build Entry JS
 
   // Get entry file name
-  let entryScriptEl = $('[data-cayo-entry-src]');
-  console.log(entryScriptEl.length !== 0 ? entryScriptEl.first().data().cayoEntrySrc : 'no entry');
-  let userEntryFile = entryScriptEl.length !== 0 ? entryScriptEl.first().data().cayoEntrySrc : '';
+  let entryScripts = $('[data-cayo-entry-src]');
+  let userEntryFile = entryScripts.length !== 0 ? entryScripts.first().data().cayoEntrySrc : '';
 
   // if no JS needed, remove entry point
   let js = '';
@@ -180,14 +182,14 @@ export async function handlePageDeps(content, page) {
     
 
     // Read entry contents
-    let path = modulePath.replace(/\/(\w+)\.svelte/, '');
-    console.log('path to entry: ', path);
-    try {
-      const entryContent = await fs.promises.readFile(`${path}/${userEntryFile}`, 'utf8');
-      // then append it to js
-      js += entryContent;
-    } catch (err) {
-      console.error(`Can't read entry file ${userEntryFile}\nReference: ${page.modulePath}\n\n`, err);
+    let absolutePathRoot = modulePath.replace(/\/(\w+)\.svelte/, '');
+    let entryFilePath = path.resolve(absolutePathRoot, userEntryFile);
+    // if file exists, append its import
+    const entryFileExists = await fs.pathExists(entryFilePath);
+    if (entryFileExists) {
+      js += `import '${entryFilePath}';`;
+    } else {
+      console.error(`Can't read entry file ${userEntryFile} in ${page.modulePath}`);
     }
   }
 

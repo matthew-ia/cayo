@@ -5,8 +5,6 @@ import fg from 'fast-glob';
 
 export function getPages(modules, ext = 'svelte') {
   // TODO: build path from config
-
-  console.log(modules);
   const extRegex = new RegExp(String.raw`(\.${ext})$`);
 
   return Object.entries(modules).reduce((pages, [modulePath, page]) => {
@@ -71,9 +69,13 @@ export async function getComponentModulePaths(resolvedProjectRoot) {
 
 export async function createPageImports(resolvedProjectRoot, dotPath) {
   const pagePaths = await getPageModulePaths(resolvedProjectRoot);
-  let importPages = '';
+  // let importPages = '';
+  let importPages = `import { createRequire } from 'module';\n`
+  importPages += `const require = createRequire(import.meta.url);\n`
+  importPages += `require('svelte/register');\n`;
   pagePaths.forEach((path, i) => {
-    importPages += `import * as page_${i} from '${path}'\n`;
+    importPages += `delete require.cache['${path}'];\n`
+    importPages += `const page_${i} = require('${path}');\n`;
   }); 
   importPages += 'export const pages = {\n';
   pagePaths.forEach((path, i) => {
@@ -84,6 +86,10 @@ export async function createPageImports(resolvedProjectRoot, dotPath) {
 }
 
 export async function createTemplateImport(resolvedProjectRoot, dotPath) {
-  let importTemplate = `export { default as Template } from '${resolvedProjectRoot}/src/__index.svelte';`;
+  let importTemplate = `import { createRequire } from 'module';\n`
+  importTemplate += `const require = createRequire(import.meta.url);\n`
+  importTemplate += `require('svelte/register');\n`
+  importTemplate += `export const Template = require('${resolvedProjectRoot}/src/__index.svelte').default;\n`;
+  // export { default as Template } from '${resolvedProjectRoot}/src/__index.svelte';
   return await fs.outputFile(`${dotPath}/generated/template.js`, importTemplate);
 }

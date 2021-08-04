@@ -3,6 +3,7 @@ import chokidar from 'chokidar';
 import path from 'path';
 import { createServer } from 'vite';
 const __dirname = path.resolve();
+import { prerender } from './src/prerender.js';
 
 import { 
   hash, 
@@ -66,8 +67,9 @@ export async function cli(args) {
 async function run({ cmd }) {
   const main = createTemplateImport(resolvedProjectRoot, dotPath)
     .then(() => createPageImports(resolvedProjectRoot, dotPath))
-    .then(() => refreshPrerender())
-    .then(({ prerender }) => prerender(options, resolvedProjectRoot))
+    // .then(() => refreshPrerender())
+    .then(() => prerender(options, resolvedProjectRoot))
+    // .then(({ prerender }) => prerender(options, resolvedProjectRoot))
     .then(() => {
       if (cmd === 'dev') {
         watch();
@@ -83,7 +85,7 @@ async function run({ cmd }) {
 
 async function refreshPrerender() {
   return viteBuildScript('prerender').then(async () => {
-    return await import(`./dist/prerender.js?v=${hash()}}`)
+    return await import(`./dist/prerender.js?v=${hash()}`)
   });
 }
 
@@ -112,7 +114,10 @@ function watch() {
         refreshTemplate().then(({ prerender }) => prerender(options, resolvedProjectRoot));
       } else {
         console.log('> watch:change : rerendering'); 
-        refreshPrerender().then(({ prerender }) => prerender(options, resolvedProjectRoot));
+        prerender(options, resolvedProjectRoot);
+        // await import(`./dist/prerender.js`)
+        //   .then(({ prerender }) => prerender(options, resolvedProjectRoot));
+        // refreshPrerender().then(({ prerender }) => prerender(options, resolvedProjectRoot));
       }
     }
   });
