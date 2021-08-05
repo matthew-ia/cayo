@@ -2,22 +2,23 @@ import yargs from 'yargs-parser';
 import chokidar from 'chokidar';
 import path from 'path';
 import { createServer } from 'vite';
-const __dirname = path.resolve();
-import { prerender } from './src/prerender.js';
 import { createLogger } from 'vite';
+const __dirname = path.resolve();
 import chalk from 'chalk';
+import { prerender } from './src/prerender.js';
+import { 
+  hash,
+  getPageModules, 
+  getComponentModules,
+  createTemplateManifest,
+  createPageManifest,
+} from './src/utils.js';
+
 
 const logger = createLogger('info', {
   prefix: chalk.magenta('[cayo]'),
   allowClearScreen: false,
 });
-
-import { 
-  hash, 
-  viteBuildScript, 
-  createPageImports, 
-  createTemplateImport 
-} from './dist/utils.js';
 
 const config = {
   projectRoot: path.resolve(process.cwd(), 'test'),
@@ -28,6 +29,8 @@ const config = {
 const options = {
   outDir: path.join(process.cwd(), '.cayo/'),
 }
+
+const data = {}
 
 const cayoPath = path.join(process.cwd(), '.cayo/');
 
@@ -74,11 +77,9 @@ export async function cli(args) {
 async function run({ cmd }) {
   logger.info(chalk.magenta('\n  cayo ') + chalk.green(`${cmd}`), { timestamp: false });
 
-  const main = createTemplateImport(config.projectRoot, cayoPath)
-    .then(() => createPageImports(config.projectRoot, cayoPath))
-    // .then(() => refreshPrerender())
-    .then(() => prerender(config))
-    // .then(({ prerender }) => prerender(options, config.projectRoot))
+  getTemplate(config.projectRoot, cayoPath)
+    .then(() => getPages(config.projectRoot, cayoPath))
+    .then(() => prerender(data.template, data.pages, config))
     .then(() => {
       if (cmd === 'dev') {
         watch();
@@ -92,20 +93,23 @@ async function run({ cmd }) {
   // } 
 }
 
-async function refreshPrerender() {
-  return viteBuildScript('prerender').then(async () => {
-    return await import(`./dist/prerender.js?v=${hash()}`)
-  });
+
+async function getTemplate(projectRoot, cayoPath) {
+  return createTemplateManifest(projectRoot, cayoPath)
+    .then(async () => await import(path.resolve(cayoPath, `generated/template.js?v=${hash()}`)))
+    .then(({ Template }) => {
+      data.template = Template;
+      return data.template;
+    });
 }
 
-async function refreshTemplate() {
-  return createTemplateImport()
-    .then(() => refreshPrerender())
-}
-
-async function refreshPages() {
-  return createPageImports()
-    .then(() => refreshPrerender());
+async function getPages(projectRoot, cayoPath) {
+  return createPageManifest(projectRoot, cayoPath)
+    .then(async () => await import(path.resolve(cayoPath, `generated/pages.js?v=${hash()}`)))
+    .then(({ pages }) => {
+      data.pages = getPageModules(pages);
+      return data.pages;
+    });
 }
 
 function watch() {
@@ -115,12 +119,20 @@ function watch() {
     //   pollInterval: 250
     // },
   });
-  watcher.on('change', async (path) => {
-    if (path.endsWith('.svelte')) {
-      if (path.endsWith('__index.svelte')) {
-        refreshTemplate().then(({ prerender }) => prerender(config));
+  watcher.on('change', async (filePath) => {
+    if (filePath.endsWith('.svelte')) {
+      if (filePath.endsWith('__index.svelte')) {
+        getTemplate(config.projectRoot, cayoPath)
+          .then(() => prerender(data.template, data.pages, config));
+      } else if (filePath.startsWith(path.resolve(config.projectRoot, 'src/pages'))) {
+        getPages(config.projectRoot, cayoPath)
+          .then((pages) => {
+            let pageModule = Object.entries(pages).find(([, { modulePath }]) => modulePath === filePath);
+            let page = pageModule ? { [`${pageModule[0]}`]: pageModule[1] } : {}
+            prerender(data.template, page, config)
+          })
       } else {
-        prerender(config, config.projectRoot);
+        prerender(data.template, data.pages, config);
         // await import(`./dist/prerender.js`)
         //   .then(({ prerender }) => prerender(options, config.projectRoot));
         // refreshPrerender().then(({ prerender }) => prerender(options, config.projectRoot));

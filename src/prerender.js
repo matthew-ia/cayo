@@ -3,47 +3,37 @@ import path from 'path';
 import * as cheerio from 'cheerio';
 import chalk from 'chalk';
 import { Renderer } from './renderer.js';
-import { getPages, getComponents, hash } from './utils.js';
+import { getComponentModules } from './utils.js';
 
-export async function prerender(config) {
-  const { Template } = await import(`../.cayo/generated/template.js?v=${hash()}`);
-  let pages = await import(`../.cayo/generated/pages.js?v=${hash()}`)
-    .then(({ pages }) => getPages(pages));
+export async function prerender(Template, pages, config) {
   const template = Template.render();
   const renderer = new Renderer(template.html);
-
-  // Get all the rendered content
-  // const renderedContent = {};
-  const deps = {};
   const componentList = new Set();
 
   // Render page, parse html, and save its deps
   Object.entries(pages).forEach(async ([pathname, page]) => {
-
     // Render page
     const content = renderer.render(pathname, page);
     // Postprocess the content, get deps and inject dep references
     const { html, css, js, components } = await handlePageDeps(content, page);
-
     Object.keys(components).forEach(component => componentList.add(component))
-
     writeContent({ html , css, js }, page, config);
   });
 
-  // Do something with componentList
   writeComponentFiles(componentList, config.projectRoot);
 }
 
+// Write file content for a page
 async function writeContent(content, page, config) {
   const { html, css, js } = content;
-  
   const htmlPath = page.urlPath === '/' ? 'index.html' : `${page.filePath}/index.html`;
+  // Write HTML
   await fs.outputFile(path.resolve(config.outDir, `${htmlPath}`), html)
     .then(() => config.logger.info(
       chalk.green('page rebuild ') + chalk.dim(`${htmlPath}`), 
       { timestamp: true })
     );
-
+  // Write CSS
   if (css.code !== '') {
     await fs.outputFile(path.resolve(config.outDir, `${page.filePath}index.css`), css.code)
       .then(() => config.logger.info(
@@ -51,7 +41,7 @@ async function writeContent(content, page, config) {
         { timestamp: true })
       );
   }
-
+  // Write JS
   if (js !== '') {
     let jsPath = page.urlPath === '/' ? 'index.js' : `${page.filePath}/index.js`;
     await fs.outputFile(path.resolve(config.outDir, jsPath), js)
@@ -135,9 +125,11 @@ export async function handlePageDeps(content, page) {
   };
 }
 
+// Generate re-xport files for components
 async function writeComponentFiles(components, outDir, projectRoot) {
-  const componentPaths = await getComponents(projectRoot);
+  const componentPaths = await getComponentModules(projectRoot);
 
+  // TODO: make this use svelte/register & require
   Object.keys(components).forEach(async (name) => {
     let content = `export { default as ${name} } from '${componentPaths[name]}'`;
     await fs.outputFile(path.resolve(outDir, `./components.js`, content))
@@ -145,6 +137,7 @@ async function writeComponentFiles(components, outDir, projectRoot) {
   });
 }
 
+// Generate the code to wrap component instances in an event listener wrapper
 function genComponentInstanceWrapper(contents) {
   return (
 `
@@ -155,6 +148,7 @@ ${contents}
   );
 }
 
+// Generate the code for a component instance
 function genComponentInstance(cayoId, componentName) {
   return (
 ` 
