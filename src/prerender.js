@@ -7,18 +7,17 @@ import { Renderer } from './renderer.js';
 import fs from 'fs-extra';
 import path from 'path';
 import * as cheerio from 'cheerio';
+import chalk from 'chalk';
 
 const development = true;
 
-export async function prerender(options, resolvedProjectRoot) {
+export async function prerender(config, resolvedProjectRoot) {
   let t = 'template';
   const { Template } = await import(`../.cayo/generated/${t}.js?v=${hash()}`);
   const template = Template.render();
   const renderer = new Renderer(template.html);
   let pages = await import(`../.cayo/generated/pages.js?v=${hash()}`)
     .then(({ pages }) => getPages(pages));
-
-  console.log(`Rendering ${Object.keys(pages).length} ${Object.keys(pages).length === 1 ? 'page' : 'pages'}...`);
 
   // Get all the rendered content
   // const renderedContent = {};
@@ -35,29 +34,38 @@ export async function prerender(options, resolvedProjectRoot) {
 
     Object.keys(components).forEach(component => componentList.add(component))
 
-    writeContent({ html , css, js }, page, options.outDir);
+    writeContent({ html , css, js }, page, config);
   });
 
   // Do something with componentList
   writeComponentFiles(componentList, resolvedProjectRoot);
 }
 
-async function writeContent(content, page, outDir) {
+async function writeContent(content, page, config) {
   const { html, css, js } = content;
   
   const htmlPath = page.urlPath === '/' ? 'index.html' : `${page.filePath}/index.html`;
-  await fs.outputFile(path.resolve(outDir, `${htmlPath}`), html)
-    .then(() => console.log('🖨   Prerendered', `${htmlPath}`));
+  await fs.outputFile(path.resolve(config.outDir, `${htmlPath}`), html)
+    .then(() => config.logger.info(
+      chalk.green('page rebuild ') + chalk.dim(`${htmlPath}`), 
+      { timestamp: true })
+    );
 
   if (css.code !== '') {
-    await fs.outputFile(path.resolve(outDir, `${page.filePath}index.css`), css.code)
-      .then(() => console.log('🎨   CSS output for', `${page.filePath}.html`));
+    await fs.outputFile(path.resolve(config.outDir, `${page.filePath}index.css`), css.code)
+      .then(() => config.logger.info(
+        chalk.green('css rebuild ') + chalk.dim(`${page.filePath}.html`), 
+        { timestamp: true })
+      );
   }
 
   if (js !== '') {
     let jsPath = page.urlPath === '/' ? 'index.js' : `${page.filePath}/index.js`;
-    await fs.outputFile(path.resolve(outDir, jsPath), js)
-      .then(() => console.log('🛠   JS output for', `${page.filePath}.html`));
+    await fs.outputFile(path.resolve(config.outDir, jsPath), js)
+      .then(() => config.logger.info(
+        chalk.green('entry rebuild ') + chalk.dim(`for ${page.filePath}.html`), 
+        { timestamp: true })
+      );
   }
 }
 
@@ -101,8 +109,8 @@ export async function getComponents(resolvedProjectRoot) {
 
 import MyComponent from './MyComponent.svelte';
 
-window.MyComponent = function (options) {
-    return new MyComponent(options);
+window.MyComponent = function (config) {
+    return new MyComponent(config);
 };
 
 document.addEventListener("DOMContentLoaded", function (event) {
@@ -126,7 +134,7 @@ export async function handlePageDeps(content, page) {
   // 
   // find components
   // 
-  // let options = null;
+  // let config = null;
   const $ = cheerio.load(content.html);
 
   // Get Components

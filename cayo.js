@@ -4,6 +4,13 @@ import path from 'path';
 import { createServer } from 'vite';
 const __dirname = path.resolve();
 import { prerender } from './src/prerender.js';
+import { createLogger } from 'vite';
+import chalk from 'chalk';
+
+const logger = createLogger('info', {
+  prefix: chalk.magenta('[cayo]'),
+  allowClearScreen: false,
+});
 
 import { 
   hash, 
@@ -14,7 +21,9 @@ import {
 } from './dist/utils.js';
 
 const config = {
-  projectRoot: 'test'
+  projectRoot: 'test',
+  logger: logger,
+  outDir: path.join(process.cwd(), '.cayo/'),
 }
 
 const options = {
@@ -65,10 +74,12 @@ export async function cli(args) {
 }
 
 async function run({ cmd }) {
+  logger.info(chalk.magenta('\n  cayo ') + chalk.green(`${cmd}`), { timestamp: false });
+
   const main = createTemplateImport(resolvedProjectRoot, dotPath)
     .then(() => createPageImports(resolvedProjectRoot, dotPath))
     // .then(() => refreshPrerender())
-    .then(() => prerender(options, resolvedProjectRoot))
+    .then(() => prerender(config, resolvedProjectRoot))
     // .then(({ prerender }) => prerender(options, resolvedProjectRoot))
     .then(() => {
       if (cmd === 'dev') {
@@ -107,14 +118,11 @@ function watch() {
     // },
   });
   watcher.on('change', async (path) => {
-    console.log('> watch:change', path); 
     if (path.endsWith('.svelte')) {
       if (path.endsWith('__index.svelte')) {
-        console.log('> watch:change : refreshing template & rerendering'); 
-        refreshTemplate().then(({ prerender }) => prerender(options, resolvedProjectRoot));
+        refreshTemplate().then(({ prerender }) => prerender(config, resolvedProjectRoot));
       } else {
-        console.log('> watch:change : rerendering'); 
-        prerender(options, resolvedProjectRoot);
+        prerender(config, resolvedProjectRoot);
         // await import(`./dist/prerender.js`)
         //   .then(({ prerender }) => prerender(options, resolvedProjectRoot));
         // refreshPrerender().then(({ prerender }) => prerender(options, resolvedProjectRoot));
