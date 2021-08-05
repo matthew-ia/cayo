@@ -25,6 +25,17 @@ export function getPages(modules, ext = 'svelte') {
   }, {})
 }
 
+export async function getComponents(projectRoot) {
+  const componentPaths = await getComponentModulePaths(projectRoot);
+  const componentNameRegex = /\/(?<name>\w+)\.svelte/; // Foo-{hash}
+  const componentNamesFromPaths = componentPaths.map(path => path.match(componentNameRegex).groups.name);
+
+  const paths = {};
+  componentNamesFromPaths.forEach((name, i) => modules[name] = componentPaths[i]);
+
+  return paths;
+}
+
 export async function viteBuildScript(moduleName, verbose) {
   const cmd = 'vite';
   const args = [

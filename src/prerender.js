@@ -1,23 +1,16 @@
-
-
-
-  
-import { getComponentModulePaths, hash } from './utils.js';
-import { Renderer } from './renderer.js';
 import fs from 'fs-extra';
 import path from 'path';
 import * as cheerio from 'cheerio';
 import chalk from 'chalk';
+import { Renderer } from './renderer.js';
+import { getPages, getComponents, hash } from './utils.js';
 
-const development = true;
-
-export async function prerender(config, resolvedProjectRoot) {
-  let t = 'template';
-  const { Template } = await import(`../.cayo/generated/${t}.js?v=${hash()}`);
-  const template = Template.render();
-  const renderer = new Renderer(template.html);
+export async function prerender(config) {
+  const { Template } = await import(`../.cayo/generated/template.js?v=${hash()}`);
   let pages = await import(`../.cayo/generated/pages.js?v=${hash()}`)
     .then(({ pages }) => getPages(pages));
+  const template = Template.render();
+  const renderer = new Renderer(template.html);
 
   // Get all the rendered content
   // const renderedContent = {};
@@ -38,7 +31,7 @@ export async function prerender(config, resolvedProjectRoot) {
   });
 
   // Do something with componentList
-  writeComponentFiles(componentList, resolvedProjectRoot);
+  writeComponentFiles(componentList, config.projectRoot);
 }
 
 async function writeContent(content, page, config) {
@@ -69,72 +62,8 @@ async function writeContent(content, page, config) {
   }
 }
 
-export function getPages(modules, ext = 'svelte') {
-  // TODO: build path from config
-
-  const extRegex = new RegExp(String.raw`(\.${ext})$`);
-
-  return Object.entries(modules).reduce((pages, [modulePath, page]) => {
-    // Make these paths actually useful
-    // /^(.+)\/pages/
-    // /^(\/\w+)*\/pages/
-    const filePath = modulePath.replace(/^(.+)\/pages\//, '').replace(extRegex, '')
-    const urlPath = filePath === 'index' ? filePath.replace(/index$/, '/') : `${filePath}/`
-    // name = name.split('.', 1)[0];
-    pages[urlPath] = {
-      Component: page.default,
-      meta: page.meta ? page.meta : {},
-      filePath,
-      modulePath,
-      urlPath
-    }
-    return pages
-  }, {})
-}
-
-export async function getComponents(resolvedProjectRoot) {
-  const componentPaths = await getComponentModulePaths(resolvedProjectRoot);
-  const componentNameRegex = /\/(?<name>\w+)\.svelte/; // Foo-{hash}
-  const componentNamesFromPaths = componentPaths.map(path => path.match(componentNameRegex).groups.name);
-
-  const paths = {};
-  componentNamesFromPaths.forEach((name, i) => modules[name] = componentPaths[i]);
-
-  return paths;
-}
-
-
-
-/*
-
-import MyComponent from './MyComponent.svelte';
-
-window.MyComponent = function (config) {
-    return new MyComponent(config);
-};
-
-document.addEventListener("DOMContentLoaded", function (event) {
-  new MyComponent({
-      target: document.getElementById("my-component"),
-      hydrate: true,
-      props: { ... },
-  });
-});
-
-
-*/
-
-
 // Derive JS dependencies from the html
 export async function handlePageDeps(content, page) {
-  const { modulePath } = page;
-  // use cheerio
-  // find script.src, 
-  // copy over the corresponding file from users src folder
-  // 
-  // find components
-  // 
-  // let config = null;
   const $ = cheerio.load(content.html);
 
   // Get Components
@@ -148,56 +77,53 @@ export async function handlePageDeps(content, page) {
       components[name] = { id }
     }
   });
-  // const components = cayoIds.map(id => {
-  //   let name = id.match(componentNameRegex).groups.name;
-  //   return { id, name };
-  // });
 
-  // Build Entry JS
-
-  // Get entry file name
+  // Get user-specified entry file name
   let entryScripts = $('[data-cayo-entry-src]');
   let userEntryFile = entryScripts.length !== 0 ? entryScripts.first().data().cayoEntrySrc : '';
+  // Remove user-specified entry file placeholder
+  if (userEntryFile) entryScripts.remove();
 
-  // if no JS needed, remove entry point
+  // Build generated entry file contents
   let js = '';
   if (cayoIds.length === 0 && !userEntryFile) {
     // Remove the entry point script tag if the page doesn't need any JS
+    // This is injected by Renderer.render based on the template
     $('script[type="module"][src="./index.js"]').remove();
   } else {
-    // define contents of ./index.js
+    // Read entry contents
+    const entryFilePath = path.resolve(
+      page.modulePath.replace(/\/(\w+)\.svelte/, ''), 
+      userEntryFile
+    );
+    const entryFileExists = await fs.pathExists(entryFilePath);
+    if (entryFileExists) {
+      js += `import '${entryFilePath}';`;
+    } else {
+      console.error(`Can't read entry file ${userEntryFile} in ${page.modulePath}`);
+    }
+
+    // Handle components as deps
     if (Object.keys(components).length !== 0) {
       // Add getProps helper for runtime
       js += `import { getProps } from 'cayo-utils.js';`;
 
       // Add component dependencies
       // TODO: make this be constructred properly using page.filePath
-      let componentPath = '..';
+      const componentPath = '..';
       Object.entries(components).forEach(([componentName]) => {
         js += `import { ${componentName} } from '${componentPath}/components.js';\n`;
       });
 
       // Add component instances
+      // TODO: test that this works
       let instances = '';
       Object.entries(components).forEach(([name, { id }]) => {
         instances += genComponentInstance(id, name);
       });
 
       js += genComponentInstanceWrapper(instances);
-
       await writeComponentFiles(components);
-    }
-    
-
-    // Read entry contents
-    let absolutePathRoot = modulePath.replace(/\/(\w+)\.svelte/, '');
-    let entryFilePath = path.resolve(absolutePathRoot, userEntryFile);
-    // if file exists, append its import
-    const entryFileExists = await fs.pathExists(entryFilePath);
-    if (entryFileExists) {
-      js += `import '${entryFilePath}';`;
-    } else {
-      console.error(`Can't read entry file ${userEntryFile} in ${page.modulePath}`);
     }
   }
 
@@ -209,12 +135,11 @@ export async function handlePageDeps(content, page) {
   };
 }
 
-async function writeComponentFiles(components, outDir, resolvedProjectRoot) {
-  const componentPaths = await getComponents(resolvedProjectRoot);
+async function writeComponentFiles(components, outDir, projectRoot) {
+  const componentPaths = await getComponents(projectRoot);
 
   Object.keys(components).forEach(async (name) => {
     let content = `export { default as ${name} } from '${componentPaths[name]}'`;
-
     await fs.outputFile(path.resolve(outDir, `./components.js`, content))
       .then(() => console.log(`Wrote file {outDir}/components/${name}.js`));
   });
@@ -242,9 +167,21 @@ function genComponentInstance(cayoId, componentName) {
   );
 }
 
-// function getProps(el) {
-//   const data = el.text();
-//   el.remove();
-//   return data;
-// }
+/*
 
+import MyComponent from './MyComponent.svelte';
+
+window.MyComponent = function (config) {
+    return new MyComponent(config);
+};
+
+document.addEventListener("DOMContentLoaded", function (event) {
+  new MyComponent({
+      target: document.getElementById("my-component"),
+      hydrate: true,
+      props: { ... },
+  });
+});
+
+
+*/

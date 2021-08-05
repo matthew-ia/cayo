@@ -15,13 +15,12 @@ const logger = createLogger('info', {
 import { 
   hash, 
   viteBuildScript, 
-  getPageModulePaths,
   createPageImports, 
   createTemplateImport 
 } from './dist/utils.js';
 
 const config = {
-  projectRoot: 'test',
+  projectRoot: path.resolve(process.cwd(), 'test'),
   logger: logger,
   outDir: path.join(process.cwd(), '.cayo/'),
 }
@@ -30,8 +29,7 @@ const options = {
   outDir: path.join(process.cwd(), '.cayo/'),
 }
 
-const resolvedProjectRoot = path.resolve(process.cwd(), config.projectRoot);
-const dotPath = path.join(process.cwd(), '.cayo/');
+const cayoPath = path.join(process.cwd(), '.cayo/');
 
 // / Handle arguments
 function resolveArgs(argv) {
@@ -76,11 +74,11 @@ export async function cli(args) {
 async function run({ cmd }) {
   logger.info(chalk.magenta('\n  cayo ') + chalk.green(`${cmd}`), { timestamp: false });
 
-  const main = createTemplateImport(resolvedProjectRoot, dotPath)
-    .then(() => createPageImports(resolvedProjectRoot, dotPath))
+  const main = createTemplateImport(config.projectRoot, cayoPath)
+    .then(() => createPageImports(config.projectRoot, cayoPath))
     // .then(() => refreshPrerender())
-    .then(() => prerender(config, resolvedProjectRoot))
-    // .then(({ prerender }) => prerender(options, resolvedProjectRoot))
+    .then(() => prerender(config))
+    // .then(({ prerender }) => prerender(options, config.projectRoot))
     .then(() => {
       if (cmd === 'dev') {
         watch();
@@ -111,7 +109,7 @@ async function refreshPages() {
 }
 
 function watch() {
-  const watcher = chokidar.watch(`${resolvedProjectRoot}/src`, {
+  const watcher = chokidar.watch(`${config.projectRoot}/src`, {
     // awaitWriteFinish: {
     //   stabilityThreshold: 1,
     //   pollInterval: 250
@@ -120,12 +118,12 @@ function watch() {
   watcher.on('change', async (path) => {
     if (path.endsWith('.svelte')) {
       if (path.endsWith('__index.svelte')) {
-        refreshTemplate().then(({ prerender }) => prerender(config, resolvedProjectRoot));
+        refreshTemplate().then(({ prerender }) => prerender(config));
       } else {
-        prerender(config, resolvedProjectRoot);
+        prerender(config, config.projectRoot);
         // await import(`./dist/prerender.js`)
-        //   .then(({ prerender }) => prerender(options, resolvedProjectRoot));
-        // refreshPrerender().then(({ prerender }) => prerender(options, resolvedProjectRoot));
+        //   .then(({ prerender }) => prerender(options, config.projectRoot));
+        // refreshPrerender().then(({ prerender }) => prerender(options, config.projectRoot));
       }
     }
   });
