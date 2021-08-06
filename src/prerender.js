@@ -17,14 +17,16 @@ export async function prerender(Template, pages, config) {
     // Postprocess the content, get deps and inject dep references
     const { html, css, js, components } = await handlePageDeps(content, page);
     Object.keys(components).forEach(component => componentList.add(component))
-    writeContent({ html , css, js }, page, config);
+    writePageFiles({ html , css, js }, page, config);
   });
 
   writeComponentFiles(componentList, config.projectRoot);
+
+  return componentList;
 }
 
 // Write file content for a page
-async function writeContent(content, page, config) {
+async function writePageFiles(content, page, config) {
   const { html, css, js } = content;
   const htmlPath = page.urlPath === '/' ? 'index.html' : `${page.filePath}/index.html`;
   // Write HTML
@@ -127,11 +129,11 @@ export async function handlePageDeps(content, page) {
 
 // Generate re-xport files for components
 async function writeComponentFiles(components, outDir, projectRoot) {
-  const componentPaths = await getComponentModules(projectRoot);
+  const modules = await getComponentModules(projectRoot);
 
   // TODO: make this use svelte/register & require
   Object.keys(components).forEach(async (name) => {
-    let content = `export { default as ${name} } from '${componentPaths[name]}'`;
+    let content = `export { default as ${name} } from '${modules[name].modulePath}'`;
     await fs.outputFile(path.resolve(outDir, `./components.js`, content))
       .then(() => console.log(`Wrote file {outDir}/components/${name}.js`));
   });

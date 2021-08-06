@@ -28,12 +28,15 @@ export function getPageModules(modules, ext = 'svelte') {
 export async function getComponentModules(projectRoot) {
   const componentPaths = await getComponentModulePaths(projectRoot);
   const componentNameRegex = /\/(?<name>\w+)\.svelte/; // Foo-{hash}
-  const componentNamesFromPaths = componentPaths.map(path => path.match(componentNameRegex).groups.name);
-
-  const paths = {};
-  componentNamesFromPaths.forEach((name, i) => modules[name] = componentPaths[i]);
-
-  return paths;
+  const componentNamesFromPaths = componentPaths.map(filePath => 
+    filePath.match(componentNameRegex).groups.name
+  );
+  // componentNamesFromPaths.forEach((name, i) => components[name].modulePath = componentPaths[i]);
+  return componentNamesFromPaths.reduce((components, name, i) => {
+    components[name] = {
+      modulePath: componentPaths[i]
+    }
+  }, {});
 }
 
 export async function viteBuildScript(moduleName, verbose) {
@@ -70,16 +73,16 @@ export function hash(bytes = 5) {
   return crypto.randomBytes(bytes).toString('hex');
 }
 
-export async function getPageModulePaths(projcetRoot) {
-  return await fg([`${projcetRoot}/src/pages/**/*.svelte`]);
+export async function getPageModulePaths(projectRoot) {
+  return await fg([`${projectRoot}/src/pages/**/*.svelte`]);
 }
 
-export async function getComponentModulePaths(projcetRoot) {
-  return await fg([`${projcetRoot}/src/components/**/*.svelte`]);
+export async function getComponentModulePaths(projectRoot) {
+  return await fg([`${projectRoot}/src/components/**/*.svelte`]);
 }
 
-export async function createPageManifest(projcetRoot, cayoPath) {
-  const pagePaths = await getPageModulePaths(projcetRoot);
+export async function createPageManifest(projectRoot, cayoPath) {
+  const pagePaths = await getPageModulePaths(projectRoot);
   // let importPages = '';
   let importPages = `import { createRequire } from 'module';\n`
   importPages += `const require = createRequire(import.meta.url);\n`
@@ -96,11 +99,11 @@ export async function createPageManifest(projcetRoot, cayoPath) {
   return await fs.outputFile(`${cayoPath}/generated/pages.js`, importPages);
 }
 
-export async function createTemplateManifest(projcetRoot, cayoPath) {
+export async function createTemplateManifest(projectRoot, cayoPath) {
   let importTemplate = `import { createRequire } from 'module';\n`
   importTemplate += `const require = createRequire(import.meta.url);\n`
   importTemplate += `require('svelte/register');\n`
-  importTemplate += `export const Template = require('${projcetRoot}/src/__index.svelte').default;\n`;
-  // export { default as Template } from '${projcetRoot}/src/__index.svelte';
+  importTemplate += `export const Template = require('${projectRoot}/src/__index.svelte').default;\n`;
+  // export { default as Template } from '${projectRoot}/src/__index.svelte';
   return await fs.outputFile(`${cayoPath}/generated/template.js`, importTemplate);
 }
