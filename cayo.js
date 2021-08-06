@@ -1,11 +1,14 @@
 import yargs from 'yargs-parser';
 import chokidar from 'chokidar';
 import path from 'path';
-import { createServer } from 'vite';
-import { createLogger } from 'vite';
 const __dirname = path.resolve();
 import chalk from 'chalk';
+import { createServer, createLogger } from 'vite';
 import { prerender } from './src/prerender.js';
+import { 
+  writePageFiles,
+  writeComponentFile,
+} from './src/files.js';
 import { 
   hash,
   getPageModules, 
@@ -17,7 +20,7 @@ import {
 
 const logger = createLogger('info', {
   prefix: chalk.magenta('[cayo]'),
-  allowClearScreen: false,
+  // allowClearScreen: true,
 });
 
 const config = {
@@ -75,24 +78,18 @@ export async function cli(args) {
 }
 
 async function run({ cmd }) {
-  logger.info(chalk.magenta('\n  cayo ') + chalk.green(`${cmd}`), { timestamp: false });
+  logger.info(`\n  ${chalk.magenta.bold(`cayo.${cmd}`)}${chalk.dim(` starting`)}`, { timestamp: false });
 
   getTemplate(config.projectRoot, cayoPath)
     .then(() => getPages(config.projectRoot, cayoPath))
-    .then(() => prerender(data.template, data.pages, config))
     .then(() => {
+      build();
       if (cmd === 'dev') {
         watch();
         serve();
       }     
     });
-  
-  // if (cmd === 'dev') {
-  //   watch();
-  //   serve();
-  // } 
 }
-
 
 async function getTemplate(projectRoot, cayoPath) {
   return createTemplateManifest(projectRoot, cayoPath)
@@ -123,19 +120,19 @@ function watch() {
     if (filePath.endsWith('.svelte')) {
       if (filePath.endsWith('__index.svelte')) {
         getTemplate(config.projectRoot, cayoPath)
-          .then(() => prerender(data.template, data.pages, config));
+          .then(() => build());
       } else if (filePath.startsWith(path.resolve(config.projectRoot, 'src/pages'))) {
         getPages(config.projectRoot, cayoPath)
           .then((pages) => {
             let pageModule = Object.entries(pages).find(([, { modulePath }]) => modulePath === filePath);
             let page = pageModule ? { [`${pageModule[0]}`]: pageModule[1] } : {}
-            prerender(data.template, page, config)
+            build(page);
           })
+      // } else if (componentFileChanged) {
+      // find out which pages are affected
+      // find out which components are affected (imports)?
       } else {
-        prerender(data.template, data.pages, config);
-        // await import(`./dist/prerender.js`)
-        //   .then(({ prerender }) => prerender(options, config.projectRoot));
-        // refreshPrerender().then(({ prerender }) => prerender(options, config.projectRoot));
+        build();
       }
     }
   });
@@ -153,6 +150,19 @@ async function serve() {
     }
   })
   await server.listen()
+}
+
+async function build(pages = data.pages) {
+  const { prerendered, componentList } = prerender(data.template, pages, config);
+  Object.entries(prerendered).forEach(([some, page]) => {
+    writePageFiles(page, config, config.outDir)
+  });  
+  
+  // Handle components
+  // const componentModules = await getComponentModules(config.projectRoot);
+  // componentList.forEach(name => {
+  //   writeComponentFile(name, componentModules[name], config.outDir);
+  // });
 }
 
 cli(process.argv);

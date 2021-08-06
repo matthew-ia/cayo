@@ -1,74 +1,60 @@
 import fs from 'fs-extra';
 import path from 'path';
 import * as cheerio from 'cheerio';
-import chalk from 'chalk';
 import { Renderer } from './renderer.js';
 import { getComponentModules } from './utils.js';
 
-export async function prerender(Template, pages, config) {
+export function prerender(Template, pages, config) {
   const template = Template.render();
   const renderer = new Renderer(template.html);
   const componentList = new Set();
 
+  // const prerendered = {};
   // Render page, parse html, and save its deps
-  Object.entries(pages).forEach(async ([pathname, page]) => {
-    // Render page
-    const content = renderer.render(pathname, page);
-    // Postprocess the content, get deps and inject dep references
-    const { html, css, js, components } = await handlePageDeps(content, page);
-    Object.keys(components).forEach(component => componentList.add(component))
-    writePageFiles({ html , css, js }, page, config);
-  });
+  const prerendered = Object.entries(pages).reduce(
+    (prerendered, [pathname, page]) => {
+      // Render page
+      const content = renderer.render(pathname, page);
+      // Postprocess the content, get deps and inject dep references
+      const { html, css, js, components } = handlePageDeps(content, page);
+      prerendered[pathname] = {
+        html,
+        css, 
+        js,
+        components,
+        ...page,
+      }
+      Object.keys(components).forEach(component => componentList.add(component))
+      return prerendered;
+    }, {}
+  );
 
-  writeComponentFiles(componentList, config.projectRoot);
-
-  return componentList;
-}
-
-// Write file content for a page
-async function writePageFiles(content, page, config) {
-  const { html, css, js } = content;
-  const htmlPath = page.urlPath === '/' ? 'index.html' : `${page.filePath}/index.html`;
-  // Write HTML
-  await fs.outputFile(path.resolve(config.outDir, `${htmlPath}`), html)
-    .then(() => config.logger.info(
-      chalk.green('page rebuild ') + chalk.dim(`${htmlPath}`), 
-      { timestamp: true })
-    );
-  // Write CSS
-  if (css.code !== '') {
-    await fs.outputFile(path.resolve(config.outDir, `${page.filePath}index.css`), css.code)
-      .then(() => config.logger.info(
-        chalk.green('css rebuild ') + chalk.dim(`${page.filePath}.html`), 
-        { timestamp: true })
-      );
-  }
-  // Write JS
-  if (js !== '') {
-    let jsPath = page.urlPath === '/' ? 'index.js' : `${page.filePath}/index.js`;
-    await fs.outputFile(path.resolve(config.outDir, jsPath), js)
-      .then(() => config.logger.info(
-        chalk.green('entry rebuild ') + chalk.dim(`for ${page.filePath}.html`), 
-        { timestamp: true })
-      );
+  return { 
+    prerendered,
+    componentList,
   }
 }
 
-// Derive JS dependencies from the html
-export async function handlePageDeps(content, page) {
+// Derive JS dependencies from the prerendered html
+export function handlePageDeps(content, page) {
   const $ = cheerio.load(content.html);
 
-  // Get Components
+  // Get component instance ids
   let cayoIds = [];
   $('[data-cayo-id]').each(() => cayoIds.push(this.data().cayoId));
+
+  // Get component list
   const componentNameRegex = /(?<name>\w+)-/; // Foo-{hash}
-  const components = {};
-  cayoIds.forEach(id => {
+  const components = cayoIds.reduce((components, id) => {
     let name = id.match(componentNameRegex).groups.name;
+    // Collect keys of components, and an array of their respective instance ids
     if (!components[name]) {
-      components[name] = { id }
+      components[name] = [id]
+    } else {
+      components[name].push(id);
     }
-  });
+    return components;
+  }, {});
 
   // Get user-specified entry file name
   let entryScripts = $('[data-cayo-entry-src]');
@@ -88,7 +74,7 @@ export async function handlePageDeps(content, page) {
       page.modulePath.replace(/\/(\w+)\.svelte/, ''), 
       userEntryFile
     );
-    const entryFileExists = await fs.pathExists(entryFilePath);
+    const entryFileExists = fs.pathExistsSync(entryFilePath);
     if (entryFileExists) {
       js += `import '${entryFilePath}';`;
     } else {
@@ -100,22 +86,23 @@ export async function handlePageDeps(content, page) {
       // Add getProps helper for runtime
       js += `import { getProps } from 'cayo-utils.js';`;
 
-      // Add component dependencies
+      
       // TODO: make this be constructred properly using page.filePath
       const componentPath = '..';
-      Object.entries(components).forEach(([componentName]) => {
-        js += `import { ${componentName} } from '${componentPath}/components.js';\n`;
+      let instances = '';
+      // TODO: test that this works
+      Object.entries(components).forEach(([name, ids]) => {
+        // Add component dependencies
+        js += `import { ${name} } from '${componentPath}/components.js';\n`;
+        // Generate component instances
+        ids.forEach(id => {
+          instances += genComponentInstance(id, name)
+        });
       });
 
       // Add component instances
-      // TODO: test that this works
-      let instances = '';
-      Object.entries(components).forEach(([name, { id }]) => {
-        instances += genComponentInstance(id, name);
-      });
-
       js += genComponentInstanceWrapper(instances);
-      await writeComponentFiles(components);
+      // await writeComponentFiles(components);
     }
   }
 
@@ -127,17 +114,8 @@ export async function handlePageDeps(content, page) {
   };
 }
 
-// Generate re-xport files for components
-async function writeComponentFiles(components, outDir, projectRoot) {
-  const modules = await getComponentModules(projectRoot);
-
-  // TODO: make this use svelte/register & require
-  Object.keys(components).forEach(async (name) => {
-    let content = `export { default as ${name} } from '${modules[name].modulePath}'`;
-    await fs.outputFile(path.resolve(outDir, `./components.js`, content))
-      .then(() => console.log(`Wrote file {outDir}/components/${name}.js`));
-  });
-}
+// UTILITIES
+// ────────────────────────────────────
 
 // Generate the code to wrap component instances in an event listener wrapper
 function genComponentInstanceWrapper(contents) {

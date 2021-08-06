@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 
-export default async function viteBuildScript(moduleName) {
+export async function build(moduleName, verbose) {
   const cmd = 'vite';
   const args = [
     'build', 
@@ -12,19 +12,22 @@ export default async function viteBuildScript(moduleName) {
     // File to build (output is runnable in node env)
     '--ssr', `src/${moduleName}.js`
   ];
+
+  const options = verbose ? { shell: true, stdio: 'inherit' } : {}
   
   return new Promise((resolve, reject) => {
-    const process = spawn(cmd, args, { shell: true, stdio: 'inherit' });
+    const process = spawn(cmd, args, options);
     // Resolve promise
     process.on('close', (code) => {
       resolve(code)
     });
     // Reject promise
     process.on('error', (err) => {
-      console.error(`Couldn't build module: src/${moduleName}.js`);
+      console.error(`Error building module: src/${moduleName}.js`);
+      console.error(err);
       reject(err)
     });
   });
 }
 
-viteBuildScript('utils');
+build('prerender', true);
