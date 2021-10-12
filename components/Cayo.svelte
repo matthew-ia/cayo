@@ -1,5 +1,5 @@
 <script>
-  import crypto from 'crypto';
+  import * as crypto from 'crypto';
 
   export let name;
   export let props = {};
@@ -12,12 +12,13 @@
   }
 
   const HASH = hash();
-  const json = JSON.stringify(props);
   props.cayoComponentName = name;
   props.cayoInstanceId = `${name}-${HASH}`;
+  const json = JSON.stringify(props);
 </script>
 
-<div data-cayo-id={props.cayoInstanceId}></div>
+<div data-cayo-id={props.cayoInstanceId} data-cayo-props={props}></div>
+<!-- {@html `<data>${props}</data>`} -->
 {@html `<!-- %cayo.data:${json}% -->`}
 <slot/>
 

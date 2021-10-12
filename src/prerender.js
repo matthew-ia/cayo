@@ -3,6 +3,7 @@ import path from 'path';
 import * as cheerio from 'cheerio';
 import { Renderer } from './renderer.js';
 import { getComponentModules } from './utils.js';
+import { writeComponentFiles } from './files.js';
 
 export function prerender(Template, pages, config) {
   const template = Template.render();
@@ -41,7 +42,10 @@ export function handlePageDeps(content, page) {
 
   // Get component instance ids
   let cayoIds = [];
-  $('[data-cayo-id]').each(() => cayoIds.push(this.data().cayoId));
+  $('[data-cayo-id]').each(function() {
+    // console.log(i, el)
+    cayoIds.push($(this).data('cayoId'));
+  });
 
   // Get component list
   const componentNameRegex = /(?<name>\w+)-/; // Foo-{hash}
@@ -84,7 +88,8 @@ export function handlePageDeps(content, page) {
     // Handle components as deps
     if (Object.keys(components).length !== 0) {
       // Add getProps helper for runtime
-      js += `import { getProps } from 'cayo-utils.js';`;
+      // TODO: get this from somewhere else
+      js += `import { getProps } from '../src/runtime.js'\n;`;
 
       
       // TODO: make this be constructred properly using page.filePath
@@ -102,7 +107,7 @@ export function handlePageDeps(content, page) {
 
       // Add component instances
       js += genComponentInstanceWrapper(instances);
-      // await writeComponentFiles(components);
+      writeComponentFiles(components);
     }
   }
 
