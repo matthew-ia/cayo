@@ -37,14 +37,19 @@ export async function writeComponentFiles(components, outDir) {
 
   // TODO: make this use svelte/register & require
   Object.keys(components).forEach(async (name) => {
-    let content = `export { default as ${name} } from '${modules[name].modulePath}'`;
+    let content = `export { default as ${name} } from '${modules[name].modulePath}'\n`;
     await fs.outputFile(path.resolve(outDir, `./components.js`, content))
       .then(() => console.log(`Wrote file ${outDir}/components/${name}.js`));
   });
 }
 
 export async function writeComponentFile(name, modulePath, outDir) {
-  let content = `export { default as ${name} } from '${modulePath}'`;
-  await fs.outputFile(path.resolve(outDir, `./components.js`, content))
-    .then(() => console.log(`Wrote file ${outDir}/components/${name}.js`));
+  // let content = `import { createRequire } from 'module';\n`;
+  // content += `const require = createRequire(import.meta.url);\n`;
+  // content += `require('svelte/register');\n`;
+
+
+  // let content = `export { default as ${name} } from '${modulePath}'`;
+  // await fs.outputFile(path.resolve(outDir, `./components.js`, content))
+  //   .then(() => console.log(`Wrote file ${outDir}/components/${name}.js`));
 }

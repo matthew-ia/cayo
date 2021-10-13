@@ -17,7 +17,7 @@ export function prerender(Template, pages, config) {
       // Render page
       const content = renderer.render(pathname, page);
       // Postprocess the content, get deps and inject dep references
-      const { html, css, js, components } = handlePageDeps(content, page);
+      const { html, css, js, components } = handlePageDeps(content, page, config.projectRoot);
       prerendered[pathname] = {
         html,
         css, 
@@ -37,7 +37,7 @@ export function prerender(Template, pages, config) {
 }
 
 // Derive JS dependencies from the prerendered html
-export function handlePageDeps(content, page) {
+export function handlePageDeps(content, page, projectRoot) {
   const $ = cheerio.load(content.html);
 
   // Get component instance ids
@@ -89,11 +89,15 @@ export function handlePageDeps(content, page) {
     if (Object.keys(components).length !== 0) {
       // Add getProps helper for runtime
       // TODO: get this from somewhere else
-      js += `import { getProps } from '../src/runtime.js'\n;`;
+      // js += `import { getProps } from '../src/runtime.js'\n;`;
+      // js += `import { createRequire } from 'module';\n`;
+      // js += `const require = createRequire(import.meta.url);\n`;
+      // js += `require('svelte/register');\n`;
 
       
       // TODO: make this be constructred properly using page.filePath
       const componentPath = '..';
+      // const componentModules = getComponentModules(projectRoot, components)
       let instances = '';
       // TODO: test that this works
       Object.entries(components).forEach(([name, ids]) => {
@@ -107,7 +111,7 @@ export function handlePageDeps(content, page) {
 
       // Add component instances
       js += genComponentInstanceWrapper(instances);
-      writeComponentFiles(components);
+      // writeComponentFiles(components);
     }
   }
 

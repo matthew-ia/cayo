@@ -24,19 +24,41 @@ export function getPageModules(modules, ext = 'svelte') {
   }, {})
 }
 
-export async function getComponentModules(projectRoot) {
-  const componentPaths = await getComponentModulePaths(projectRoot);
-  const componentNameRegex = /\/(?<name>\w+)\.svelte/; // Foo-{hash}
-  const componentNamesFromPaths = componentPaths.map(filePath => 
-    filePath.match(componentNameRegex).groups.name
-  );
-  // componentNamesFromPaths.forEach((name, i) => components[name].modulePath = componentPaths[i]);
-  return componentNamesFromPaths.reduce((components, name, i) => {
-    return components[name] = {
-      modulePath: componentPaths[i]
+export function getComponentModules(modules, ext = 'svelte') {
+  // TODO: build path from config
+  // const extRegex = new RegExp(String.raw`(\.${ext})$`);
+
+  return Object.entries(modules).reduce((components, [modulePath, component]) => {
+    const componentNameRegex = /\/(?<name>\w+)\.svelte/; // Foo-{hash}
+    // name = name.split('.', 1)[0];
+    const name = modulePath.match(componentNameRegex).groups.name;
+    components[name] = {
+      Component: component.default,
+      modulePath,
     }
-  }, {});
+    return components;
+  }, {})
 }
+
+// export async function getComponentModules(projectRoot, componentList) {
+//   const componentPaths = await getComponentModulePaths(projectRoot);
+//   const componentNameRegex = /\/(?<name>\w+)\.svelte/; // Foo-{hash}
+
+//   const componentNamesFromPaths = componentPaths.map(filePath => 
+//     filePath.match(componentNameRegex).groups.name
+//   );
+
+//   // NOTE: non-unique component names are not supported due to how the Cayo component works atm. 
+//   // To change this, it'd probably be better if Cayo used the component path rather than the name. 
+//   const componentNames = [...new Set([...componentList, ...componentNamesFromPaths])];
+
+//   // componentNamesFromPaths.forEach((name, i) => components[name].modulePath = componentPaths[i]);
+//   return componentNames.reduce((components, name, i) => {
+//     return components[name] = {
+//       modulePath: componentPaths[i]
+//     }
+//   }, {});
+// }
 
 export function hash(bytes = 5) {
   return crypto.randomBytes(bytes).toString('hex');
@@ -67,6 +89,24 @@ export async function createPageManifest(projectRoot, cayoPath) {
   importPages += '}\n';
   return await fs.outputFile(`${cayoPath}/generated/pages.js`, importPages);
 }
+
+export async function createComponentManifest(projectRoot, cayoPath) {
+  const componentPaths = await getComponentModulePaths(projectRoot);
+  let importComponents = `import { createRequire } from 'module';\n`
+  importComponents += `const require = createRequire(import.meta.url);\n`
+  importComponents += `require('svelte/register');\n`;
+  componentPaths.forEach((path, i) => {
+    importComponents += `delete require.cache['${path}'];\n`
+    importComponents += `const component_${i} = require('${path}');\n`;
+  }); 
+  importComponents += 'export const components = {\n';
+  componentPaths.forEach((path, i) => {
+    importComponents += `  '${path}': component_${i},\n`;
+  })
+  importComponents += '}\n';
+  return await fs.outputFile(`${cayoPath}/generated/components.js`, importComponents);
+}
+
 
 export async function createTemplateManifest(projectRoot, cayoPath) {
   let importTemplate = `import { createRequire } from 'module';\n`

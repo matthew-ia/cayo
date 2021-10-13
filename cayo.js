@@ -15,6 +15,7 @@ import {
   getComponentModules,
   createTemplateManifest,
   createPageManifest,
+  createComponentManifest,
 } from './src/utils.js';
 
 
@@ -33,7 +34,11 @@ const options = {
   outDir: path.join(process.cwd(), '.cayo/'),
 }
 
-const data = {}
+const data = {
+  template: undefined,
+  pages: undefined,
+  components: undefined,
+}
 
 const cayoPath = path.join(process.cwd(), '.cayo/');
 
@@ -82,6 +87,7 @@ async function run({ cmd }) {
 
   getTemplate(config.projectRoot, cayoPath)
     .then(() => getPages(config.projectRoot, cayoPath))
+    // .then(() => getComponents(config.projectRoot, cayoPath))
     .then(() => {
       build();
       if (cmd === 'dev') {
@@ -105,7 +111,18 @@ async function getPages(projectRoot, cayoPath) {
     .then(async () => await import(path.resolve(cayoPath, `generated/pages.js?v=${hash()}`)))
     .then(({ pages }) => {
       data.pages = getPageModules(pages);
+      // data.components = getComponentModules(components);
+
       return data.pages;
+    });
+}
+
+async function getComponents(projectRoot, cayoPath) {
+  return createComponentManifest(projectRoot, cayoPath)
+    .then(async () => await import(path.resolve(cayoPath, `generated/components.js?v=${hash()}`)))
+    .then(({ components }) => {
+      data.components = getComponentModules(components);
+      return data.components;
     });
 }
 
@@ -154,9 +171,12 @@ async function serve() {
 
 async function build(pages = data.pages) {
   const { prerendered, componentList } = prerender(data.template, pages, config);
-  Object.entries(prerendered).forEach(([some, page]) => {
+  Object.entries(prerendered).forEach(([, page]) => {
     writePageFiles(page, config, config.outDir)
-  });  
+    // componentList.forEach((component) => {
+    //   writeComponentFile(component, data.components, config)
+    // });
+  });
   
   // Handle components
   // const componentModules = await getComponentModules(config.projectRoot);
