@@ -2,8 +2,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import * as cheerio from 'cheerio';
 import { Renderer } from './renderer.js';
-import { getComponentModules } from './utils.js';
-import { writeComponentFiles } from './files.js';
+// import { getComponentModules, getComponentModulePaths } from './utils.js';
+// import { writeComponentFile } from './files.js';
 
 export function prerender(Template, pages, config) {
   const template = Template.render();
@@ -80,7 +80,7 @@ export function handlePageDeps(content, page, projectRoot) {
     );
     const entryFileExists = fs.pathExistsSync(entryFilePath);
     if (entryFileExists) {
-      js += `import '${entryFilePath}';`;
+      js += `import '${entryFilePath}';\n`;
     } else {
       console.error(`Can't read entry file ${userEntryFile} in ${page.modulePath}`);
     }
@@ -89,20 +89,17 @@ export function handlePageDeps(content, page, projectRoot) {
     if (Object.keys(components).length !== 0) {
       // Add getProps helper for runtime
       // TODO: get this from somewhere else
-      // js += `import { getProps } from '../src/runtime.js'\n;`;
-      // js += `import { createRequire } from 'module';\n`;
-      // js += `const require = createRequire(import.meta.url);\n`;
-      // js += `require('svelte/register');\n`;
-
+      js += `import { getProps } from '../src/runtime.js';\n`;
       
       // TODO: make this be constructred properly using page.filePath
-      const componentPath = '..';
+      const componentPath = './generated/components';
+
       // const componentModules = getComponentModules(projectRoot, components)
       let instances = '';
       // TODO: test that this works
       Object.entries(components).forEach(([name, ids]) => {
         // Add component dependencies
-        js += `import { ${name} } from '${componentPath}/components.js';\n`;
+        js += `import { ${name} } from '${componentPath}/${name}.js';\n`;
         // Generate component instances
         ids.forEach(id => {
           instances += genComponentInstance(id, name)
@@ -144,27 +141,8 @@ function genComponentInstance(cayoId, componentName) {
   new ${componentName}({
     target: document.querySelector('[data-cayo-id="${cayoId}"]'),
     hydrate: true,
-    props: { getProps('${cayoId}') },
+    props: { str: getProps('${cayoId}') },
   });
 `
   );
 }
-
-/*
-
-import MyComponent from './MyComponent.svelte';
-
-window.MyComponent = function (config) {
-    return new MyComponent(config);
-};
-
-document.addEventListener("DOMContentLoaded", function (event) {
-  new MyComponent({
-      target: document.getElementById("my-component"),
-      hydrate: true,
-      props: { ... },
-  });
-});
-
-
-*/

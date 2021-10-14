@@ -98,6 +98,7 @@ export async function createComponentManifest(projectRoot, cayoPath) {
   componentPaths.forEach((path, i) => {
     importComponents += `delete require.cache['${path}'];\n`
     importComponents += `const component_${i} = require('${path}');\n`;
+    // importComponents += `export component_`
   }); 
   importComponents += 'export const components = {\n';
   componentPaths.forEach((path, i) => {

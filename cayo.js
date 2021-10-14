@@ -18,6 +18,26 @@ import {
   createComponentManifest,
 } from './src/utils.js';
 
+// vite stuff
+
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+import sveltePreprocess from 'svelte-preprocess';
+
+const viteConfig = {
+  plugins: [svelte({
+    preprocess: sveltePreprocess({ preserve: ['json'] }),
+    compilerOptions: {
+      // generate: 'ssr',
+      // hydratable: true,
+      // we'll extract any component CSS out into
+      // a separate file - better for performance
+      // css: css => {
+      //   css.write('dist/bundle.css'); // (3)
+      // },
+    },
+  })],
+}
+
 
 const logger = createLogger('info', {
   prefix: chalk.magenta('[cayo]'),
@@ -87,7 +107,7 @@ async function run({ cmd }) {
 
   getTemplate(config.projectRoot, cayoPath)
     .then(() => getPages(config.projectRoot, cayoPath))
-    // .then(() => getComponents(config.projectRoot, cayoPath))
+    .then(() => getComponents(config.projectRoot, cayoPath))
     .then(() => {
       build();
       if (cmd === 'dev') {
@@ -164,7 +184,8 @@ async function serve() {
     root: '.cayo',
     server: {
       port: 5000
-    }
+    },
+    ...viteConfig,
   })
   await server.listen()
 }
@@ -173,9 +194,10 @@ async function build(pages = data.pages) {
   const { prerendered, componentList } = prerender(data.template, pages, config);
   Object.entries(prerendered).forEach(([, page]) => {
     writePageFiles(page, config, config.outDir)
-    // componentList.forEach((component) => {
-    //   writeComponentFile(component, data.components, config)
-    // });
+  });
+
+  componentList.forEach((component) => {
+    writeComponentFile(component, data.components[component].modulePath, config)
   });
   
   // Handle components
