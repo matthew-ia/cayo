@@ -88,17 +88,15 @@ export function handlePageDeps(content, page, projectRoot) {
     // Handle components as deps
     if (Object.keys(components).length !== 0) {
       // Add getProps helper for runtime
-      // TODO: get this from somewhere else
       js += `import { getProps } from '../src/runtime.js';\n`;
       
-      // TODO: make this be constructred properly using page.filePath
+      // TODO: make this be constructred properly using page.filePath?
       const componentPath = './generated/components';
 
-      // const componentModules = getComponentModules(projectRoot, components)
       let instances = '';
       // TODO: test that this works
       Object.entries(components).forEach(([name, ids]) => {
-        // Add component dependencies
+        // Add component dependency import
         js += `import { ${name} } from '${componentPath}/${name}.js';\n`;
         // Generate component instances
         ids.forEach(id => {
@@ -108,7 +106,6 @@ export function handlePageDeps(content, page, projectRoot) {
 
       // Add component instances
       js += genComponentInstanceWrapper(instances);
-      // writeComponentFiles(components);
     }
   }
 

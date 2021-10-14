@@ -165,6 +165,7 @@ function watch() {
             let page = pageModule ? { [`${pageModule[0]}`]: pageModule[1] } : {}
             build(page);
           })
+      // TODO: watch component changes
       // } else if (componentFileChanged) {
       // find out which pages are affected
       // find out which components are affected (imports)?
