@@ -10,10 +10,9 @@
     return crypto.randomBytes(3).toString('hex');
   }
 
-  const HASH = hash();
   const json = JSON.stringify($$restProps);
 </script>
 
-<div data-cayo-id={`${name}-${HASH}`} data-cayo-props={json}></div>
+<div data-cayo-id={`${name}-${hash()}`} data-cayo-props={json}></div>
 <slot/>
 

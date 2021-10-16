@@ -28,7 +28,7 @@ const viteConfig = {
     preprocess: sveltePreprocess({ preserve: ['json'] }),
     compilerOptions: {
       // generate: 'ssr',
-      // hydratable: true,
+      hydratable: true,
       // we'll extract any component CSS out into
       // a separate file - better for performance
       // css: css => {
