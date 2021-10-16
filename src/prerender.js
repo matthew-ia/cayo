@@ -48,6 +48,7 @@ export function handlePageDeps(content, page, projectRoot) {
   });
 
   // Get component list
+  // TODO: make this regex allow '-' character, before the last one, to be part of the component name?
   const componentNameRegex = /(?<name>\w+)-/; // Foo-{hash}
   const components = cayoIds.reduce((components, id) => {
     let name = id.match(componentNameRegex).groups.name;
@@ -138,7 +139,7 @@ function genComponentInstance(cayoId, componentName) {
   new ${componentName}({
     target: document.querySelector('[data-cayo-id="${cayoId}"]'),
     hydrate: true,
-    props: { str: getProps('${cayoId}') },
+    props: getProps('${cayoId}'),
   });
 `
   );

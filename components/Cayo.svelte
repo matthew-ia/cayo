@@ -12,13 +12,9 @@
   }
 
   const HASH = hash();
-  props.cayoComponentName = name;
-  props.cayoInstanceId = `${name}-${HASH}`;
   const json = JSON.stringify(props);
 </script>
 
-<div data-cayo-id={props.cayoInstanceId} data-cayo-props={props}></div>
-<!-- {@html `<data>${props}</data>`} -->
-{@html `<!-- %cayo.data:${json}% -->`}
+<div data-cayo-id={`${name}-${HASH}`} data-cayo-props={json}></div>
 <slot/>
 

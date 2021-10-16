@@ -1,4 +1,4 @@
 <script>
-  export let name = '';
+  export let beans = '';
 </script>
-<div>I'm coooler. {name}</div>
+<div>{beans}</div>
