@@ -2,7 +2,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import * as cheerio from 'cheerio';
 import { Renderer } from './renderer.js';
-import { getComponentModules } from './utils.js';
+// import { getComponentModules, getComponentModulePaths } from './utils.js';
+// import { writeComponentFile } from './files.js';
 
 export function prerender(Template, pages, config) {
   const template = Template.render();
@@ -16,7 +17,7 @@ export function prerender(Template, pages, config) {
       // Render page
       const content = renderer.render(pathname, page);
       // Postprocess the content, get deps and inject dep references
-      const { html, css, js, components } = handlePageDeps(content, page);
+      const { html, css, js, components } = handlePageDeps(content, page, config.projectRoot);
       prerendered[pathname] = {
         html,
         css, 
@@ -36,14 +37,18 @@ export function prerender(Template, pages, config) {
 }
 
 // Derive JS dependencies from the prerendered html
-export function handlePageDeps(content, page) {
+export function handlePageDeps(content, page, projectRoot) {
   const $ = cheerio.load(content.html);
 
   // Get component instance ids
   let cayoIds = [];
-  $('[data-cayo-id]').each(() => cayoIds.push(this.data().cayoId));
+  $('[data-cayo-id]').each(function() {
+    // console.log(i, el)
+    cayoIds.push($(this).data('cayoId'));
+  });
 
   // Get component list
+  // TODO: make this regex allow '-' character, before the last one, to be part of the component name?
   const componentNameRegex = /(?<name>\w+)-/; // Foo-{hash}
   const components = cayoIds.reduce((components, id) => {
     let name = id.match(componentNameRegex).groups.name;
@@ -76,7 +81,7 @@ export function handlePageDeps(content, page) {
     );
     const entryFileExists = fs.pathExistsSync(entryFilePath);
     if (entryFileExists) {
-      js += `import '${entryFilePath}';`;
+      js += `import '${entryFilePath}';\n`;
     } else {
       console.error(`Can't read entry file ${userEntryFile} in ${page.modulePath}`);
     }
@@ -84,16 +89,16 @@ export function handlePageDeps(content, page) {
     // Handle components as deps
     if (Object.keys(components).length !== 0) {
       // Add getProps helper for runtime
-      js += `import { getProps } from 'cayo-utils.js';`;
-
+      js += `import { getProps } from '../src/runtime.js';\n`;
       
-      // TODO: make this be constructred properly using page.filePath
-      const componentPath = '..';
+      // TODO: make this be constructred properly using page.filePath?
+      const componentPath = './generated/components';
+
       let instances = '';
       // TODO: test that this works
       Object.entries(components).forEach(([name, ids]) => {
-        // Add component dependencies
-        js += `import { ${name} } from '${componentPath}/components.js';\n`;
+        // Add component dependency import
+        js += `import { ${name} } from '${componentPath}/${name}.js';\n`;
         // Generate component instances
         ids.forEach(id => {
           instances += genComponentInstance(id, name)
@@ -102,7 +107,6 @@ export function handlePageDeps(content, page) {
 
       // Add component instances
       js += genComponentInstanceWrapper(instances);
-      // await writeComponentFiles(components);
     }
   }
 
@@ -135,27 +139,8 @@ function genComponentInstance(cayoId, componentName) {
   new ${componentName}({
     target: document.querySelector('[data-cayo-id="${cayoId}"]'),
     hydrate: true,
-    props: { getProps('${cayoId}') },
+    props: getProps('${cayoId}'),
   });
 `
   );
 }
-
-/*
-
-import MyComponent from './MyComponent.svelte';
-
-window.MyComponent = function (config) {
-    return new MyComponent(config);
-};
-
-document.addEventListener("DOMContentLoaded", function (event) {
-  new MyComponent({
-      target: document.getElementById("my-component"),
-      hydrate: true,
-      props: { ... },
-  });
-});
-
-
-*/

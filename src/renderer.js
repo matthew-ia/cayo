@@ -37,7 +37,7 @@ export class Renderer {
       cayoDataHead += 
         `<script data-cayo-data-for="${data.cayoInstanceId}" type="application/json">`
         + cayoData[dataId]
-        + '</script>\n'
+        + `</script>\n`;
     }
 
     let processedHead = cayoDataHead !== '' 

@@ -1,5 +1,6 @@
 
 export function getProps(cayoId) {
-  const json = document.querySelector(`[data-cayo-data-for="${cayoId}"]`).textContent;
+  const componentElement = document.querySelector(`[data-cayo-id="${cayoId}"]`);
+  const json = '' + componentElement.dataset.cayoProps;
   return JSON.parse(json);
 }

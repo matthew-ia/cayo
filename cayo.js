@@ -15,7 +15,28 @@ import {
   getComponentModules,
   createTemplateManifest,
   createPageManifest,
+  createComponentManifest,
 } from './src/utils.js';
+
+// vite stuff
+
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+import sveltePreprocess from 'svelte-preprocess';
+
+const viteConfig = {
+  plugins: [svelte({
+    preprocess: sveltePreprocess({ preserve: ['json'] }),
+    compilerOptions: {
+      // generate: 'ssr',
+      hydratable: true,
+      // we'll extract any component CSS out into
+      // a separate file - better for performance
+      // css: css => {
+      //   css.write('dist/bundle.css'); // (3)
+      // },
+    },
+  })],
+}
 
 
 const logger = createLogger('info', {
@@ -33,7 +54,11 @@ const options = {
   outDir: path.join(process.cwd(), '.cayo/'),
 }
 
-const data = {}
+const data = {
+  template: undefined,
+  pages: undefined,
+  components: undefined,
+}
 
 const cayoPath = path.join(process.cwd(), '.cayo/');
 
@@ -82,6 +107,7 @@ async function run({ cmd }) {
 
   getTemplate(config.projectRoot, cayoPath)
     .then(() => getPages(config.projectRoot, cayoPath))
+    .then(() => getComponents(config.projectRoot, cayoPath))
     .then(() => {
       build();
       if (cmd === 'dev') {
@@ -105,7 +131,18 @@ async function getPages(projectRoot, cayoPath) {
     .then(async () => await import(path.resolve(cayoPath, `generated/pages.js?v=${hash()}`)))
     .then(({ pages }) => {
       data.pages = getPageModules(pages);
+      // data.components = getComponentModules(components);
+
       return data.pages;
+    });
+}
+
+async function getComponents(projectRoot, cayoPath) {
+  return createComponentManifest(projectRoot, cayoPath)
+    .then(async () => await import(path.resolve(cayoPath, `generated/components.js?v=${hash()}`)))
+    .then(({ components }) => {
+      data.components = getComponentModules(components);
+      return data.components;
     });
 }
 
@@ -128,6 +165,7 @@ function watch() {
             let page = pageModule ? { [`${pageModule[0]}`]: pageModule[1] } : {}
             build(page);
           })
+      // TODO: watch component changes
       // } else if (componentFileChanged) {
       // find out which pages are affected
       // find out which components are affected (imports)?
@@ -147,16 +185,21 @@ async function serve() {
     root: '.cayo',
     server: {
       port: 5000
-    }
+    },
+    ...viteConfig,
   })
   await server.listen()
 }
 
 async function build(pages = data.pages) {
   const { prerendered, componentList } = prerender(data.template, pages, config);
-  Object.entries(prerendered).forEach(([some, page]) => {
+  Object.entries(prerendered).forEach(([, page]) => {
     writePageFiles(page, config, config.outDir)
-  });  
+  });
+
+  componentList.forEach((component) => {
+    writeComponentFile(component, data.components[component].modulePath, config)
+  });
   
   // Handle components
   // const componentModules = await getComponentModules(config.projectRoot);

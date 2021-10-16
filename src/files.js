@@ -32,19 +32,28 @@ export async function writePageFiles(page, config) {
 }
 
 // Generate re-xport files for components
-export async function writeComponentFiles(components, outDir) {
-  const modules = await getComponentModules(config.projectRoot);
+// export async function writeComponentFiles(components, outDir) {
+//   const modules = await getComponentModules(config.projectRoot);
 
-  // TODO: make this use svelte/register & require
-  Object.keys(components).forEach(async (name) => {
-    let content = `export { default as ${name} } from '${modules[name].modulePath}'`;
-    await fs.outputFile(path.resolve(outDir, `./components.js`, content))
-      .then(() => console.log(`Wrote file ${outDir}/components/${name}.js`));
-  });
-}
+//   // TODO: make this use svelte/register & require
+//   Object.keys(components).forEach(async (name) => {
+//     let content = `export { default as ${name} } from '${modules[name].modulePath}'\n`;
+//     await fs.outputFile(path.resolve(outDir, `./components.js`, content))
+//       .then(() => console.log(`Wrote file ${outDir}/components/${name}.js`));
+//   });
+// }
 
-export async function writeComponentFile(name, modulePath, outDir) {
-  let content = `export { default as ${name} } from '${modulePath}'`;
-  await fs.outputFile(path.resolve(outDir, `./components.js`, content))
-    .then(() => console.log(`Wrote file ${outDir}/components/${name}.js`));
+export async function writeComponentFile(name, modulePath, config) {
+  // let content = `import { createRequire } from 'module';\n`;
+  // content += `const require = createRequire(import.meta.url);\n`;
+  // content += `require('svelte/register');\n`;
+
+  let content = `export { default as ${name} } from '${modulePath}';\n`;
+  await fs.outputFile(path.resolve(config.outDir, './generated', `components/${name}.js`), content)
+    .then(() => config.logger.info(
+      chalk.green('component dep ') + chalk.dim(`${name}`), 
+      { timestamp: true })
+    );
+    
+    // console.log(`Wrote file ${outDir}generated/components/${name}.js`);
 }
