@@ -13,6 +13,6 @@
   const json = JSON.stringify($$restProps);
 </script>
 
-<div data-cayo-id={`${name}-${hash()}`} data-cayo-props={json}></div>
+<div data-cayo-id={`${name}-${hash()}`} data-cayo-props={json}>Cayo loading...<slot/></div>
 <slot/>
 
