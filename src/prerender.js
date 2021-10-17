@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
+const __dirname = path.resolve();
 import * as cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
 import { Renderer } from './renderer.js';
@@ -18,7 +19,7 @@ export function prerender(Template, pages, config) {
       // Render page
       const content = renderer.render(pathname, page);
       // Postprocess the content, get deps and inject dep references
-      const { html, css, js, components } = handlePageDeps(content, page, config.projectRoot);
+      const { html, css, js, components } = handlePageDeps(content, page, config);
       prerendered[pathname] = {
         html,
         css, 
@@ -38,7 +39,7 @@ export function prerender(Template, pages, config) {
 }
 
 // Derive JS dependencies from the prerendered html
-export function handlePageDeps(content, page, projectRoot) {
+export function handlePageDeps(content, page, config) {
   const $ = cheerio.load(content.html);
   const dom = new JSDOM(content.html);
   const { document } = dom.window;
@@ -95,10 +96,11 @@ export function handlePageDeps(content, page, projectRoot) {
     // Handle components as deps
     if (Object.keys(components).length !== 0) {
       // Add getProps helper for runtime
-      js += `import { getProps } from '../src/runtime.js';\n`;
+      let runtimePath = path.resolve(__dirname, './src/runtime.js');
+      js += `import { getProps } from '${runtimePath}';\n`;
       
       // TODO: make this be constructred properly using page.filePath?
-      const componentPath = './generated/components';
+      const componentPath = path.resolve(process.cwd(), config.outDir, './generated/components');
 
       let instances = '';
       // TODO: test that this works
