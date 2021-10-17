@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 const __dirname = path.resolve();
-import * as cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
 import { Renderer } from './renderer.js';
 import chalk from 'chalk';
@@ -41,7 +40,6 @@ export function prerender(Template, pages, config) {
 
 // Derive JS dependencies from the prerendered html
 export function handlePageDeps(content, page, config) {
-  const $ = cheerio.load(content.html);
   const dom = new JSDOM(content.html);
   const { document } = dom.window;
 
