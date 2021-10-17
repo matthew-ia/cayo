@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import * as cheerio from 'cheerio';
+import { JSDOM } from 'jsdom';
 import { Renderer } from './renderer.js';
 // import { getComponentModules, getComponentModulePaths } from './utils.js';
 // import { writeComponentFile } from './files.js';
@@ -39,12 +40,13 @@ export function prerender(Template, pages, config) {
 // Derive JS dependencies from the prerendered html
 export function handlePageDeps(content, page, projectRoot) {
   const $ = cheerio.load(content.html);
+  const dom = new JSDOM(content.html);
+  const { document } = dom.window;
 
   // Get component instance ids
   let cayoIds = [];
-  $('[data-cayo-id]').each(function() {
-    // console.log(i, el)
-    cayoIds.push($(this).data('cayoId'));
+  document.querySelectorAll('[data-cayo-id]').forEach((el) => {
+    cayoIds.push(el.dataset.cayoId);
   });
 
   // Get component list
@@ -62,17 +64,21 @@ export function handlePageDeps(content, page, projectRoot) {
   }, {});
 
   // Get user-specified entry file name
-  let entryScripts = $('[data-cayo-entry-src]');
-  let userEntryFile = entryScripts.length !== 0 ? entryScripts.first().data().cayoEntrySrc : '';
+  const entryScripts = document.querySelectorAll('script[data-cayo-entry]');
+  const userEntryFile = entryScripts.length !== 0 ? entryScripts[0].src : '';
   // Remove user-specified entry file placeholder
-  if (userEntryFile) entryScripts.remove();
+  if (userEntryFile) { 
+    entryScripts.forEach((script) => {
+      script.remove();
+    });
+  }
 
   // Build generated entry file contents
   let js = '';
   if (cayoIds.length === 0 && !userEntryFile) {
     // Remove the entry point script tag if the page doesn't need any JS
     // This is injected by Renderer.render based on the template
-    $('script[type="module"][src="./index.js"]').remove();
+    document.querySelector(`script[type="module"][src="./index.js"]`).remove();
   } else {
     // Read entry contents
     const entryFilePath = path.resolve(
@@ -110,8 +116,9 @@ export function handlePageDeps(content, page, projectRoot) {
     }
   }
 
+  const processedHTML = dom.window.document.documentElement.outerHTML;
   return { 
-    html: $.root().html(), 
+    html: processedHTML, 
     css: content.css, 
     js, 
     components 

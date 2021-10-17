@@ -1,3 +1,6 @@
 howdyyy
 <br><a href="/home/">Back</a>
-<div data-cayo-entry-src="../main.js" />
+
+<slot name="entry">
+  <script src="../main2.js" data-cayo-entry />
+</slot>

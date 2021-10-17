@@ -7,4 +7,6 @@ I'm index howdy ok<br>
 <Cayo name="Cool" beans='beeeeaaaaasnnss' />
 <Cayo name="Cool" beans='NOT BEANS' />
 
-<div data-cayo-entry-src="../main.js"/>
+<slot name="entry">
+  <script src="../main.js" data-cayo-entry />
+</slot>
