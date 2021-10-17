@@ -4,6 +4,7 @@ const __dirname = path.resolve();
 import * as cheerio from 'cheerio';
 import { JSDOM } from 'jsdom';
 import { Renderer } from './renderer.js';
+import chalk from 'chalk';
 // import { getComponentModules, getComponentModulePaths } from './utils.js';
 // import { writeComponentFile } from './files.js';
 
@@ -79,7 +80,15 @@ export function handlePageDeps(content, page, config) {
   if (cayoIds.length === 0 && !userEntryFile) {
     // Remove the entry point script tag if the page doesn't need any JS
     // This is injected by Renderer.render based on the template
-    document.querySelector(`script[type="module"][src="./index.js"]`).remove();
+    const entryScript = document.querySelector(`script[type="module"][src="./index.js"]`);
+    if (entryScript) {
+      entryScript.remove();
+    } else {
+      config.logger.info(
+        chalk.bgRed.white(`No entry placeholder in '__index.svelte'.`) + chalk.dim(` Cayo components will not render.`), 
+        { timestamp: true }
+      );
+    }
   } else {
     // Read entry contents
     const entryFilePath = path.resolve(
