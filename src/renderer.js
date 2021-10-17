@@ -31,6 +31,8 @@ export class Renderer {
       processedBody = processedBody.replace(match[0], '');
     }
 
+
+    // TODO: remove this stuff, I think
     let cayoDataHead = '';
     for (const dataId in cayoData) {
       const data = JSON.parse(cayoData[dataId]);
