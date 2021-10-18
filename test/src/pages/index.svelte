@@ -10,6 +10,7 @@ I'm index howdy ok<br>
 <a href="/howdy/">Howdy</a><br>
 <a href="/hey/" class="red">Hey</a>
 
+<Cayo beans='ayo'></Cayo>
 <Cayo name="Cool" beans='ayo'></Cayo>
 <Cayo name="Cool" beans='beeeeaaaaasnnss' />
 <Cayo name="Cool" beans='NOT BEANS' />
