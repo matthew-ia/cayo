@@ -8,9 +8,11 @@
     %cayo.head%
   </head>
   <body>
+    <!-- 
+      TODO: Show how to condtionally render any of these pieces based on dev vs. prod
+      E.g., I need to remove head from prod, but want it there in dev
+    -->
     %cayo.body%
     %cayo.script%
-    <!-- <script data-type="module" src="./main.js"></script> -->
-    <!-- <script type="module" src="./main.js"></script> -->
   </body>
 </html>

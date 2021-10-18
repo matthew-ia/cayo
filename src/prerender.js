@@ -17,7 +17,7 @@ export function prerender(Template, pages, config) {
   const prerendered = Object.entries(pages).reduce(
     (prerendered, [pathname, page]) => {
       // Render page
-      const content = renderer.render(pathname, page);
+      const content = renderer.render(page);
       // Postprocess the content, get deps and inject dep references
       const { html, css, js, components } = handlePageDeps(content, page, config);
       prerendered[pathname] = {

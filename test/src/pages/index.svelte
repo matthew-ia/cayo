@@ -1,3 +1,8 @@
+<script context="module">
+  export const meta = {
+    title: 'Home',
+  };
+</script>
 <script>
   import Cayo from '../../../components/Cayo.svelte';
 </script>
