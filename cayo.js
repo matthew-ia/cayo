@@ -48,6 +48,10 @@ const config = {
   projectRoot: path.resolve(process.cwd(), 'test'),
   logger: logger,
   outDir: path.join(process.cwd(), '.cayo/'),
+  css: {
+    useStyleTags: false,
+  },
+  depsInBody: false,
 }
 
 const options = {
@@ -170,7 +174,7 @@ function watch() {
           .then((components) => {
             let componentModule = Object.entries(components).find(([, { modulePath }]) => modulePath === filePath);
             // let component = componentModule ? { [`${componentModule[0]}`]: componentModule[1] } : {};
-            handleCayoComponent(...componentModule);
+            handleCayoComponent(componentModule[0], componentModule[1].modulePath);
             // build(data.pages, true);
           })
       // TODO: watch component changes

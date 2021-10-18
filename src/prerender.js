@@ -43,6 +43,33 @@ export function handlePageDeps(content, page, config) {
   const dom = new JSDOM(content.html);
   const { document } = dom.window;
 
+  // Handle CSS
+  if (!config.css.useStyleTags) {
+    let link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './index.css';
+    
+    if (!config.depsInBody) {
+      // Add to head with link tag
+      document.head.append(link);
+    } else {
+      // Add to body with link tag
+      document.body.prepend(link);
+    }
+
+  } else {
+    if (!config.depsInBody) {
+      // Add to head with style tag
+      document.head.append(style);
+    } else {
+      // Add to body with style tag
+      let style = document.createElement('style');
+      style.append(content.css.code);
+      console.log(content.css);
+      document.body.prepend(style);
+    }
+  }
+
   // Get component instance ids
   let cayoIds = [];
   document.querySelectorAll('[data-cayo-id]').forEach((el) => {
@@ -128,7 +155,7 @@ export function handlePageDeps(content, page, config) {
   const processedHTML = dom.window.document.documentElement.outerHTML;
   return { 
     html: processedHTML, 
-    css: content.css, 
+    css: content.css.code, 
     js, 
     components 
   };
