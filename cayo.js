@@ -107,7 +107,7 @@ async function run({ cmd }) {
 
   getTemplate(config.projectRoot, cayoPath)
     .then(() => getPages(config.projectRoot, cayoPath))
-    .then(() => getComponents(config.projectRoot, cayoPath))
+    .then(() => getCayoComponents(config.projectRoot, cayoPath))
     .then(() => {
       build();
       if (cmd === 'dev') {
@@ -137,7 +137,7 @@ async function getPages(projectRoot, cayoPath) {
     });
 }
 
-async function getComponents(projectRoot, cayoPath) {
+async function getCayoComponents(projectRoot, cayoPath) {
   return createComponentManifest(projectRoot, cayoPath)
     .then(async () => await import(path.resolve(cayoPath, `generated/components.js?v=${hash()}`)))
     .then(({ components }) => {
@@ -164,6 +164,14 @@ function watch() {
             let pageModule = Object.entries(pages).find(([, { modulePath }]) => modulePath === filePath);
             let page = pageModule ? { [`${pageModule[0]}`]: pageModule[1] } : {}
             build(page);
+          })
+      } else if (filePath.includes('.cayo')) {
+        getCayoComponents(config.projectRoot, cayoPath)
+          .then((components) => {
+            let componentModule = Object.entries(components).find(([, { modulePath }]) => modulePath === filePath);
+            // let component = componentModule ? { [`${componentModule[0]}`]: componentModule[1] } : {};
+            handleCayoComponent(...componentModule);
+            // build(data.pages, true);
           })
       // TODO: watch component changes
       // } else if (componentFileChanged) {
@@ -196,16 +204,10 @@ async function build(pages = data.pages) {
   Object.entries(prerendered).forEach(([, page]) => {
     writePageFiles(page, config, config.outDir)
   });
+}
 
-  componentList.forEach((component) => {
-    writeComponentFile(component, data.components[component].modulePath, config)
-  });
-  
-  // Handle components
-  // const componentModules = await getComponentModules(config.projectRoot);
-  // componentList.forEach(name => {
-  //   writeComponentFile(name, componentModules[name], config.outDir);
-  // });
+async function handleCayoComponent(name, modulePath) {
+  writeComponentFile(name, modulePath, config)
 }
 
 cli(process.argv);

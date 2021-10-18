@@ -27,7 +27,7 @@ export function getPageModules(modules, ext = 'svelte') {
 export function getComponentModules(modules, ext = 'svelte') {
 
   return Object.entries(modules).reduce((components, [modulePath, component]) => {
-    const componentNameRegex = /\/(?<name>\w+)\.svelte/; // Foo-{hash}
+    const componentNameRegex = /\/(?<name>\w+)\.cayo\.svelte/; // Foo-{hash}
     const name = modulePath.match(componentNameRegex).groups.name;
     components[name] = {
       Component: component.default,
@@ -46,7 +46,7 @@ export async function getPageModulePaths(projectRoot) {
 }
 
 export async function getComponentModulePaths(projectRoot) {
-  return await fg([`${projectRoot}/src/components/**/*.svelte`]);
+  return await fg([`${projectRoot}/src/components/**/*.cayo.svelte`]);
 }
 
 export async function createPageManifest(projectRoot, cayoPath) {

@@ -8,7 +8,6 @@ export class Renderer {
   render(page) {
     const { Component } = page;
     const { html, css, head } = Component.render();
-    console.log(page);
 
     // TODO: template function for page title
     const title = page.meta.title ? `${page.meta.title} — Cayo` : 'Cayo';
