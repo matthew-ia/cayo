@@ -72,7 +72,14 @@ export function handlePageDeps(content, page, config) {
   // Get component instance ids
   let cayoIds = [];
   document.querySelectorAll('[data-cayo-id]').forEach((el) => {
-    if (el.dataset.cayoId !== '') cayoIds.push(el.dataset.cayoId);
+    if (el.dataset.cayoId !== '') {
+      cayoIds.push(el.dataset.cayoId);
+    } else {
+      config.logger.info(
+        chalk.red(`Cayo component instance without a name found`) + chalk.dim(` ${page.filePath}`), 
+        { timestamp: true, clear: true, }
+      );
+    }
   });
 
   // Get component list
@@ -81,7 +88,11 @@ export function handlePageDeps(content, page, config) {
   const components = cayoIds.reduce((components, id) => {
     let name = id.match(componentNameRegex).groups.name;
     // Collect keys of components, and an array of their respective instance ids
-    if (!name) return components;
+    // if (!name) return components;
+    // console.log('name', name);
+    // if (!name) {
+    //   return components;
+    // }
 
     if (!components[name]) {
       components[name] = [id]
@@ -140,7 +151,6 @@ export function handlePageDeps(content, page, config) {
       let instances = '';
       // TODO: test that this works
       Object.entries(components).forEach(([name, ids]) => {
-        console.log(components);
         // Add component dependency import
         js += `import { ${name} } from '${componentPath}/${name}.js';\n`;
         // Generate component instances

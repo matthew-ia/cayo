@@ -7,14 +7,10 @@
   // TODO: Consider error handling for required stuff
   // if (!name) throw new Error('No name for component');
   // try {
-    if (!name) throw new Error(`\x1b[31mCayo Component: 'name' prop is required and can't be an empty string`);
+    // if (!name) throw new Error(`\x1b[31mCayo Component: 'name' prop is required and can't be an empty string`);
   // } catch (err) {
   //   new Error(err);
   // }
-
-  function nameError() {
-    
-  }
 
   function hash() {
     return crypto.randomBytes(3).toString('hex');

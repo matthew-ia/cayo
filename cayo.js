@@ -158,11 +158,20 @@ function watch() {
     // },
   });
   watcher.on('change', async (filePath) => {
+    
     if (filePath.endsWith('.svelte')) {
       if (filePath.endsWith('__index.svelte')) {
+        config.logger.info(
+          '> template updated',
+          { timestamp: true, clear: true, }
+        );
         getTemplate(config.projectRoot, cayoPath)
           .then(() => build());
       } else if (filePath.startsWith(path.resolve(config.projectRoot, 'src/pages'))) {
+        config.logger.info(
+          '> page updated', 
+          { timestamp: true, clear: true, }
+        );
         getPages(config.projectRoot, cayoPath)
           .then((pages) => {
             let pageModule = Object.entries(pages).find(([, { modulePath }]) => modulePath === filePath);
@@ -170,6 +179,10 @@ function watch() {
             build(page);
           })
       } else if (filePath.includes('.cayo')) {
+        config.logger.info(
+          '> cayo component updated',
+          { timestamp: true, clear: true, }
+        );
         getCayoComponents(config.projectRoot, cayoPath)
           .then((components) => {
             let componentModule = Object.entries(components).find(([, { modulePath }]) => modulePath === filePath);

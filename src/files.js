@@ -17,7 +17,7 @@ export async function writePageFiles(page, config) {
     const cssPath = page.urlPath === '/' ? 'index.css' : `${page.filePath}/index.css`;
     await fs.outputFile(path.resolve(config.outDir, cssPath), css)
       .then(() => config.logger.info(
-        chalk.green('css rebuild ') + chalk.dim(`${page.filePath}.html`), 
+        chalk.green('css rebuild ') + chalk.dim(`${page.filePath}`), 
         { timestamp: true })
       );
   }
