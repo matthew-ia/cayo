@@ -40,7 +40,7 @@ const viteConfig = {
 
 
 const logger = createLogger('info', {
-  prefix: chalk.magenta('[cayo]'),
+  prefix: chalk.magenta.bold('[cayo]'),
   // allowClearScreen: true,
 });
 
@@ -134,7 +134,7 @@ async function getPages(projectRoot, cayoPath) {
   return createPageManifest(projectRoot, cayoPath)
     .then(async () => await import(path.resolve(cayoPath, `generated/pages.js?v=${hash()}`)))
     .then(({ pages }) => {
-      data.pages = getPageModules(pages);
+      data.pages = getPageModules(pages, config);
       // data.components = getComponentModules(components);
 
       return data.pages;
@@ -145,7 +145,7 @@ async function getCayoComponents(projectRoot, cayoPath) {
   return createComponentManifest(projectRoot, cayoPath)
     .then(async () => await import(path.resolve(cayoPath, `generated/components.js?v=${hash()}`)))
     .then(({ components }) => {
-      data.components = getComponentModules(components);
+      data.components = getComponentModules(components, config);
       return data.components;
     });
 }
@@ -217,10 +217,21 @@ async function serve() {
 }
 
 async function build(pages = data.pages) {
-  const { prerendered, componentList } = prerender(data.template, pages, config);
+  const { template, components } = data;
+  const { prerendered, componentList } = prerender(template, pages, components, config);
   Object.entries(prerendered).forEach(([, page]) => {
     writePageFiles(page, config, config.outDir)
   });
+  // componentList.forEach((name) => {
+  //   if (!data.components[name]) {
+  //     config.logger.info(
+  //       chalk.red(
+  //         `Cayo component with name '${name}' does not exists Cayo components must have unique file names.`
+  //       ) + chalk.dim(`\n\t\t\t${modulePath}`), 
+  //       { timestamp: true, clear: true, }
+  //     );
+  //   }
+  // })
 }
 
 async function handleCayoComponent(name, modulePath) {

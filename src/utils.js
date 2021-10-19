@@ -1,10 +1,11 @@
 import fs from 'fs-extra';
 import fg from 'fast-glob';
 import crypto from 'crypto';
+import chalk from 'chalk';
 
-export function getPageModules(modules, ext = 'svelte') {
+export function getPageModules(modules, config) {
   // TODO: build path from config
-  const extRegex = new RegExp(String.raw`(\.${ext})$`);
+  const extRegex = new RegExp(String.raw`(\.svelte)$`);
 
   return Object.entries(modules).reduce((pages, [modulePath, page]) => {
     // Make these paths actually useful
@@ -24,11 +25,19 @@ export function getPageModules(modules, ext = 'svelte') {
   }, {})
 }
 
-export function getComponentModules(modules, ext = 'svelte') {
+export function getComponentModules(modules, config) {
 
   return Object.entries(modules).reduce((components, [modulePath, component]) => {
     const componentNameRegex = /\/(?<name>\w+)\.cayo\.svelte/; // Foo-{hash}
     const name = modulePath.match(componentNameRegex).groups.name;
+    if (components[name]) {
+      config.logger.info(
+        chalk.red(
+          `Cayo component with name '${name}' already exists. Cayo components must have unique file names.`
+        ) + chalk.dim(`\n\t\t\t${modulePath}`), 
+        { timestamp: true, clear: true, }
+      );
+    }
     components[name] = {
       Component: component.default,
       modulePath,

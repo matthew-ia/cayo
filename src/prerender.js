@@ -7,7 +7,7 @@ import chalk from 'chalk';
 // import { getComponentModules, getComponentModulePaths } from './utils.js';
 // import { writeComponentFile } from './files.js';
 
-export function prerender(Template, pages, config) {
+export function prerender(Template, pages, componentModules, config) {
   const template = Template.render();
   const renderer = new Renderer(template.html);
   const componentList = new Set();
@@ -19,7 +19,7 @@ export function prerender(Template, pages, config) {
       // Render page
       const content = renderer.render(page);
       // Postprocess the content, get deps and inject dep references
-      const { html, css, js, components } = handlePageDeps(content, page, config);
+      const { html, css, js, components } = handlePageDeps(content, page, Object.keys(componentModules), config);
       prerendered[pathname] = {
         html,
         css, 
@@ -39,7 +39,7 @@ export function prerender(Template, pages, config) {
 }
 
 // Derive JS dependencies from the prerendered html
-export function handlePageDeps(content, page, config) {
+export function handlePageDeps(content, page, componentNames, config) {
   const dom = new JSDOM(content.html);
   const { document } = dom.window;
 
@@ -93,6 +93,15 @@ export function handlePageDeps(content, page, config) {
     // if (!name) {
     //   return components;
     // }
+    if (!componentNames.includes(name)) {
+      config.logger.warn(
+        chalk.red(
+          `Cayo component with name '${name}' does not exist but is trying to be rendered`
+        ) + chalk.dim(` ${page.filePath}`), 
+        { timestamp: true, clear: true, }
+      );
+      return components;
+    }
 
     if (!components[name]) {
       components[name] = [id]
