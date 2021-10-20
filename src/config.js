@@ -1,50 +1,78 @@
 import path from 'path';
 import { existsSync } from 'fs';
+import { z } from 'zod';
+import { normalizePath } from './utils.js';
 
-/** Set default config values */
-async function configDefaults(userConfig) {
-  const config = { ...(userConfig || {}) };
 
-  if (!config.projectRoot) config.projectRoot = '.';
-  if (!config.src) config.src = './src';
-  if (!config.pages) config.pages = './src/pages';
-  if (!config.dist) config.dist = './dist';
-  if (!config.public) config.public = './public';
 
-  return config;
-}
 
 /** Turn raw config values into normalized values */
-function normalizeConfig(userConfig, root) {
-  const config = { ...(userConfig || {}) };
+async function validateConfig(userConfig, base) {
 
-  const fileProtocolRoot = `file://${root}/`;
-  config.projectRoot = new URL(config.projectRoot + '/', fileProtocolRoot);
-  config.src = new URL(config.src + '/', fileProtocolRoot);
-  config.pages = new URL(config.pages + '/', fileProtocolRoot);
-  config.public = new URL(config.public + '/', fileProtocolRoot);
+  const ConfigSchema = z.object({
+    root: z
+      .string()
+      .optional()
+      .default('.')
+      .transform(val => normalizePath(base, val)),
+    src: z
+      .string()
+      .optional()
+      .default('./src')
+      .transform(val => normalizePath(base, val)),
+    pages: z
+      .string()
+      .optional()
+      .default('./src/pages')
+      .transform(val => normalizePath(base, val)),
+    publicDir: z
+      .string()
+      .optional()
+      .default('./public')
+      .transform(val => normalizePath(base, val)),
+    buildOptions: z
+      .object({
+        outDir: z
+          .string()
+          .optional()
+          .default('./dist')
+          .transform(val => normalizePath(base, val)),
+        assetsDir: z
+          .string()
+          .or(z.boolean())
+          .optional()
+          .default('./assets')
+          // TODO: This may cause bugs if user passes boolean, idk tho
+          .transform(val => normalizePath(base, val)),
+        legacy: z.
+          boolean()
+          .optional()
+          .default(false)
+      })
+      .optional()
+      .default({}),
+    viteOptions: z
+      .object()
+      .optional()
+      .default({})
+  });
 
-  return config;
+  return ConfigSchema.parseAsync(userConfig);
+
 }
 
-export async function loadConfig(root, configFileName) {
+export async function loadConfig(base, configFileName = 'cayo.config.js') {
   // TODO: root necessary?
   // const root = root ? path.resolve(root) : process.cwd();
-  const configPath = new URL(`./${configFileName}`, `file://${root}/`);
+  // const configPath = new URL(`./${configFileName}`, `file://${root}/`);
+  const configPath = path.resolve(base, `./${configFileName}`);
 
   // load config
-  let config;
+  let userConfig;
   if (existsSync(configPath)) {
     // from user config file
-    config = await configDefaults((await import(astroConfigPath.href)).default);
-  } else {
-    // default config fallback
-    config = await configDefaults();
+    userConfig = await import(configPath).default;
   }
 
-  // validate
-  validateConfig(config);
-
-  // normalize (paths)
-  config = normalizeConfig(config, root);
+  return validateConfig(userConfig, base);
 }

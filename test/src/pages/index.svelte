@@ -15,6 +15,8 @@ I'm index howdy ok<br>
 <Cayo name="Cool" beans='beeeeaaaaasnnss' />
 <Cayo name="Cool" beans='NOT BEANS' />
 
+<img src="/app-icon.png" alt="">
+
 <slot name="entry">
   <script src="../main.js" data-cayo-entry />
 </slot>

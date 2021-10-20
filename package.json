@@ -29,5 +29,8 @@
     "svelte-preprocess": "^4.7.4",
     "vite": "^2.4.4",
     "yargs-parser": "^20.2.9"
+  },
+  "dependencies": {
+    "zod": "^3.10.3"
   }
 }

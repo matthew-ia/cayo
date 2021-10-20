@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import fg from 'fast-glob';
 import crypto from 'crypto';
 import chalk from 'chalk';
+import path from 'path';
 
 export function getPageModules(modules, config) {
   // TODO: build path from config
@@ -100,4 +101,15 @@ export async function createTemplateManifest(projectRoot, cayoPath) {
   importTemplate += `export const Template = require('${projectRoot}/src/__index.svelte').default;\n`;
   // export { default as Template } from '${projectRoot}/src/__index.svelte';
   return await fs.outputFile(`${cayoPath}/generated/template.js`, importTemplate);
+}
+
+
+// Credit: https://github.com/snowpackjs/astro
+/** Add / to the end of string (but don’t double-up) */
+export function addTrailingSlash(_path) {
+  return _path.replace(/\/?$/, '/');
+}
+
+export function normalizePath(root, _path) {
+  path.join(root, addTrailingSlash(_path));
 }
