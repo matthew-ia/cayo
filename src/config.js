@@ -3,14 +3,11 @@ import { existsSync } from 'fs';
 import { z } from 'zod';
 import { normalizePath } from './utils.js';
 
-
-
-
-/** Turn raw config values into normalized values */
 async function validateConfig(userConfig, base) {
+  console.log('HELP', userConfig);
 
   const ConfigSchema = z.object({
-    root: z
+    projectRoot: z
       .string()
       .optional()
       .default('.')
@@ -52,27 +49,48 @@ async function validateConfig(userConfig, base) {
       .optional()
       .default({}),
     viteOptions: z
-      .object()
+      .object({})
       .optional()
-      .default({})
+      .default({}),
+    cayoPath: z
+      .string()
+      .optional()
+      .default('.cayo/')
+      .transform(val => normalizePath(base, val)),
+    cayoComponentInfix: z
+      .string()
+      .optional()
+      .default('cayo'),
+    mode: z
+      .string()
+      .optional()
+      .default('development'),
   });
 
-  return ConfigSchema.parseAsync(userConfig);
+  return await ConfigSchema.parseAsync(userConfig);
 
 }
 
-export async function loadConfig(base, configFileName = 'cayo.config.js') {
-  // TODO: root necessary?
-  // const root = root ? path.resolve(root) : process.cwd();
-  // const configPath = new URL(`./${configFileName}`, `file://${root}/`);
-  const configPath = path.resolve(base, `./${configFileName}`);
+export async function loadConfig(options) {
+  const configFileName = 'cayo.config.js';
 
-  // load config
-  let userConfig;
+  // Use options passed to the CLI for projectRoot and configPath
+  const root = options.projectRoot 
+    ? path.resolve(options.projectRoot) 
+    : process.cwd();
+
+  const configPath = options.configPath 
+    ? path.resolve(root, options.configPath)
+    : path.resolve(root, `./${configFileName}`);
+
+  // Load config from user config file
+  let userConfig = { projectRoot: root, mode: options.mode };
   if (existsSync(configPath)) {
-    // from user config file
-    userConfig = await import(configPath).default;
+    userConfig = { 
+      ...(await import(configPath)).default,
+      ...userConfig,
+    };
+    // console.log('userConfig', userConfig);
   }
-
-  return validateConfig(userConfig, base);
+  return validateConfig(userConfig, root);
 }

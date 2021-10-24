@@ -37,8 +37,8 @@ function printHelp() {
 function run(command) {
   const { cmd, options } = command;
   try {
-    const projectRoot = options.projectRoot;
-    const config = await loadConfig(projectRoot, options.config);
+    // const { projectRoot, configPath } = options;
+    const config = await loadConfig(options);
 
     // TODO: actually run command now
   } catch (err) {

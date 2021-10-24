@@ -16,7 +16,10 @@ import {
   createTemplateManifest,
   createPageManifest,
   createComponentManifest,
+  getOutDir,
 } from './src/utils.js';
+
+import { loadConfig } from './src/config.js';
 
 // vite stuff
 
@@ -44,19 +47,15 @@ const logger = createLogger('info', {
   // allowClearScreen: true,
 });
 
-const config = {
-  projectRoot: path.resolve(process.cwd(), 'test'),
-  logger: logger,
-  outDir: path.join(process.cwd(), '.cayo/'),
-  css: {
-    useStyleTags: false,
-  },
-  depsInBody: false,
-}
-
-const options = {
-  outDir: path.join(process.cwd(), '.cayo/'),
-}
+// const config = {
+//   projectRoot: path.resolve(process.cwd(), 'test'),
+//   logger: logger,
+//   outDir: path.join(process.cwd(), '.cayo/'),
+//   css: {
+//     useStyleTags: false,
+//   },
+//   depsInBody: false,
+// }
 
 const data = {
   template: undefined,
@@ -64,21 +63,21 @@ const data = {
   components: undefined,
 }
 
-const cayoPath = path.join(process.cwd(), '.cayo/');
-
 // / Handle arguments
 function resolveArgs(argv) {
+  const cmd = argv._[2];
 
-  const cmd = argv._[2]
   const options = {
-    //TODO: support options from command line
+    projectRoot: typeof argv.projectRoot === 'string' ? argv.projectRoot : undefined,
+    configPath: typeof argv.config === 'string' ? argv.config : undefined,
+    mode: cmd === 'build' ? 'production' : 'development',
   }
 
   switch (cmd) {
-    case 'dev':
-      return { cmd: 'dev', options };
     case 'build':
-      return { cmd: 'build', options };
+    case 'dev':
+    case 'help':
+      return { cmd: cmd, options };
     default:
       return { cmd: 'help', options };
   }
@@ -93,7 +92,6 @@ function printHelp() {
 export async function cli(args) {
   const argv = yargs(args);
   const command = resolveArgs(argv);
-  // TODO: do something with options
 
   switch(command.cmd) {
     case 'dev':
@@ -106,108 +104,142 @@ export async function cli(args) {
   }
 }
 
-async function run({ cmd }) {
-  logger.info(`\n  ${chalk.magenta.bold(`cayo.${cmd}`)}${chalk.dim(` starting`)}`, { timestamp: false });
+const commands = new Map([
+  ['build', (config) => {
+    build(config);
+  }],
+  ['dev', (config) => {
+    build(config);
+    watch(config);
+    serve(config);
+  }]
+]);
 
-  getTemplate(config.projectRoot, cayoPath)
-    .then(() => getPages(config.projectRoot, cayoPath))
-    .then(() => getCayoComponents(config.projectRoot, cayoPath))
+async function run(command) {
+  const { cmd, options } = command;
+
+  logger.info(
+    `\n  ${chalk.magenta.bold(`cayo.${cmd}`)}${chalk.dim(` starting`)}`, 
+    { timestamp: false }
+  );
+
+  try {
+    const config = await loadConfig(options);
+
+    console.log('skrrrr', config.cayoPath, config);
+
+    getTemplate(config)
+    .then(() => getPages(config))
+    .then(() => getCayoComponents(config))
+    .then((components) => {
+      handleCayoComponents(components, config);
+    })
     .then(() => {
-      build();
-      if (cmd === 'dev') {
-        watch();
-        serve();
-      }     
+      const runCommand = commands.get(cmd);
+      runCommand(config);
+      // if (cmd === 'dev') {
+      //   watch(config);
+      //   serve(config);
+      // }     
     });
+
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
 }
 
-async function getTemplate(projectRoot, cayoPath) {
-  return createTemplateManifest(projectRoot, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `generated/template.js?v=${hash()}`)))
+async function getTemplate(config) {
+  const { src, cayoPath } = config;
+  return createTemplateManifest(src, cayoPath)
+    .then(async () => await import(path.resolve(cayoPath, `./generated/template.js?v=${hash()}`)))
     .then(({ Template }) => {
       data.template = Template;
       return data.template;
     });
 }
 
-async function getPages(projectRoot, cayoPath) {
-  return createPageManifest(projectRoot, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `generated/pages.js?v=${hash()}`)))
+async function getPages(config) {
+  const { pages, cayoPath } = config;
+  return createPageManifest(pages, cayoPath)
+    .then(async () => await import(path.resolve(cayoPath, `./generated/pages.js?v=${hash()}`)))
     .then(({ pages }) => {
       data.pages = getPageModules(pages, config);
-      // data.components = getComponentModules(components);
-
       return data.pages;
     });
 }
 
-async function getCayoComponents(projectRoot, cayoPath) {
-  return createComponentManifest(projectRoot, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `generated/components.js?v=${hash()}`)))
+async function getCayoComponents(config) {
+  const { src, cayoPath } = config;
+  return createComponentManifest(src, cayoPath)
+    .then(async () => await import(path.resolve(cayoPath, `./generated/components.js?v=${hash()}`)))
     .then(({ components }) => {
       data.components = getComponentModules(components, config);
       return data.components;
     });
 }
 
-function watch() {
-  const watcher = chokidar.watch(`${config.projectRoot}/src`, {
+function watch(config) {
+  const fileExt = '.svelte';
+  const templateFileName = '__index' + fileExt;
+
+  const watcher = chokidar.watch(config.src, {
     // awaitWriteFinish: {
     //   stabilityThreshold: 1,
     //   pollInterval: 250
     // },
   });
+
+  const logChange = (type) => {
+    logger.info(
+      `> ${type} updated`,
+      { timestamp: true, clear: true, }
+    );
+  }
+
+  console.log(config.cayoComponentInfix);
+
   watcher.on('change', async (filePath) => {
-    
-    if (filePath.endsWith('.svelte')) {
-      if (filePath.endsWith('__index.svelte')) {
-        config.logger.info(
-          '> template updated',
-          { timestamp: true, clear: true, }
-        );
-        getTemplate(config.projectRoot, cayoPath)
-          .then(() => build());
-      } else if (filePath.startsWith(path.resolve(config.projectRoot, 'src/pages'))) {
-        config.logger.info(
-          '> page updated', 
-          { timestamp: true, clear: true, }
-        );
-        getPages(config.projectRoot, cayoPath)
+    if (filePath.endsWith(fileExt)) {
+      if (filePath.endsWith(templateFileName)) {
+        logChange('template')
+        getTemplate(config)
+          .then(() => build(config));
+
+      } else if (filePath.startsWith(config.pages)) {
+        logChange('page');
+        getPages(config)
           .then((pages) => {
             let pageModule = Object.entries(pages).find(([, { modulePath }]) => modulePath === filePath);
             let page = pageModule ? { [`${pageModule[0]}`]: pageModule[1] } : {}
-            build(page);
+            build(config, page);
           })
-      } else if (filePath.includes('.cayo')) {
-        config.logger.info(
-          '> cayo component updated',
-          { timestamp: true, clear: true, }
-        );
-        getCayoComponents(config.projectRoot, cayoPath)
+
+      } else if (filePath.includes(`.${config.cayoComponentInfix}`)) {
+        logChange('cayo component');
+        getCayoComponents(config)
           .then((components) => {
             let componentModule = Object.entries(components).find(([, { modulePath }]) => modulePath === filePath);
-            // let component = componentModule ? { [`${componentModule[0]}`]: componentModule[1] } : {};
-            handleCayoComponent(componentModule[0], componentModule[1].modulePath);
-            // build(data.pages, true);
+            handleCayoComponent(componentModule[0], componentModule[1].modulePath, config);
           })
       // TODO: watch component changes
       // } else if (componentFileChanged) {
       // find out which pages are affected
       // find out which components are affected (imports)?
       } else {
-        build();
+        build(config);
       }
     }
   });
   // watcher.close();
 }
 
-async function serve() {
+async function serve(config) {
   const server = await createServer({
     // any valid user config options, plus `mode` and `configFile`
     configFile: false,
     clearScreen: false,
-    root: '.cayo',
+    root: config.cayoPath,
     server: {
       port: 5000
     },
@@ -216,26 +248,27 @@ async function serve() {
   await server.listen()
 }
 
-async function build(pages = data.pages) {
+async function build(config, pages = data.pages) {
   const { template, components } = data;
-  const { prerendered, componentList } = prerender(template, pages, components, config);
+  const { prerendered } = prerender(template, pages, components, config, logger);
+
   Object.entries(prerendered).forEach(([, page]) => {
-    writePageFiles(page, config, config.outDir)
+    writePageFiles(page, getOutDir(config), logger, config);
   });
-  // componentList.forEach((name) => {
-  //   if (!data.components[name]) {
-  //     config.logger.info(
-  //       chalk.red(
-  //         `Cayo component with name '${name}' does not exists Cayo components must have unique file names.`
-  //       ) + chalk.dim(`\n\t\t\t${modulePath}`), 
-  //       { timestamp: true, clear: true, }
-  //     );
-  //   }
-  // })
 }
 
-async function handleCayoComponent(name, modulePath) {
-  writeComponentFile(name, modulePath, config)
+async function handleCayoComponent(name, modulePath, config) {
+  writeComponentFile(name, modulePath, getOutDir(config), logger);
+}
+
+async function handleCayoComponents(components = data.components, config) {
+
+  Object.keys(components).forEach(name => {
+    let component = components[name];
+    handleCayoComponent(name, component.modulePath, config);
+  })
+  // let componentModule = Object.entries(components).find(([, { modulePath }]) => modulePath === filePath);
+  // handleCayoComponent(componentModule[0], componentModule[1].modulePath, config, logger);
 }
 
 cli(process.argv);

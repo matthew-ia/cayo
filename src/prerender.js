@@ -7,7 +7,7 @@ import chalk from 'chalk';
 // import { getComponentModules, getComponentModulePaths } from './utils.js';
 // import { writeComponentFile } from './files.js';
 
-export function prerender(Template, pages, componentModules, config) {
+export function prerender(Template, pages, componentModules, config, logger) {
   const template = Template.render();
   const renderer = new Renderer(template.html);
   const componentList = new Set();
@@ -19,7 +19,7 @@ export function prerender(Template, pages, componentModules, config) {
       // Render page
       const content = renderer.render(page);
       // Postprocess the content, get deps and inject dep references
-      const { html, css, js, components } = handlePageDeps(content, page, Object.keys(componentModules), config);
+      const { html, css, js, components } = handlePageDeps(content, page, Object.keys(componentModules), config, logger);
       prerendered[pathname] = {
         html,
         css, 
@@ -39,12 +39,12 @@ export function prerender(Template, pages, componentModules, config) {
 }
 
 // Derive JS dependencies from the prerendered html
-export function handlePageDeps(content, page, componentNames, config) {
+export function handlePageDeps(content, page, componentNames, config, logger) {
   const dom = new JSDOM(content.html);
   const { document } = dom.window;
 
   // Handle CSS
-  if (!config.css.useStyleTags) {
+  if (config.css && !config.css.useStyleTags) {
     let link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = './index.css';
@@ -58,13 +58,13 @@ export function handlePageDeps(content, page, componentNames, config) {
     }
 
   } else {
+    let style = document.createElement('style');
+    style.append(content.css.code);
     if (!config.depsInBody) {
       // Add to head with style tag
       document.head.append(style);
     } else {
       // Add to body with style tag
-      let style = document.createElement('style');
-      style.append(content.css.code);
       document.body.prepend(style);
     }
   }
@@ -75,7 +75,7 @@ export function handlePageDeps(content, page, componentNames, config) {
     if (el.dataset.cayoId !== '') {
       cayoIds.push(el.dataset.cayoId);
     } else {
-      config.logger.info(
+      logger.info(
         chalk.red(`Cayo component instance without a name found`) + chalk.dim(` ${page.filePath}`), 
         { timestamp: true, clear: true, }
       );
@@ -94,7 +94,7 @@ export function handlePageDeps(content, page, componentNames, config) {
     //   return components;
     // }
     if (!componentNames.includes(name)) {
-      config.logger.warn(
+      logger.warn(
         chalk.red(
           `Cayo component with name '${name}' does not exist but is trying to be rendered`
         ) + chalk.dim(` ${page.filePath}`), 
@@ -130,7 +130,7 @@ export function handlePageDeps(content, page, componentNames, config) {
     if (entryScript) {
       entryScript.remove();
     } else {
-      config.logger.info(
+      logger.info(
         chalk.bgRed.white(`No entry placeholder in '__index.svelte'.`) + chalk.dim(` Cayo components will not render.`), 
         { timestamp: true }
       );
@@ -151,11 +151,12 @@ export function handlePageDeps(content, page, componentNames, config) {
     // Handle components as deps
     if (Object.keys(components).length !== 0) {
       // Add getProps helper for runtime
+      //TODO: pretty sure this will break when not run from a real user project
       let runtimePath = path.resolve(__dirname, './src/runtime.js');
       js += `import { getProps } from '${runtimePath}';\n`;
       
       // TODO: make this be constructred properly using page.filePath?
-      const componentPath = path.resolve(process.cwd(), config.outDir, './generated/components');
+      const componentPath = path.resolve(config.cayoPath, './generated/components');
 
       let instances = '';
       // TODO: test that this works

@@ -51,16 +51,16 @@ export function hash(bytes = 5) {
   return crypto.randomBytes(bytes).toString('hex');
 }
 
-export async function getPageModulePaths(projectRoot) {
-  return await fg([`${projectRoot}/src/pages/**/*.svelte`]);
+export async function getPageModulePaths(pagesPath) {
+  return await fg([path.resolve(pagesPath, './**/*.svelte')]);
 }
 
-export async function getComponentModulePaths(projectRoot) {
-  return await fg([`${projectRoot}/src/components/**/*.cayo.svelte`]);
+export async function getComponentModulePaths(srcPath) {
+  return await fg([path.resolve(srcPath, './components/**/*.cayo.svelte')]);
 }
 
-export async function createPageManifest(projectRoot, cayoPath) {
-  const pagePaths = await getPageModulePaths(projectRoot);
+export async function createPageManifest(pagesPath, outDir) {
+  const pagePaths = await getPageModulePaths(pagesPath);
   let importPages = `import { createRequire } from 'module';\n`
   importPages += `const require = createRequire(import.meta.url);\n`
   importPages += `require('svelte/register');\n`;
@@ -73,11 +73,11 @@ export async function createPageManifest(projectRoot, cayoPath) {
     importPages += `  '${path}': page_${i},\n`;
   })
   importPages += '}\n';
-  return await fs.outputFile(`${cayoPath}/generated/pages.js`, importPages);
+  return await fs.outputFile(path.resolve(outDir, './generated/pages.js'), importPages);
 }
 
-export async function createComponentManifest(projectRoot, cayoPath) {
-  const componentPaths = await getComponentModulePaths(projectRoot);
+export async function createComponentManifest(srcPath, outDir) {
+  const componentPaths = await getComponentModulePaths(srcPath);
   let importComponents = `import { createRequire } from 'module';\n`
   importComponents += `const require = createRequire(import.meta.url);\n`
   importComponents += `require('svelte/register');\n`;
@@ -90,17 +90,17 @@ export async function createComponentManifest(projectRoot, cayoPath) {
     importComponents += `  '${path}': component_${i},\n`;
   })
   importComponents += '}\n';
-  return await fs.outputFile(`${cayoPath}/generated/components.js`, importComponents);
+  return await fs.outputFile(path.resolve(outDir, './generated/components.js'), importComponents);
 }
 
 
-export async function createTemplateManifest(projectRoot, cayoPath) {
+export async function createTemplateManifest(srcPath, outDir) {
   let importTemplate = `import { createRequire } from 'module';\n`
   importTemplate += `const require = createRequire(import.meta.url);\n`
   importTemplate += `require('svelte/register');\n`
-  importTemplate += `export const Template = require('${projectRoot}/src/__index.svelte').default;\n`;
+  importTemplate += `export const Template = require('${path.resolve(srcPath, './__index.svelte')}').default;\n`;
   // export { default as Template } from '${projectRoot}/src/__index.svelte';
-  return await fs.outputFile(`${cayoPath}/generated/template.js`, importTemplate);
+  return await fs.outputFile(path.resolve(outDir, './generated/template.js'), importTemplate);
 }
 
 
@@ -111,5 +111,9 @@ export function addTrailingSlash(_path) {
 }
 
 export function normalizePath(root, _path) {
-  path.join(root, addTrailingSlash(_path));
+  return path.join(root, addTrailingSlash(_path));
+}
+
+export function getOutDir(config) {
+  return config.mode === 'production' ? config.buildOptions.outDir : config.cayoPath;
 }
