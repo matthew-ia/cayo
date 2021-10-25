@@ -2,10 +2,9 @@ import path from 'path';
 import { existsSync } from 'fs';
 import { z } from 'zod';
 import { normalizePath } from './utils.js';
+import { default as viteConfig } from './vite.config.js';
 
 async function validateConfig(userConfig, base) {
-  console.log('HELP', userConfig);
-
   const ConfigSchema = z.object({
     projectRoot: z
       .string()
@@ -48,10 +47,9 @@ async function validateConfig(userConfig, base) {
       })
       .optional()
       .default({}),
-    viteOptions: z
-      .object({})
-      .optional()
-      .default({}),
+    viteConfig: z
+      .any({})
+      .default(viteConfig),
     cayoPath: z
       .string()
       .optional()

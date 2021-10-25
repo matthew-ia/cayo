@@ -34,7 +34,6 @@ export async function writePageFiles(page, outDir, logger, config) {
 
 export async function writeComponentFile(name, modulePath, outDir, logger) {
   let content = `export { default as ${name} } from '${modulePath}';\n`;
-  console.log(outDir);
   await fs.outputFile(path.resolve(outDir, `./generated/components/${name}.js`), content)
     .then(() => logger.info(
       chalk.green('component dep ') + chalk.dim(`${name}`), 

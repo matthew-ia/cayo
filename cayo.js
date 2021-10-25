@@ -3,7 +3,7 @@ import chokidar from 'chokidar';
 import path from 'path';
 const __dirname = path.resolve();
 import chalk from 'chalk';
-import { createServer, createLogger } from 'vite';
+import { createServer, createLogger, build as viteBuild } from 'vite';
 import { prerender } from './src/prerender.js';
 import { 
   writePageFiles,
@@ -23,23 +23,23 @@ import { loadConfig } from './src/config.js';
 
 // vite stuff
 
-import { svelte } from '@sveltejs/vite-plugin-svelte';
-import sveltePreprocess from 'svelte-preprocess';
+// import { svelte } from '@sveltejs/vite-plugin-svelte';
+// import sveltePreprocess from 'svelte-preprocess';
 
-const viteConfig = {
-  plugins: [svelte({
-    preprocess: sveltePreprocess({ preserve: ['json'] }),
-    compilerOptions: {
-      // generate: 'ssr',
-      hydratable: true,
-      // we'll extract any component CSS out into
-      // a separate file - better for performance
-      // css: css => {
-      //   css.write('dist/bundle.css'); // (3)
-      // },
-    },
-  })],
-}
+// const viteConfig = {
+//   plugins: [svelte({
+//     preprocess: sveltePreprocess({ preserve: ['json'] }),
+//     compilerOptions: {
+//       // generate: 'ssr',
+//       hydratable: true,
+//       // we'll extract any component CSS out into
+//       // a separate file - better for performance
+//       // css: css => {
+//       //   css.write('dist/bundle.css'); // (3)
+//       // },
+//     },
+//   })],
+// }
 
 
 const logger = createLogger('info', {
@@ -106,10 +106,12 @@ export async function cli(args) {
 
 const commands = new Map([
   ['build', (config) => {
-    build(config);
+    prerenderPages(config).then(()=>{
+      build(config);
+    });
   }],
   ['dev', (config) => {
-    build(config);
+    prerenderPages(config);
     watch(config);
     serve(config);
   }]
@@ -125,8 +127,6 @@ async function run(command) {
 
   try {
     const config = await loadConfig(options);
-
-    console.log('skrrrr', config.cayoPath, config);
 
     getTemplate(config)
     .then(() => getPages(config))
@@ -197,14 +197,12 @@ function watch(config) {
     );
   }
 
-  console.log(config.cayoComponentInfix);
-
   watcher.on('change', async (filePath) => {
     if (filePath.endsWith(fileExt)) {
       if (filePath.endsWith(templateFileName)) {
         logChange('template')
         getTemplate(config)
-          .then(() => build(config));
+          .then(() => prerenderPages(config));
 
       } else if (filePath.startsWith(config.pages)) {
         logChange('page');
@@ -212,7 +210,7 @@ function watch(config) {
           .then((pages) => {
             let pageModule = Object.entries(pages).find(([, { modulePath }]) => modulePath === filePath);
             let page = pageModule ? { [`${pageModule[0]}`]: pageModule[1] } : {}
-            build(config, page);
+            prerenderPages(config, page);
           })
 
       } else if (filePath.includes(`.${config.cayoComponentInfix}`)) {
@@ -227,7 +225,7 @@ function watch(config) {
       // find out which pages are affected
       // find out which components are affected (imports)?
       } else {
-        build(config);
+        prerenderPages(config);
       }
     }
   });
@@ -243,12 +241,19 @@ async function serve(config) {
     server: {
       port: 5000
     },
-    ...viteConfig,
+    ...config.viteConfig,
   })
   await server.listen()
 }
 
-async function build(config, pages = data.pages) {
+async function build(config) {
+  return await viteBuild({
+    root: config.cayoPath,
+    ...config.viteConfig,
+  })
+}
+
+async function prerenderPages(config, pages = data.pages) {
   const { template, components } = data;
   const { prerendered } = prerender(template, pages, components, config, logger);
 
