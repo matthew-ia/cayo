@@ -21,8 +21,6 @@ export class Renderer {
       cssTag = `<style>${css.code}</style>`;
     }
 
-    console.log(this.template);
-
     return {
       html: this.template
         // Ignore placeholders wrapped in HTML comments
