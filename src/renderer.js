@@ -12,7 +12,7 @@ export class Renderer {
     const { html, css, head } = Component.render();
 
     // TODO: template function for page title
-    const title = page.meta.title ? `${page.meta.title} — Cayo` : 'Cayo';
+    let title = page.meta.title ? `${page.meta.title} — Cayo` : 'Cayo';
 
     let cssTag = '';
     if (cssOptions.internal === false) {
@@ -21,8 +21,13 @@ export class Renderer {
       cssTag = `<style>${css.code}</style>`;
     }
 
+    console.log(this.template);
+
     return {
       html: this.template
+        // Ignore placeholders wrapped in HTML comments
+        .replaceAll(/<!--[^]*\%cayo\.\w+\%[^]*-->/g, '') 
+        // Replace placeholders in template
         .replace('%cayo.title%', !head.includes('<title>') ? `<title>${title}</title>` : '')
         .replace('%cayo.head%', head)
         .replace('%cayo.body%', html)

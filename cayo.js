@@ -127,7 +127,6 @@ async function run(command) {
 
   try {
     const config = await loadConfig(options);
-    console.log(config);
 
     getTemplate(config)
     .then(() => getPages(config))

@@ -78,11 +78,11 @@ export async function createPageManifest(pagesPath, outDir) {
 
 export async function createComponentManifest(srcPath, outDir) {
   const componentPaths = await getComponentModulePaths(srcPath);
-  let importComponents = `import { createRequire } from 'module';\n`
-  importComponents += `const require = createRequire(import.meta.url);\n`
+  let importComponents = `import { createRequire } from 'module';\n`;
+  importComponents += `const require = createRequire(import.meta.url);\n`;
   importComponents += `require('svelte/register');\n`;
   componentPaths.forEach((path, i) => {
-    importComponents += `delete require.cache['${path}'];\n`
+    importComponents += `delete require.cache['${path}'];\n`;
     importComponents += `const component_${i} = require('${path}');\n`;
   }); 
   importComponents += 'export const components = {\n';
@@ -95,10 +95,12 @@ export async function createComponentManifest(srcPath, outDir) {
 
 
 export async function createTemplateManifest(srcPath, outDir) {
-  let importTemplate = `import { createRequire } from 'module';\n`
-  importTemplate += `const require = createRequire(import.meta.url);\n`
-  importTemplate += `require('svelte/register');\n`
-  importTemplate += `export const Template = require('${path.resolve(srcPath, './__index.svelte')}').default;\n`;
+  let templatePath = path.resolve(srcPath, './__index.svelte');
+  let importTemplate = `import { createRequire } from 'module';\n`;
+  importTemplate += `const require = createRequire(import.meta.url);\n`;
+  importTemplate += `require('svelte/register');\n`;
+  importTemplate += `delete require.cache['${templatePath}'];\n`;
+  importTemplate += `export const Template = require('${templatePath}').default;\n`;
   // export { default as Template } from '${projectRoot}/src/__index.svelte';
   return await fs.outputFile(path.resolve(outDir, './generated/template.js'), importTemplate);
 }
