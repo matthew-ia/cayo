@@ -5,18 +5,28 @@ export class Renderer {
     this.template = templateHtml;
   }
 
-  render(page) {
+  render(page, config) {
+    const { css: cssOptions } = config;
+
     const { Component } = page;
     const { html, css, head } = Component.render();
 
     // TODO: template function for page title
     const title = page.meta.title ? `${page.meta.title} — Cayo` : 'Cayo';
 
+    let cssTag = '';
+    if (cssOptions.internal === false) {
+      cssTag = `<link rel="stylesheet" href="./index.css">`;
+    } else {
+      cssTag = `<style>${css.code}</style>`;
+    }
+
     return {
       html: this.template
         .replace('%cayo.title%', !head.includes('<title>') ? `<title>${title}</title>` : '')
         .replace('%cayo.head%', head)
         .replace('%cayo.body%', html)
+        .replace('%cayo.css%', cssTag)
         .replace('%cayo.script%', `<script type="module" src="./index.js"></script>`),
       css: css,
     }

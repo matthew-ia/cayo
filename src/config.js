@@ -47,6 +47,15 @@ async function validateConfig(userConfig, base) {
       })
       .optional()
       .default({}),
+    css: z
+      .object({
+        internal: z
+          .boolean()
+          .optional()
+          .default(false),
+      })
+      .optional()
+      .default({}),
     viteConfig: z
       .any({})
       .default(viteConfig),

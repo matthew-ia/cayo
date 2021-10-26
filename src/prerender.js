@@ -17,7 +17,7 @@ export function prerender(Template, pages, componentModules, config, logger) {
   const prerendered = Object.entries(pages).reduce(
     (prerendered, [pathname, page]) => {
       // Render page
-      const content = renderer.render(page);
+      const content = renderer.render(page, config);
       // Postprocess the content, get deps and inject dep references
       const { html, css, js, components } = handlePageDeps(content, page, Object.keys(componentModules), config, logger);
       prerendered[pathname] = {
@@ -42,32 +42,6 @@ export function prerender(Template, pages, componentModules, config, logger) {
 export function handlePageDeps(content, page, componentNames, config, logger) {
   const dom = new JSDOM(content.html);
   const { document } = dom.window;
-
-  // Handle CSS
-  if (config.css && !config.css.useStyleTags) {
-    let link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = './index.css';
-    
-    if (!config.depsInBody) {
-      // Add to head with link tag
-      document.head.append(link);
-    } else {
-      // Add to body with link tag
-      document.body.prepend(link);
-    }
-
-  } else {
-    let style = document.createElement('style');
-    style.append(content.css.code);
-    if (!config.depsInBody) {
-      // Add to head with style tag
-      document.head.append(style);
-    } else {
-      // Add to body with style tag
-      document.body.prepend(style);
-    }
-  }
 
   // Get component instance ids
   let cayoIds = [];
