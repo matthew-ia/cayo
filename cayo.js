@@ -234,14 +234,19 @@ function watch(config) {
 
 async function serve(config) {
   const server = await createServer({
-    // any valid user config options, plus `mode` and `configFile`
     configFile: false,
     clearScreen: false,
-    root: config.cayoPath,
     server: {
-      port: 5000
+      port: 5000,
     },
+    // User config
     ...config.viteConfig,
+    // Necessary cayo config values
+    // These intentionally will override respective keys
+    // in the user's vite config, if present
+    root: config.cayoPath,
+    publicDir: config.publicDir,
+    mode: config.mode,
   })
   await server.listen()
 }

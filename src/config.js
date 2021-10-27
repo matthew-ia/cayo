@@ -35,9 +35,9 @@ async function validateConfig(userConfig, base) {
           .transform(val => normalizePath(base, val)),
         assetsDir: z
           .string()
-          .or(z.boolean())
+          // .or(z.boolean())
           .optional()
-          .default('./assets')
+          .default('.')
           // TODO: This may cause bugs if user passes boolean, idk tho
           .transform(val => normalizePath(base, val)),
         legacy: z.

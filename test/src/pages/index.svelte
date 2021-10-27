@@ -7,6 +7,7 @@
   import Cayo from '../../../components/Cayo.svelte';
 </script>
 
+
 I'm index howdy ok<br>
 <a href="/howdy/">Howdy</a><br>
 <a href="/hey/" class="red">Hey</a>
@@ -24,5 +25,8 @@ I'm index howdy ok<br>
 <style>
   .red {
     color: red;
+  }
+  img {
+    width: 50px;
   }
 </style>

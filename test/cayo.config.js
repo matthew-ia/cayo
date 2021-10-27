@@ -16,7 +16,6 @@
 
 export default {
   root: '.',
-  // viteConfig,
   css: {
     internal: true,
   }
