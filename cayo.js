@@ -4,11 +4,11 @@ import path from 'path';
 const __dirname = path.resolve();
 import chalk from 'chalk';
 import { createServer, createLogger, build as viteBuild } from 'vite';
-import { prerender } from './src/prerender.js';
+import { prerender } from '#lib/prerender';
 import { 
   writePageFiles,
   writeComponentFile,
-} from './src/files.js';
+} from '#lib/files';
 import { 
   hash,
   getPageModules, 
@@ -17,9 +17,9 @@ import {
   createPageManifest,
   createComponentManifest,
   getOutDir,
-} from './src/utils.js';
+} from '#lib/utils';
 
-import { loadConfig } from './src/config.js';
+import { loadConfig } from '#lib/config';
 
 // vite stuff
 
