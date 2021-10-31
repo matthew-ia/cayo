@@ -1,2 +1,0 @@
-const modules = import.meta.globEager(`%PATH%`);
-export default modules;

@@ -4,13 +4,14 @@
   };
 </script>
 <script>
-  import Cayo from '../../../components/Cayo.svelte';
+  import Cayo from '../../../lib/components/Cayo.svelte';
 </script>
 
 
 I'm index howdy ok<br>
 <a href="/howdy/">Howdy</a><br>
 <a href="/hey/" class="red">Hey</a>
+<a href="/some/some/" class="red">Some</a>
 
 <Cayo name="Cool" beans='ayo'></Cayo>
 <Cayo name="Cool" beans='beeeeaaaaasnnss' />
@@ -19,7 +20,7 @@ I'm index howdy ok<br>
 <img src="/app-icon.png" alt="">
 
 <slot name="entry">
-  <script src="../main.js" data-cayo-entry />
+  <script src="/main.js" data-cayo-entry />
 </slot>
 
 <style>

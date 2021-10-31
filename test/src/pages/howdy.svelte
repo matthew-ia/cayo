@@ -1,5 +1,5 @@
 <script>
-  import Cayo from '../../../components/Cayo.svelte';
+  import Cayo from '../../../lib/components/Cayo.svelte';
 </script>
 
 howdyyy
@@ -7,5 +7,5 @@ howdyyy
 <Cayo name="Cool" beans='on Howdy' />
 
 <slot name="entry">
-  <script src="../main2.js" data-cayo-entry />
+  <script src="/main2.js" data-cayo-entry />
 </slot>

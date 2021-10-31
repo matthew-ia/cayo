@@ -4,11 +4,12 @@ import path from 'path';
 const __dirname = path.resolve();
 import chalk from 'chalk';
 import { createServer, createLogger, build as viteBuild } from 'vite';
-import { prerender } from './src/prerender.js';
+import { prerender } from '#lib/prerender';
 import { 
   writePageFiles,
   writeComponentFile,
-} from './src/files.js';
+  cleanCayoPath,
+} from '#lib/files';
 import { 
   hash,
   getPageModules, 
@@ -17,9 +18,9 @@ import {
   createPageManifest,
   createComponentManifest,
   getOutDir,
-} from './src/utils.js';
+} from '#lib/utils';
 
-import { loadConfig } from './src/config.js';
+import { loadConfig } from '#lib/config';
 
 // vite stuff
 
@@ -106,7 +107,7 @@ export async function cli(args) {
 
 const commands = new Map([
   ['build', (config) => {
-    prerenderPages(config).then(()=>{
+    prerenderPages(config).then(() => {
       build(config);
     });
   }],
@@ -128,6 +129,9 @@ async function run(command) {
   try {
     const config = await loadConfig(options);
 
+    // Create a fresh cayo folder for this run
+    cleanCayoPath(config.cayoPath);
+
     getTemplate(config)
     .then(() => getPages(config))
     .then(() => getCayoComponents(config))
@@ -136,11 +140,7 @@ async function run(command) {
     })
     .then(() => {
       const runCommand = commands.get(cmd);
-      runCommand(config);
-      // if (cmd === 'dev') {
-      //   watch(config);
-      //   serve(config);
-      // }     
+      runCommand(config);   
     });
 
   } catch (err) {
@@ -152,7 +152,7 @@ async function run(command) {
 async function getTemplate(config) {
   const { src, cayoPath } = config;
   return createTemplateManifest(src, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `./generated/template.js?v=${hash()}`)))
+    .then(async () => await import(path.resolve(cayoPath, `./__cayo/template.js?v=${hash()}`)))
     .then(({ Template }) => {
       data.template = Template;
       return data.template;
@@ -162,7 +162,7 @@ async function getTemplate(config) {
 async function getPages(config) {
   const { pages, cayoPath } = config;
   return createPageManifest(pages, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `./generated/pages.js?v=${hash()}`)))
+    .then(async () => await import(path.resolve(cayoPath, `./__cayo/pages.js?v=${hash()}`)))
     .then(({ pages }) => {
       data.pages = getPageModules(pages, config);
       return data.pages;
@@ -172,7 +172,7 @@ async function getPages(config) {
 async function getCayoComponents(config) {
   const { src, cayoPath } = config;
   return createComponentManifest(src, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `./generated/components.js?v=${hash()}`)))
+    .then(async () => await import(path.resolve(cayoPath, `./__cayo/components.js?v=${hash()}`)))
     .then(({ components }) => {
       data.components = getComponentModules(components, config);
       return data.components;
