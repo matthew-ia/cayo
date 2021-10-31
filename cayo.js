@@ -152,7 +152,7 @@ async function run(command) {
 async function getTemplate(config) {
   const { src, cayoPath } = config;
   return createTemplateManifest(src, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `./generated/template.js?v=${hash()}`)))
+    .then(async () => await import(path.resolve(cayoPath, `./__cayo/template.js?v=${hash()}`)))
     .then(({ Template }) => {
       data.template = Template;
       return data.template;
@@ -162,7 +162,7 @@ async function getTemplate(config) {
 async function getPages(config) {
   const { pages, cayoPath } = config;
   return createPageManifest(pages, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `./generated/pages.js?v=${hash()}`)))
+    .then(async () => await import(path.resolve(cayoPath, `./__cayo/pages.js?v=${hash()}`)))
     .then(({ pages }) => {
       data.pages = getPageModules(pages, config);
       return data.pages;
@@ -172,7 +172,7 @@ async function getPages(config) {
 async function getCayoComponents(config) {
   const { src, cayoPath } = config;
   return createComponentManifest(src, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `./generated/components.js?v=${hash()}`)))
+    .then(async () => await import(path.resolve(cayoPath, `./__cayo/components.js?v=${hash()}`)))
     .then(({ components }) => {
       data.components = getComponentModules(components, config);
       return data.components;
