@@ -8,6 +8,7 @@ import { prerender } from '#lib/prerender';
 import { 
   writePageFiles,
   writeComponentFile,
+  cleanCayoPath,
 } from '#lib/files';
 import { 
   hash,
@@ -106,7 +107,7 @@ export async function cli(args) {
 
 const commands = new Map([
   ['build', (config) => {
-    prerenderPages(config).then(()=>{
+    prerenderPages(config).then(() => {
       build(config);
     });
   }],
@@ -128,6 +129,9 @@ async function run(command) {
   try {
     const config = await loadConfig(options);
 
+    // Create a fresh cayo folder for this run
+    cleanCayoPath(config.cayoPath);
+
     getTemplate(config)
     .then(() => getPages(config))
     .then(() => getCayoComponents(config))
@@ -136,11 +140,7 @@ async function run(command) {
     })
     .then(() => {
       const runCommand = commands.get(cmd);
-      runCommand(config);
-      // if (cmd === 'dev') {
-      //   watch(config);
-      //   serve(config);
-      // }     
+      runCommand(config);   
     });
 
   } catch (err) {
