@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "node cayo dev --projectRoot test",
     "dev": "vite",
     "build": "vite build --outDir dist --ssr src/prerender.js --mode development && node dist/prerender.js",
     "serve": "vite preview"
