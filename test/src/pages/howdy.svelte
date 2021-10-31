@@ -6,6 +6,6 @@ howdyyy
 <br><a href="/home/">Back</a>
 <Cayo name="Cool" beans='on Howdy' />
 
-<!-- <slot name="entry">
+<slot name="entry">
   <script src="/main2.js" data-cayo-entry />
-</slot> -->
+</slot>
