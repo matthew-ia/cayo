@@ -17,6 +17,6 @@
 export default {
   root: '.',
   css: {
-    internal: true,
+    internal: false,
   }
 }

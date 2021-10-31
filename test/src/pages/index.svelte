@@ -19,9 +19,9 @@ I'm index howdy ok<br>
 
 <img src="/app-icon.png" alt="">
 
-<slot name="entry">
+<!-- <slot name="entry">
   <script src="/main.js" data-cayo-entry />
-</slot>
+</slot> -->
 
 <style>
   .red {
