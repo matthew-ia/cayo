@@ -1,5 +1,7 @@
 /node_modules/
 /dist/
+/test/**/dist/
+/tests/**/dist/
 /.vscode/
 .DS_Store
 .cayo

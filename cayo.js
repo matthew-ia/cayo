@@ -106,10 +106,12 @@ export async function cli(args) {
 }
 
 const commands = new Map([
-  ['build', (config) => {
-    prerenderPages(config).then(() => {
+  ['build', async (config) => {
+    await prerenderPages(config).then((some)=> {
+      console.log(some);
       build(config);
     });
+    // build(config);
   }],
   ['dev', (config) => {
     prerenderPages(config);
@@ -244,7 +246,7 @@ async function serve(config) {
     // Necessary cayo config values
     // These intentionally will override respective keys
     // in the user's vite config, if present
-    root: config.cayoPath,
+    root: config.cayoPath, 
     publicDir: config.publicDir,
     mode: config.mode,
   })
@@ -255,20 +257,28 @@ async function build(config) {
   return await viteBuild({
     root: config.cayoPath,
     ...config.viteConfig,
+    // root: getOutDir(config),
+    build: {
+      outDir: config.build.outDir,
+      emptyOutDir: true,
+    },
+    root: config.cayoPath, 
+    publicDir: config.publicDir,
+    mode: config.mode,
   })
 }
 
 async function prerenderPages(config, pages = data.pages) {
   const { template, components } = data;
   const { prerendered } = prerender(template, pages, components, config, logger);
-
-  Object.entries(prerendered).forEach(([, page]) => {
-    writePageFiles(page, getOutDir(config), logger, config);
-  });
+  
+  for (const [, page] of Object.entries(prerendered)) {
+    await writePageFiles(page, config.cayoPath, logger, config);
+  }
 }
 
 async function handleCayoComponent(name, modulePath, config) {
-  writeComponentFile(name, modulePath, getOutDir(config), logger);
+  writeComponentFile(name, modulePath, config.cayoPath, logger);
 }
 
 async function handleCayoComponents(components = data.components, config) {
