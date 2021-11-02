@@ -8,7 +8,7 @@
     %cayo.css%    
     %cayo.head%
   </head>
-  <body>
+  <body class="hey">
     <!-- 
       TODO: Show how to condtionally render any of these pieces based on dev vs. prod
       E.g., I need to remove head from prod, but want it there in dev

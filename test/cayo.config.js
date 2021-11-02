@@ -14,10 +14,10 @@
 // });
 
 export default {
-  root: '.',
-  css: {
-    internal: false,
-  },
+  // projectRoot: '.',
+  // css: {
+  //   internal: false,
+  // },
   // templateFileName: '__app',
   // viteConfig: {
   //   plugins: [
