@@ -192,6 +192,14 @@ function watch(config) {
     // },
   });
 
+  const configWatcher = chokidar.watch(path.resolve(config.src, '../cayo.config.js'));
+  configWatcher.on('change', (filePath) => {
+    logger.info(
+      chalk.yellow(`> config updated... restart dev server to use new config.`),
+      { timestamp: true, clear: true, }
+    );
+  })
+
   const logChange = (type) => {
     logger.info(
       `> ${type} updated`,
