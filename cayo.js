@@ -183,9 +183,7 @@ async function getCayoComponents(config) {
 }
 
 function watch(config) {
-  const fileExt = '.svelte';
-  const templateFileName = '__index' + fileExt;
-
+  
   const watcher = chokidar.watch(config.src, {
     // awaitWriteFinish: {
     //   stabilityThreshold: 1,
@@ -201,8 +199,8 @@ function watch(config) {
   }
 
   watcher.on('change', async (filePath) => {
-    if (filePath.endsWith(fileExt)) {
-      if (filePath.endsWith(templateFileName)) {
+    if (filePath.endsWith('.svelte')) {
+      if (filePath.endsWith('__layout.svelte')) {
         logChange('template')
         getTemplate(config)
           .then(() => prerenderPages(config));
