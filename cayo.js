@@ -155,8 +155,8 @@ async function run(command) {
 async function getTemplate(config) {
   const { src, cayoPath } = config;
   return createTemplateManifest(src, cayoPath)
-    .then(async () => await import(path.resolve(cayoPath, `./__cayo/template.js?v=${hash()}`)))
-    .then(({ Template }) => {
+    .then(async () => {
+      const { Template } = await import(path.resolve(cayoPath, `./__cayo/template.js?v=${hash()}`)) 
       data.template = Template;
       return data.template;
     });
@@ -236,7 +236,7 @@ function watch(config) {
 }
 
 async function serve(config) {
-  console.log(config.viteConfig);
+  // console.log(config.viteConfig);
   const server = await createServer({
     configFile: false,
     clearScreen: false,
@@ -268,7 +268,7 @@ async function build(config, pages) {
       inputs[page.filePath] = path.resolve(config.cayoPath, `${page.filePath}/index.html`);
     }
   }
-  console.log(inputs);
+  // console.log(inputs);
 
   // return;
   // TODO: deep merge user vite config

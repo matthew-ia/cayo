@@ -36,6 +36,7 @@
     "yargs-parser": "^20.2.9"
   },
   "dependencies": {
+    "linkedom": "^0.13.0",
     "zod": "^3.10.3"
   }
 }
