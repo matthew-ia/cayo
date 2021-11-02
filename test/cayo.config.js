@@ -13,10 +13,16 @@
 //   })],
 // });
 
-
 export default {
   root: '.',
   css: {
     internal: false,
-  }
+  },
+  // viteConfig: {
+  //   plugins: [
+  //     legacy({
+  //       targets: ['defaults', 'not IE 11']
+  //     })
+  //   ]
+  // }
 }

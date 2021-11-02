@@ -22,6 +22,9 @@ import {
 
 import { loadConfig } from '#lib/config';
 
+import legacy from '@vitejs/plugin-legacy'
+
+
 // vite stuff
 
 // import { svelte } from '@sveltejs/vite-plugin-svelte';
@@ -233,6 +236,7 @@ function watch(config) {
 }
 
 async function serve(config) {
+  console.log(config.viteConfig);
   const server = await createServer({
     configFile: false,
     clearScreen: false,
@@ -268,12 +272,20 @@ async function build(config, pages) {
 
   // return;
   // TODO: deep merge user vite config
-  const { build: viteConfigBuild, ...restViteConfig } = config.viteConfig;
+  const { build: viteConfigBuild, plugins: vitePlugins, ...restViteConfig } = config.viteConfig;
 
+  
+  
   return await viteBuild({
     root: config.cayoPath,
     // ...restViteConfig,
     ...config.viteConfig,
+    plugins: [
+      ...vitePlugins,
+      // legacy({
+      //   targets: ['defaults', 'not IE 11']
+      // })
+    ],
     // root: getOutDir(config),
     build: {
       // ...viteConfigBuild,
