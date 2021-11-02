@@ -153,8 +153,8 @@ async function run(command) {
 }
 
 async function getTemplate(config) {
-  const { src, cayoPath } = config;
-  return createTemplateManifest(src, cayoPath)
+  const { src, cayoPath, templateFileName } = config;
+  return createTemplateManifest(path.resolve(src, `${templateFileName}.svelte`), cayoPath)
     .then(async () => {
       const { Template } = await import(path.resolve(cayoPath, `./__cayo/template.js?v=${hash()}`)) 
       data.template = Template;
@@ -183,7 +183,7 @@ async function getCayoComponents(config) {
 }
 
 function watch(config) {
-  
+
   const watcher = chokidar.watch(config.src, {
     // awaitWriteFinish: {
     //   stabilityThreshold: 1,
@@ -200,7 +200,7 @@ function watch(config) {
 
   watcher.on('change', async (filePath) => {
     if (filePath.endsWith('.svelte')) {
-      if (filePath.endsWith('__layout.svelte')) {
+      if (filePath.endsWith(`${config.templateFileName}.svelte`)) {
         logChange('template')
         getTemplate(config)
           .then(() => prerenderPages(config));

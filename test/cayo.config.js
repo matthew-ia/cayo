@@ -18,6 +18,7 @@ export default {
   css: {
     internal: false,
   },
+  // templateFileName: '__app',
   // viteConfig: {
   //   plugins: [
   //     legacy({
