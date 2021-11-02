@@ -1,2 +1,8 @@
 yessir
-<br><a href="/home/">Back</a>
+<br><a href="/">Back</a>
+
+<style>
+  br {
+    display: block;
+  }
+</style>

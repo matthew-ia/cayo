@@ -107,11 +107,9 @@ export async function cli(args) {
 
 const commands = new Map([
   ['build', async (config) => {
-    await prerenderPages(config).then((some)=> {
-      console.log(some);
-      build(config);
+    await prerenderPages(config).then((pages)=> {
+      build(config, pages);
     });
-    // build(config);
   }],
   ['dev', (config) => {
     prerenderPages(config);
@@ -253,14 +251,37 @@ async function serve(config) {
   await server.listen()
 }
 
-async function build(config) {
+async function build(config, pages) {
+
+  const inputs = {};
+
+  // console.log(pages['/']);
+
+  for (const [, page] of Object.entries(pages)) {
+    if (page.filePath === 'index') {
+      inputs['main'] = path.resolve(config.cayoPath, 'index.html');
+    } else {
+      inputs[page.filePath] = path.resolve(config.cayoPath, `${page.filePath}/index.html`);
+    }
+  }
+  console.log(inputs);
+
+  // return;
+  // TODO: deep merge user vite config
+  const { build: viteConfigBuild, ...restViteConfig } = config.viteConfig;
+
   return await viteBuild({
     root: config.cayoPath,
+    // ...restViteConfig,
     ...config.viteConfig,
     // root: getOutDir(config),
     build: {
+      // ...viteConfigBuild,
       outDir: config.build.outDir,
       emptyOutDir: true,
+      rollupOptions: {
+        input: { ...inputs },
+      }
     },
     root: config.cayoPath, 
     publicDir: config.publicDir,
@@ -271,10 +292,12 @@ async function build(config) {
 async function prerenderPages(config, pages = data.pages) {
   const { template, components } = data;
   const { prerendered } = prerender(template, pages, components, config, logger);
-  
+
   for (const [, page] of Object.entries(prerendered)) {
     await writePageFiles(page, config.cayoPath, logger, config);
   }
+
+  return prerendered;
 }
 
 async function handleCayoComponent(name, modulePath, config) {

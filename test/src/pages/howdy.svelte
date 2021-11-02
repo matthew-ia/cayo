@@ -3,7 +3,7 @@
 </script>
 
 howdyyy
-<br><a href="/home/">Back</a>
+<br><a href="/">Back</a>
 <Cayo name="Cool" beans='on Howdy' />
 
 <slot name="entry">
