@@ -20,30 +20,6 @@ import {
   createComponentManifest,
 } from '#lib/utils';
 
-
-import legacy from '@vitejs/plugin-legacy'
-
-// vite stuff
-
-// import { svelte } from '@sveltejs/vite-plugin-svelte';
-// import sveltePreprocess from 'svelte-preprocess';
-
-// const viteConfig = {
-//   plugins: [svelte({
-//     preprocess: sveltePreprocess({ preserve: ['json'] }),
-//     compilerOptions: {
-//       // generate: 'ssr',
-//       hydratable: true,
-//       // we'll extract any component CSS out into
-//       // a separate file - better for performance
-//       // css: css => {
-//       //   css.write('dist/bundle.css'); // (3)
-//       // },
-//     },
-//   })],
-// }
-
-
 const logger = createLogger('info', {
   prefix: chalk.magenta.bold('[cayo]'),
   // allowClearScreen: true,
@@ -52,16 +28,6 @@ const errorLogger = createLogger('warn', {
   prefix: chalk.red.bold('[cayo]'),
   // allowClearScreen: true,
 });
-
-// const config = {
-//   projectRoot: path.resolve(process.cwd(), 'test'),
-//   logger: logger,
-//   outDir: path.join(process.cwd(), '.cayo/'),
-//   css: {
-//     useStyleTags: false,
-//   },
-//   depsInBody: false,
-// }
 
 const data = {
   template: undefined,
@@ -139,15 +105,15 @@ async function run(command) {
     cleanCayoPath(config.cayoPath);
 
     getTemplate(config)
-    .then(() => getPages(config))
-    .then(() => getCayoComponents(config))
-    .then((components) => {
-      handleCayoComponents(components, config);
-    })
-    .then(() => {
-      const runCommand = commands.get(cmd);
-      runCommand(config);   
-    });
+      .then(() => getPages(config))
+      .then(() => getCayoComponents(config))
+      .then((components) => {
+        handleCayoComponents(components, config);
+      })
+      .then(() => {
+        const runCommand = commands.get(cmd);
+        runCommand(config);   
+      });
 
   } catch (err) {
     console.error(err);
@@ -268,8 +234,6 @@ async function build(config, pages) {
 
   const inputs = {};
 
-  // console.log(pages['/']);
-
   for (const [, page] of Object.entries(pages)) {
     if (page.filePath === 'index') {
       inputs['main'] = path.resolve(config.cayoPath, 'index.html');
@@ -277,14 +241,10 @@ async function build(config, pages) {
       inputs[page.filePath] = path.resolve(config.cayoPath, `${page.filePath}/index.html`);
     }
   }
-  // console.log(inputs);
 
-  // return;
   // TODO: deep merge user vite config
   const { build: viteConfigBuild, plugins: vitePlugins, ...restViteConfig } = config.viteConfig;
 
-  
-  
   return await viteBuild({
     root: config.cayoPath,
     // ...restViteConfig,
@@ -329,13 +289,10 @@ async function handleCayoComponent(name, modulePath, config) {
 }
 
 async function handleCayoComponents(components = data.components, config) {
-
   Object.keys(components).forEach(name => {
     let component = components[name];
     handleCayoComponent(name, component.modulePath, config);
   })
-  // let componentModule = Object.entries(components).find(([, { modulePath }]) => modulePath === filePath);
-  // handleCayoComponent(componentModule[0], componentModule[1].modulePath, config, logger);
 }
 
 cli(process.argv);
