@@ -1,10 +1,9 @@
 import yargs from 'yargs-parser';
 import chokidar from 'chokidar';
 import path from 'path';
-import fs from 'fs-extra';
-const __dirname = path.resolve();
 import chalk from 'chalk';
 import { createServer, createLogger, build as viteBuild } from 'vite';
+import { loadConfig, checkConfigPaths } from '#lib/config';
 import { prerender } from '#lib/prerender';
 import { 
   writePageFiles,
@@ -19,13 +18,10 @@ import {
   createTemplateManifest,
   createPageManifest,
   createComponentManifest,
-  getOutDir,
 } from '#lib/utils';
 
-import { loadConfig } from '#lib/config';
 
 import legacy from '@vitejs/plugin-legacy'
-
 
 // vite stuff
 
@@ -137,7 +133,7 @@ async function run(command) {
 
   try {
     const config = await loadConfig(options);
-    checkRequirements(config);
+    checkConfigPaths(config, errorLogger);
 
     // Create a fresh cayo folder for this run
     cleanCayoPath(config.cayoPath);
@@ -340,29 +336,6 @@ async function handleCayoComponents(components = data.components, config) {
   })
   // let componentModule = Object.entries(components).find(([, { modulePath }]) => modulePath === filePath);
   // handleCayoComponent(componentModule[0], componentModule[1].modulePath, config, logger);
-}
-
-function checkRequirements(config) {
-  let errorLogged = false;
-  const log = (option, value) => {
-    errorLogger.warn(
-      chalk.red(`Config Error: ${option}: '${value}' does not exist`),
-      { timestamp: true, clear: false, }
-    );
-    errorLogged = true;
-  }
-  if (!fs.existsSync(config.projectRoot)) 
-    log('config.projectRoot', config.projectRoot);
-  if (!fs.existsSync(path.resolve(config.projectRoot, config.src))) 
-    log('config.src', config.projectRoot);
-  if (!fs.existsSync(path.resolve(config.projectRoot, config.pages))) 
-    log('config.pages', config.pages);  
-  if (!fs.existsSync(path.resolve(config.projectRoot, config.publicDir))) 
-    log('config.publicDir', config.publicDir);  
-  if (!fs.existsSync(path.resolve(config.src, `${config.templateFileName}.svelte`))) 
-    log('config.templateFileName', `${config.templateFileName}(.svelte)`);  
-
-  if(errorLogged) throw new Error('Config Error: fix the issues above in your config file');
 }
 
 cli(process.argv);
