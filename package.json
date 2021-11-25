@@ -36,6 +36,7 @@
     "yargs-parser": "^20.2.9"
   },
   "dependencies": {
+    "deepmerge": "^4.2.2",
     "linkedom": "^0.13.0",
     "zod": "^3.10.3"
   }

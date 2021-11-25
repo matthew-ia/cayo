@@ -1,8 +1,8 @@
 
 // vite config example
-// import { defineConfig } from 'vite'
-// import { svelte } from '@sveltejs/vite-plugin-svelte'
-// import sveltePreprocess from 'svelte-preprocess'
+import { defineConfig } from 'vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
+import sveltePreprocess from 'svelte-preprocess'
 // const viteConfig = defineConfig({
 //   // root: './.cayo/',
 //   plugins: [svelte({
@@ -19,11 +19,14 @@ export default {
   //   internal: false,
   // },
   templateFileName: '__layout',
-  // viteConfig: {
-  //   plugins: [
-  //     legacy({
-  //       targets: ['defaults', 'not IE 11']
-  //     })
-  //   ]
-  // }
+  viteConfig: {
+    base: '/vite/',
+    plugins: [svelte({
+      preprocess: sveltePreprocess({ preserve: ['json'] }),
+      compilerOptions: {
+        hydratable: true,
+      },
+    })],
+  },
+  base: '/cayo/'
 }

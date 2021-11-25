@@ -2,6 +2,7 @@ import yargs from 'yargs-parser';
 import chokidar from 'chokidar';
 import path from 'path';
 import chalk from 'chalk';
+import merge from 'deepmerge';
 import { createServer, createLogger, build as viteBuild } from 'vite';
 import { loadConfig, checkConfigPaths } from '#lib/config';
 import { prerender } from '#lib/prerender';
@@ -243,30 +244,26 @@ async function build(config, pages) {
   }
 
   // TODO: deep merge user vite config
-  const { build: viteConfigBuild, plugins: vitePlugins, ...restViteConfig } = config.viteConfig;
 
-  return await viteBuild({
-    root: config.cayoPath,
-    // ...restViteConfig,
-    ...config.viteConfig,
-    plugins: [
-      ...vitePlugins,
-      // legacy({
-      //   targets: ['defaults', 'not IE 11']
-      // })
-    ],
-    // root: getOutDir(config),
+  const viteConfig = {
+    root: config.cayoPath, 
+    publicDir: config.publicDir,
+    base: config.base,
+    mode: config.mode,
+    // plugins: config.viteConfig.plugins ? config.viteConfig.plugins : null,
     build: {
-      // ...viteConfigBuild,
       outDir: config.build.outDir,
       emptyOutDir: true,
       rollupOptions: {
         input: { ...inputs },
       }
     },
-    root: config.cayoPath, 
-    publicDir: config.publicDir,
-    mode: config.mode,
+  };
+
+  const mergedConfig = merge(config.viteConfig, viteConfig);
+
+  return await viteBuild({
+    ...mergedConfig,
   })
 }
 
