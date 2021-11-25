@@ -212,27 +212,26 @@ function watch(config) {
 }
 
 async function serve(config) {
-  // console.log(config.viteConfig);
-  const server = await createServer({
-    configFile: false,
-    clearScreen: false,
-    server: {
-      port: 5000,
-    },
-    // User config
-    ...config.viteConfig,
-    // Necessary cayo config values
-    // These intentionally will override respective keys
-    // in the user's vite config, if present
+
+  const internalConfig = {
     root: config.cayoPath, 
     publicDir: config.publicDir,
     mode: config.mode,
+    configFile: false,
+  } 
+
+  const mergedConfig = merge(config.viteConfig, internalConfig);
+  
+  const server = await createServer({
+    ...mergedConfig,
   })
+
   await server.listen()
 }
 
 async function build(config, pages) {
 
+  // Create inputs for rollup based on the pages
   const inputs = {};
 
   for (const [, page] of Object.entries(pages)) {
@@ -243,14 +242,11 @@ async function build(config, pages) {
     }
   }
 
-  // TODO: deep merge user vite config
-
-  const viteConfig = {
+  const internalConfig = {
     root: config.cayoPath, 
     publicDir: config.publicDir,
     base: config.base,
     mode: config.mode,
-    // plugins: config.viteConfig.plugins ? config.viteConfig.plugins : null,
     build: {
       outDir: config.build.outDir,
       emptyOutDir: true,
@@ -260,7 +256,7 @@ async function build(config, pages) {
     },
   };
 
-  const mergedConfig = merge(config.viteConfig, viteConfig);
+  const mergedConfig = merge(config.viteConfig, internalConfig);
 
   return await viteBuild({
     ...mergedConfig,

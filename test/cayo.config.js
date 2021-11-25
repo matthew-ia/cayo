@@ -27,6 +27,9 @@ export default {
         hydratable: true,
       },
     })],
+    server: {
+      port: '5005',
+    },
   },
   base: '/cayo/'
 }
