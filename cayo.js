@@ -1,17 +1,19 @@
+#!/usr/bin/env node
+
 import yargs from 'yargs-parser';
 import chokidar from 'chokidar';
 import path from 'path';
 import chalk from 'chalk';
 import merge from 'deepmerge';
 import { createServer, createLogger, build as viteBuild } from 'vite';
-import { loadConfig, checkConfigPaths } from '#lib/config';
-import { prerender } from '#lib/prerender';
+import { loadConfig, checkConfigPaths } from './lib/config.js';
+import { prerender } from './lib/prerender.js';
 import { 
   writePageFiles,
   writeComponentFile,
   cleanCayoPath,
   writeTemplateCSS,
-} from '#lib/files';
+} from './lib/files.js';
 import { 
   hash,
   getPageModules, 
@@ -19,7 +21,7 @@ import {
   createTemplateManifest,
   createPageManifest,
   createComponentManifest,
-} from '#lib/utils';
+} from './lib/utils.js';
 
 const logger = createLogger('info', {
   prefix: chalk.magenta.bold('[cayo]'),
@@ -217,6 +219,7 @@ async function serve(config) {
     root: config.cayoPath, 
     publicDir: config.publicDir,
     mode: config.mode,
+    base: config.base,
     configFile: false,
   } 
 
@@ -249,6 +252,7 @@ async function build(config, pages) {
     mode: config.mode,
     build: {
       outDir: config.build.outDir,
+      assetsDir: config.build.assetsDir,
       emptyOutDir: true,
       rollupOptions: {
         input: { ...inputs },

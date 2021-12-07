@@ -8,6 +8,7 @@
     "build": "vite build --outDir dist --ssr src/prerender.js --mode development && node dist/prerender.js",
     "serve": "vite preview"
   },
+  "bin": "./cayo.js", 
   "imports": {
     "#lib/*": "./lib/*.js"
   },
