@@ -5,7 +5,19 @@
   "scripts": {
     "start": "node cayo dev --projectRoot test"
   },
-  "bin": "./cayo.js",
+  "bin": {
+    "cayo": "cayo.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matthew-ia/cayo.git"
+  },
+  "author": "Matthew I. Alicea",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/matthew-ia/cayo/issues"
+  },
+  "homepage": "https://github.com/matthew-ia/cayo#readme",
   "devDependencies": {
     "@vitejs/plugin-legacy": "^1.6.2"
   },
