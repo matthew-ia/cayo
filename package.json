@@ -1,44 +1,27 @@
 {
   "name": "cayo",
-  "version": "0.0.0",
+  "version": "0.9.0",
   "type": "module",
   "scripts": {
-    "start": "node cayo dev --projectRoot test",
-    "dev": "vite",
-    "build": "vite build --outDir dist --ssr src/prerender.js --mode development && node dist/prerender.js",
-    "serve": "vite preview"
+    "start": "node cayo dev --projectRoot test"
   },
-  "bin": "./cayo.js", 
-  "imports": {
-    "#lib/*": "./lib/*.js"
-  },
+  "bin": "./cayo.js",
   "devDependencies": {
-    "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@vitejs/plugin-legacy": "^1.6.2"
+  },
+  "dependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.11",
-    "@vitejs/plugin-legacy": "^1.6.2",
     "chalk": "^2.4.2",
-    "cheerio": "^1.0.0-rc.10",
     "chokidar": "^3.5.2",
-    "express": "^4.17.1",
+    "deepmerge": "^4.2.2",
     "fast-glob": "^3.2.7",
     "fs-extra": "^10.0.0",
     "jsdom": "^18.0.0",
-    "klaw": "^3.0.0",
-    "rollup": "^2.3.4",
-    "rollup-plugin-copy": "^3.3.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
+    "linkedom": "^0.13.0",
     "svelte": "^3.37.0",
     "svelte-preprocess": "^4.7.4",
     "vite": "^2.6.4",
-    "yargs-parser": "^20.2.9"
-  },
-  "dependencies": {
-    "deepmerge": "^4.2.2",
-    "linkedom": "^0.13.0",
+    "yargs-parser": "^20.2.9",
     "zod": "^3.10.3"
   }
 }
