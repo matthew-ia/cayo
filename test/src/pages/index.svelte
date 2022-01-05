@@ -5,8 +5,11 @@
 </script>
 <script>
   import Cayo from '../../../lib/components/Cayo.svelte';
+
+  import Some from '../components/Some.svelte';
 </script>
 
+<Some />
 
 I'm index howdy ok<br>
 <a href="/howdy/">Howdy</a><br>

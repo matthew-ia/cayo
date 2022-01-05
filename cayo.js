@@ -135,8 +135,8 @@ async function getTemplate(config) {
 }
 
 async function getPages(config) {
-  const { pages, cayoPath } = config;
-  return createPageManifest(pages, cayoPath)
+  const { src, pages, cayoPath } = config;
+  return createPageManifest(pages, cayoPath, src)
     .then(async () => await import(path.resolve(cayoPath, `./__cayo/pages.js?v=${hash()}`)))
     .then(({ pages }) => {
       data.pages = getPageModules(pages, config);
@@ -201,6 +201,13 @@ function watch(config) {
             let componentModule = Object.entries(components).find(([, { modulePath }]) => modulePath === filePath);
             handleCayoComponent(componentModule[0], componentModule[1].modulePath, config);
           })
+      } else if (filePath.includes('/components')) {
+        logChange('component');
+        getPages(config)
+          .then(() => {
+            prerenderPages(config);
+          })
+  
       // TODO: watch component changes
       // } else if (componentFileChanged) {
       // find out which pages are affected
