@@ -5,7 +5,13 @@ const cb = (node) => {
   console.log(node);
   return node; 
 }
+
+function replaceContents ( node ) {
+  node.innerHTML = '';
+  return node;
+}
+
 import { default as renderComponents } from './cayo-runtime.js';
 document.addEventListener('DOMContentLoaded', () => {
-  renderComponents(cb);
+  renderComponents(replaceContents);
 });

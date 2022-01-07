@@ -16,6 +16,8 @@ I'm index howdy ok<br>
 <a href="/hey/" class="red">Hey</a>
 <a href="/some/page/" class="red">Some</a>
 
+<Cayo name="Test"><div>Default Content</div></Cayo>
+
 <Cayo name="Cool" beans='ayo'>Whaaat</Cayo>
 <Cayo name="Cool" beans='beeeeaaaaasnnss' />
 <Cayo name="Cool" beans='NOT BEANS' />
