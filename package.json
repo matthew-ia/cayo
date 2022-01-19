@@ -30,7 +30,7 @@
     "fs-extra": "^10.0.0",
     "jsdom": "^18.0.0",
     "linkedom": "^0.13.0",
-    "svelte": "^3.37.0",
+    "svelte": "^3.46.2",
     "svelte-preprocess": "^4.7.4",
     "vite": "^2.6.4",
     "yargs-parser": "^20.2.9",
