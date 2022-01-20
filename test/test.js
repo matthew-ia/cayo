@@ -11,7 +11,7 @@ async function run() {
     // mode: cmd === 'build' ? 'production' : 'development',
   }
   const config = await loadConfig(options);
-  compilePages([path.resolve('./src/pages/index.svelte')], config).then((res) => console.log(res));
+  compilePages([path.resolve('./src/pages/index.svelte')], config);
   // checkConfigPaths(config, errorLogger);
 }
 

@@ -4,9 +4,11 @@
   };
 </script>
 <script>
-  import Cayo from '../../../lib/components/Cayo.svelte';
-
+  import Cayo from '#cayo/components/Cayo.svelte';
+  import { resolveImports } from '#cayo/utils.js';
   import Some from '../components/Some.svelte';
+
+  resolveImports('some');
 </script>
 
 <Some />

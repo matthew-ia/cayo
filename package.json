@@ -5,6 +5,9 @@
   "scripts": {
     "start": "node cayo dev --projectRoot test"
   },
+  "imports": {
+    "#cayo/*": "./lib/*"
+  },
   "bin": {
     "cayo": "cayo.js"
   },
@@ -19,7 +22,8 @@
   },
   "homepage": "https://github.com/matthew-ia/cayo#readme",
   "devDependencies": {
-    "@vitejs/plugin-legacy": "^1.6.2"
+    "@vitejs/plugin-legacy": "^1.6.2",
+    "precinct": "^8.3.1"
   },
   "dependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.11",
