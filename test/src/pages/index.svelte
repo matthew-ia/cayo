@@ -7,6 +7,7 @@
   // import Cayo from '#cayo/components/Cayo.svelte';
   // import { resolveImports } from '#cayo/utils.js';
   import Some from '../components/Some.svelte';
+  import Uhh from '../components/Uhh.svelte';
 
   // resolveImports('some');
 </script>
@@ -17,6 +18,7 @@ I'm index howdy ok<br>
 <a href="/howdy/">Howdy</a><br>
 <a href="/hey/" class="red">Hey</a>
 <a href="/some/page/" class="red">Some</a>
+<Uhh />
 
 <!-- <Cayo name="Test" object={{ some: 'what?$staticlink$'}}><div>Default Content</div></Cayo>
 

@@ -1,4 +1,5 @@
 import { compilePages } from "../lib/pages.js";
+import { compileCayoComponent } from "../lib/components.js";
 import { loadConfig } from '../lib/config.js';
 import { default as fse } from 'fs-extra';
 import yargs from 'yargs-parser';
@@ -12,8 +13,9 @@ async function run() {
     // mode: cmd === 'build' ? 'production' : 'development',
   }
   const config = await loadConfig(options);
-  const result = await compilePages([path.resolve('./src/pages/index.svelte')], null, config)
-  console.log('TEST: ', result)
+  await compileCayoComponent(config);
+  const result = await compilePages([path.resolve('./src/pages/index.svelte'), path.resolve('./src/pages/howdy.svelte')], null, config)
+  // console.log('TEST: ', result)
   result.stats.compiled = [...result.stats.compiled];
   for (let depender in result.stats.dependencies) {
     result.stats.dependencies[depender] = [...result.stats.dependencies[depender]];
