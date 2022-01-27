@@ -15,9 +15,10 @@ async function run() {
   const result = await compilePages([path.resolve('./src/pages/index.svelte')], null, config)
   console.log('TEST: ', result)
   result.stats.compiled = [...result.stats.compiled];
+  for (let depender in result.stats.dependencies) {
+    result.stats.dependencies[depender] = [...result.stats.dependencies[depender]];
+  }
   await fse.outputFile(path.resolve(config.cayoPath, './__cayo/test.json'), JSON.stringify(result, null, 2));
-  
-  // checkConfigPaths(config, errorLogger);
 }
 
 run();
