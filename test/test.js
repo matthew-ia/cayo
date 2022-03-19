@@ -12,15 +12,21 @@ async function run() {
     configPath: typeof argv.config === 'string' ? argv.config : undefined,
     // mode: cmd === 'build' ? 'production' : 'development',
   }
-  const config = await loadConfig(options);
-  await compileCayoComponent(config);
-  const result = await compilePages([path.resolve('./src/pages/index.svelte'), path.resolve('./src/pages/howdy.svelte')], null, config)
-  // console.log('TEST: ', result)
+  const cayoConfig = await loadConfig(options);
+  // 1. Compile Cayo Component (lib/components/Cayo.svelte)
+  await compileCayoComponent(cayoConfig);
+  // 2. Compile Compile Pages (src/pages/**/*.svelte)
+  //    The result includes the compiled page information (name, code content, and dependencies)
+  const result = await compilePages([path.resolve('./src/pages/index.svelte'), path.resolve('./src/pages/howdy.svelte')], null, cayoConfig)
+
+  // TODO: change this; stats should be a formally maintained object inside the main build process
+  // For now, we manually mutate the result data to include the overall build stats 
+  // which includes a flat dep tree and a list of all compiled components
   result.stats.compiled = [...result.stats.compiled];
   for (let depender in result.stats.dependencies) {
     result.stats.dependencies[depender] = [...result.stats.dependencies[depender]];
   }
-  await fse.outputFile(path.resolve(config.cayoPath, './__cayo/test.json'), JSON.stringify(result, null, 2));
+  await fse.outputFile(path.resolve(cayoConfig.cayoPath, './__cayo/test.json'), JSON.stringify(result, null, 2));
 }
 
 run();
