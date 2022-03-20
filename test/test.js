@@ -16,7 +16,8 @@ async function run() {
   const _cayo = {
     stats: {
       dependencies: { },
-      compiled: new Set(),  
+      compiled: new Set(),
+      cayoComponents: { },
     }
   }
 
@@ -44,10 +45,11 @@ async function run() {
   );
 
   for (const p of pages.compiledPages) {
-    p.render(false, [ 'Cool', 'Test']);
+    p.render(false, _cayo.stats.cayoComponents);
   }
   // console.log('pages', pages);
   await fse.outputFile(outputPath, JSON.stringify(pages, null, 2));
+  await fse.outputFile(path.resolve(cayoConfig.cayoPath, './__cayo/stats.json'), JSON.stringify(_cayo.stats, null, 2));
 
   // TODO: change this; stats should be a formally maintained object inside the main build process
   // For now, we manually mutate the result data to include the overall build stats 
