@@ -3,7 +3,7 @@
 </script>
 
 <span class="other">I'm other</span>
-<!-- <Uhh /> -->
+<Uhh />
 
 <style>
   .other {

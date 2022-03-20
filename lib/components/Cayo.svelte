@@ -1,4 +1,5 @@
 <script>
+  // TODO: consider using same hash tool as Svelte
   import * as crypto from 'crypto';
   // import { Boundary } from '@crownframework/svelte-error-boundary';
 
