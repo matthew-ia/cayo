@@ -1,5 +1,5 @@
 <script context="module">
-  export const name = 'Cool';
+  export const name = 'Not Cool';
 </script>
 <script>
   export let beans = '';

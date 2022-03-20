@@ -1,5 +1,5 @@
 <script>
-  import Other from './Other.svelte';
+  import Other from './some/Other.svelte';
 </script>
 <span class="some">HUH?</span>
 <Other/>

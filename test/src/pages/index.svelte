@@ -8,10 +8,13 @@
   // import { resolveImports } from '#cayo/utils.js';
   import Some from '../components/Some.svelte';
   import Uhh from '../components/Uhh.svelte';
+  import Test from '../components/Test.svelte';
+
 
   // resolveImports('some');
 </script>
 
+<Test />
 <Some />
 
 I'm index howdy ok<br>

@@ -20,9 +20,9 @@ async function run() {
   const cayoConfig = await loadConfig(options);
   // 1. Compile Cayo Component (lib/components/Cayo.svelte)
   await compile.cayoComponent(cayoConfig);
-  const { outputPath: templateOutputPath } = await compile.template(cayoConfig);
-  const TemplateComponent = (await import(templateOutputPath)).default;
-  const template = TemplateComponent.render();
+  // const { outputPath: templateOutputPath } = await compile.layout(cayoConfig);
+  // const TemplateComponent = (await import(templateOutputPath)).default;
+  // const template = TemplateComponent.render();
   
   // 2. Compile Compile Pages (src/pages/**/*.svelte)
   //    The result includes the compiled page information (name, code content, and dependencies)

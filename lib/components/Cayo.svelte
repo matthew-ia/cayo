@@ -13,6 +13,7 @@
   //   new Error(err);
   // }
 
+  // console.log(Component);
   function hash() {
     return crypto.randomBytes(3).toString('hex');
   }
