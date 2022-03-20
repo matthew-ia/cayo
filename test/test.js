@@ -27,7 +27,7 @@ async function run() {
   // 2. Compile Compile Pages (src/pages/**/*.svelte)
   //    The result includes the compiled page information (name, code content, and dependencies)
 
-  await compile.pages([path.resolve('./src/pages/index.svelte'), path.resolve('./src/pages/howdy.svelte')], stats, cayoConfig)
+  await compile.pages(null, stats, cayoConfig)
 
   // TODO: change this; stats should be a formally maintained object inside the main build process
   // For now, we manually mutate the result data to include the overall build stats 
