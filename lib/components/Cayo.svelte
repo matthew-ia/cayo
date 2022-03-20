@@ -1,9 +1,9 @@
 <script>
   // TODO: consider using same hash tool as Svelte
-  import * as crypto from 'crypto';
   // import { Boundary } from '@crownframework/svelte-error-boundary';
 
-  export let name;
+  // export let name;
+  export let src;
 
   // TODO: Consider error handling for required stuff
   // if (!name) throw new Error('No name for component');
@@ -14,14 +14,11 @@
   // }
 
   // console.log(Component);
-  function hash() {
-    return crypto.randomBytes(3).toString('hex');
-  }
-
+  
   const json = JSON.stringify($$restProps);
 </script>
 
-<div data-cayo-id={name ? `${name}-${hash()}` : ''} data-cayo-props={json}>
+<div data-cayo-id={src ? `${src}` : ''} data-cayo-props={json}>
   <slot/>
 </div>
 

@@ -1,1 +1,1 @@
-export { default as default } from '../lib/cayo.svelte';
+export { default as default } from '../lib/components/cayo.svelte';

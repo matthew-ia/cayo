@@ -4,7 +4,7 @@
   import NotCool from '../components/some/Cool.cayo.svelte';
 
 
-  console.log('howdy', Cool);
+  // console.log('howdy', Cool);
 </script>
 
 howdyyy
