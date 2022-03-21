@@ -2,7 +2,7 @@
   import Uhh from '../Uhh.svelte';
 </script>
 
-<span class="other">I'm other</span>
+<span class="other">I'm other see?</span>
 <Uhh />
 
 <style>

@@ -30,9 +30,8 @@ async function run() {
   // 1. Compile Cayo Component (lib/components/Cayo.svelte)
   await compile.cayoComponent(cayoConfig);
 
-  const { outputPath: templateOutputPath } = await compile.layout(cayoConfig);
-  const Layout = (await import(templateOutputPath)).default;
-  _cayo.layout = await Layout.render();
+  const Layout = await compile.layout(cayoConfig);
+  _cayo.layout = await Layout.render(true);
   
   // 2. Compile Compile Pages (src/pages/**/*.svelte)
   //    The result includes the compiled page information (name, code content, and dependencies)
@@ -58,9 +57,9 @@ async function run() {
   _cayo.stats.compiled = {
     paths: [..._cayo.stats.compiled]
   };
-  for (let depender in _cayo.stats.dependencies) {
-    _cayo.stats.dependencies[depender] = [..._cayo.stats.dependencies[depender]];
-  }
+  // for (let depender in _cayo.stats.dependencies) {
+  //   _cayo.stats.dependencies[depender] = [..._cayo.stats.dependencies[depender].children];
+  // }
   await fse.outputFile(path.resolve(cayoConfig.cayoPath, './__cayo/test.json'), JSON.stringify(_cayo.stats, null, 2));
 }
 
