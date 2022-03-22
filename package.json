@@ -22,9 +22,7 @@
   },
   "homepage": "https://github.com/matthew-ia/cayo#readme",
   "devDependencies": {
-    "@vitejs/plugin-legacy": "^1.6.2",
-    "precinct": "^8.3.1",
-    "rollup": "^2.70.1"
+    "@vitejs/plugin-legacy": "^1.6.2"
   },
   "dependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.11",
@@ -35,6 +33,8 @@
     "fs-extra": "^10.0.0",
     "jsdom": "^18.0.0",
     "linkedom": "^0.13.0",
+    "precinct": "^9.0.0",
+    "rollup": "^2.70.1",
     "svelte": "^3.46.2",
     "svelte-preprocess": "^4.7.4",
     "vite": "^2.6.4",

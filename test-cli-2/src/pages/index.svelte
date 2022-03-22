@@ -6,6 +6,9 @@
 <script>
   import ComponentA from '../components/b.svelte';
   import ComponentB from '../components/a.svelte';
+  import main from '../local.js';
+
+  main();
 </script>
 
 <ComponentA />
