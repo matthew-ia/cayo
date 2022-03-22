@@ -13,7 +13,7 @@
 
   // resolveImports('some');
 </script>
-okkkk
+index
 <Test />
 <Some />
 

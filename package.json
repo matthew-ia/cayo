@@ -23,7 +23,8 @@
   "homepage": "https://github.com/matthew-ia/cayo#readme",
   "devDependencies": {
     "@vitejs/plugin-legacy": "^1.6.2",
-    "precinct": "^8.3.1"
+    "precinct": "^8.3.1",
+    "rollup": "^2.70.1"
   },
   "dependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.11",

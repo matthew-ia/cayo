@@ -1,7 +1,7 @@
 <script>
   import Other from './some/Other.svelte';
 </script>
-<span class="some">ok???1 </span>
+<span class="some">how now brown cow </span>
 <Other/>
 
 <style>
