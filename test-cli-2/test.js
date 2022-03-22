@@ -1,5 +1,5 @@
-import * as compile from '../lib/compile/index.js';
-import { loadConfig } from '../lib/config.js';
+import * as compile from '../lib/core/compile/index.js';
+import { loadConfig } from '../lib/core/config.js';
 import { default as fse } from 'fs-extra';
 import yargs from 'yargs-parser';
 import path from 'path';
