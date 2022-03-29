@@ -7,14 +7,16 @@
   import ComponentA from '../components/b.svelte';
   import ComponentB from '../components/a.svelte';
   import main from '../local.js';
+  // import '../styles/yeah.css';
+  import data from '../data.json';
 
-  main();
+  main(data);
 </script>
 
 <ComponentA />
 <ComponentB />
 
-<span class="red">I'm very cool</span>
+<span class="red yeah">I'm very cool</span>
 
 <img src="/images/app-icon.png" alt="">
 
