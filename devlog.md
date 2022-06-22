@@ -27,7 +27,11 @@ Right now, prerender.js does create a list of the cayoComponenents and update th
 
 I think most of prerender.js should actually be in preprocess; the only thing that it should do is actually prerender the page with the template. 
 
-P.S. stats might be broken because I see it write a mostly empty object; no pages or components are listed. I think when the rollup switchover happened it prob stopped workingx
+P.S. stats might be broken because I see it write a mostly empty object; no pages or components are listed. I think when the rollup switchover happened it prob stopped working
+
+## 2022.6.22
+
+Worked mostly regarding the imports stuff in preprocess/index.js. I think a new bug has been introduced somewhere with aliases, when trying to use the #cayo alias in the temporary test/ folder in cayo itself. To fix, I created a new test repo outside of the cayo repo in order to test as a normal package. This is probably better, and now it's working. Just had to add some "library/package" support as detailed by Svelte folks within the package.json of cayo, and change the path references in the test/src. E.g., `import Cayo from 'cayo'` is valid now. 
 
 
 

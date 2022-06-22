@@ -6,11 +6,14 @@
     "start": "node cayo dev --projectRoot test"
   },
   "imports": {
-    "#cayo/*": "./lib/*"
+    "#cayo/*": "./lib/*",
+    "#cayo/component": "./lib/components/cayo.svelte"
   },
   "bin": {
     "cayo": "cayo.js"
   },
+  "svelte": "./dist/index.js",
+  "main": "./dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/matthew-ia/cayo.git"
@@ -42,7 +45,7 @@
     "rollup-plugin-import-css": "^3.0.3",
     "rollup-plugin-svelte": "^7.1.0",
     "svelte": "^3.46.2",
-    "svelte-preprocess": "^4.7.4",
+    "svelte-preprocess": "^4.10.7",
     "vite": "^2.6.4",
     "yargs-parser": "^20.2.9",
     "zod": "^3.10.3"

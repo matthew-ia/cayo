@@ -1,5 +1,5 @@
 <script>
-  import Cayo from '#cayo/component';
+  // import Cayo from '#cayo/component';
 </script>
 
 <Cayo src="./Test.cayo.svelte" />

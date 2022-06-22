@@ -9,6 +9,11 @@
   import Some from '../components/Some.svelte';
   import Uhh from '../components/Uhh.svelte';
   import Test from '../components/Test.svelte';
+  import help from '../help.js';
+  import Cayo from '#cayo/component';
+
+
+  help();
 
 
   // resolveImports('some');

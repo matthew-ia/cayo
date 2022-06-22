@@ -18,7 +18,7 @@
   const json = JSON.stringify($$restProps);
 </script>
 
-<div data-cayo-id={src ? `${src}` : ''} data-cayo-props={json}>
+<div data-cayo-src={src ? `${src}` : ''} data-cayo-props={json}>
   <slot/>
 </div>
 
