@@ -35,7 +35,18 @@ Worked mostly regarding the imports stuff in preprocess/index.js. I think a new 
 
 ## 2022.7.31
 
+### Import Stuff
+
 Fixed the import/export stuff. `import Cayo from 'cayo/component'` works now. 
 
 `import Cayo from 'cayo'` still works too, but I think I might deprecate that. In case anything makes sense to expose directly from the root of the package. Unless, I want to make the this work:
 `import { component as Cayo } from 'cayo'`, but I think the new 'cayo/component' one works more like how Svelte looks/works when you're working within your own project (always exports component as default).
+
+### Actual Stuff
+
+Question to answer: do we need the src string at all, since we are compiling the child components into each page?
+
+We do need to recompile the page when a child component changes. Maybe that's why we need it? (Could it from here, but use it elsewhere). 
+
+Maybe just use the preprocessor to put the right path in there,
+and then 
