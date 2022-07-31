@@ -33,5 +33,9 @@ P.S. stats might be broken because I see it write a mostly empty object; no page
 
 Worked mostly regarding the imports stuff in preprocess/index.js. I think a new bug has been introduced somewhere with aliases, when trying to use the #cayo alias in the temporary test/ folder in cayo itself. To fix, I created a new test repo outside of the cayo repo in order to test as a normal package. This is probably better, and now it's working. Just had to add some "library/package" support as detailed by Svelte folks within the package.json of cayo, and change the path references in the test/src. E.g., `import Cayo from 'cayo'` is valid now. 
 
+## 2022.7.31
 
+Fixed the import/export stuff. `import Cayo from 'cayo/component'` works now. 
 
+`import Cayo from 'cayo'` still works too, but I think I might deprecate that. In case anything makes sense to expose directly from the root of the package. Unless, I want to make the this work:
+`import { component as Cayo } from 'cayo'`, but I think the new 'cayo/component' one works more like how Svelte looks/works when you're working within your own project (always exports component as default).
