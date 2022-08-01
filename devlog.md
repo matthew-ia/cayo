@@ -48,5 +48,6 @@ Question to answer: do we need the src string at all, since we are compiling the
 
 We do need to recompile the page when a child component changes. Maybe that's why we need it? (Could it from here, but use it elsewhere). 
 
-Maybe just use the preprocessor to put the right path in there,
-and then 
+---
+
+Okay so I got the markup preprocessor working with the AST -> string manipulation thing for Cayo IDs. Next up: make sure the IDs are correct, and would match how they'll be named in the actual output. 
