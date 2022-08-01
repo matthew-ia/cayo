@@ -43,6 +43,7 @@
     "fs-extra": "^10.0.0",
     "jsdom": "^18.0.0",
     "linkedom": "^0.13.0",
+    "magic-string": "^0.26.2",
     "precinct": "^9.0.0",
     "rollup": "^2.70.1",
     "rollup-plugin-hypothetical": "^2.1.1",
