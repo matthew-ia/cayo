@@ -58,3 +58,8 @@ Moved the cayoID stuff back to prerender, bc it's easier to just do it with JSDO
 However, I'm running into the issue of the original paths for the Cayo component src attribute being relative to the component rendering it, not the page. And at the HTML level, I don't know where it was. 
 
 I think I Do still need to do some preprocessing to change the Cayo src's to be relative to the project root, so I know where the actual component is in the src files when I'm creating those IDs and getting a list of Cayo components. Unless I should just grab those Cayo component paths early, and pass them along. Not sure yet. 
+
+Think if we do it in preprocess, we'll need to parse -> walk the ast in both script and markup. Change src=<this>
+or if it's an object defined in script, just find it by any instance of '.cayo.svelte' and replace it with the relative-to-root path. The getRelativeToRootPath logic can be extracted into a helper, but the walking has to be done
+individually, because we'll be looking for different AST types. Prob just Text in scriptPreprocessor and then what we
+already had in markupPreprocessor
