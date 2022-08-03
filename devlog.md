@@ -69,3 +69,10 @@ already had in markupPreprocessor
 Decided to simply change the requirements of the src prop to be that it has
 to be relative to your components dir. Bam, all the problems solved, and no
 path math required. 
+
+## 2022.8.2
+
+Alright so I pretty much fixed handleDependencies (and thus, stats), which is cool, but components are still structured to "compile" even though I just need to get their deps, so
+I have the dep tree.
+
+When _needs_ to happen when a component is touched, instead of compile it, we need to compile any pages that render it, either directly or via another component. 
