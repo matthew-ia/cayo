@@ -122,3 +122,32 @@ writePageFiles(page, config.cayoPath, config);
 ```
 
 Right now, a similar usage for compiling pages is only used in `handlePages` in `cli/watch.js` and in the main function `run` in `cli/index/js`, as far as I know. 
+
+--- 
+
+Just realized I was wrong, `writeModule` actually does nothing now. That is handled in `compile/pages.js`. So we could more reasonably update the usage to just have `page.render(...)` run load before it runs prerender. (There was already a `load` arg defaulted to false, that is in the signature for `render`. I had forgotten what that did, and it looks like I either removed its functionality or never added it. Now I think I can, since we've figured out how the compile/bundling works (now with Rollup)
+
+Edit: I went ahead and did this, but changed the load arg to a member of an options object:
+
+```js
+await page.render(stats.cayoComponents, { load: true })
+```
+
+
+### This is what's Next
+
+- [ ] Make sure the above doesn't need to apply to Layout in a similar way
+- [ ] Getting the client-side Cayo component files to be output
+```
+[plugin:vite:import-analysis] Failed to resolve import "/__cayo/components/Test.js" from ".cayo/cayo-runtime.js". Does the file exist?
+
+/Users/malicea/home/main/01 dev/code/test-cayo/.cayo/cayo-runtime.js:1:23
+
+1  |  import { Test } from '/__cayo/components/Test.js';
+   |                        ^
+2  |  
+3  |  function getProps(cayoId) {
+  ```
+
+- [ ] Rewrite handleComponents in `cli/watch.js` to work with the new structure, and recompile and rerender pages that its changes affect.
+- [ ] Consider renaming `__cayo` to `__compiled` to be more indicative of what those files are. Also, at the very least, the double "cayo" in `.cayo/__cayo` looks kind of confusing.
