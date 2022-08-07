@@ -76,3 +76,49 @@ Alright so I pretty much fixed handleDependencies (and thus, stats), which is co
 I have the dep tree.
 
 When _needs_ to happen when a component is touched, instead of compile it, we need to compile any pages that render it, either directly or via another component. 
+
+
+## 2022.8.7
+
+Made it so pages compiled and written on start. This may have worked at one point, and this is a revival? But even if it used to work, it needed to be reworked because with the latest structure, a page can be compiled to a bundle, that bundle can be written to a file, and that bundle can be loaded as a module, all as a part of the Page API. 
+
+E.g.,
+```js
+// some.js
+let pages = [srcPageFilePath]
+// Normally, we'd be working with more than one page, but this is how you'd
+// work with just one page, for explanation purposes.
+// 
+// Compile the page (always expects an array of pages, but can be one)
+// We also get an array back, of Page objects. So here, we are just
+// destructuring the array to get the one result of the one path put in
+const [ page ] = compile.pages(pages, ...)
+// Write the bundle to a file
+await page.writeModule()
+// Loads with cash-busting method, so it's always up to date
+await page.loadModule()
+// Render the page
+await page.render(false, stats.cayoComponents);
+// Finally, write all of the prerendered page files (HTML, JS, CSS)
+writePageFiles(page, config.cayoPath, config);
+```
+
+Only optimization I'd consider it making these Page methods runnable from a single function. Maybe something like:
+
+```js
+// page.js
+class Page {
+  // ...
+  process(cayoComponents) {
+    this.writeModule()
+    this.loadModule()
+    this.render(false, cayoComponents);
+  }
+}
+
+// some.js
+await page.process(stats.cayoComponents) 
+writePageFiles(page, config.cayoPath, config);
+```
+
+Right now, a similar usage for compiling pages is only used in `handlePages` in `cli/watch.js` and in the main function `run` in `cli/index/js`, as far as I know. 
