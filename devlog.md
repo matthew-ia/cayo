@@ -137,7 +137,7 @@ await page.render(stats.cayoComponents, { load: true })
 ### This is what's Next
 
 - [ ] Make sure the above doesn't need to apply to Layout in a similar way
-- [ ] Getting the client-side Cayo component files to be output
+- [x] Getting the client-side Cayo component files to be output
 ```
 [plugin:vite:import-analysis] Failed to resolve import "/__cayo/components/Test.js" from ".cayo/cayo-runtime.js". Does the file exist?
 
@@ -151,3 +151,6 @@ await page.render(stats.cayoComponents, { load: true })
 
 - [ ] Rewrite handleComponents in `cli/watch.js` to work with the new structure, and recompile and rerender pages that its changes affect.
 - [ ] Consider renaming `__cayo` to `__compiled` to be more indicative of what those files are. Also, at the very least, the double "cayo" in `.cayo/__cayo` looks kind of confusing.
+
+### Later that day...
+Got Client-side Cayo components to output. Next: watching components and rebuilding their pages, and watching cayo components and rebuilding their client-side component version. 
