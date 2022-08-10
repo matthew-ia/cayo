@@ -153,4 +153,16 @@ await page.render(stats.cayoComponents, { load: true })
 - [ ] Consider renaming `__cayo` to `__compiled` to be more indicative of what those files are. Also, at the very least, the double "cayo" in `.cayo/__cayo` looks kind of confusing.
 
 ### Later that day...
+
 Got Client-side Cayo components to output. Next: watching components and rebuilding their pages, and watching cayo components and rebuilding their client-side component version. 
+
+
+## 2022.8.9
+
+Got watching to work, and the pages get rerendered. Still need to do the cross-dependency analysis for instances where I edit B.svelte, which is imported into A.svelte, but page.svelte imports only A.svelte.
+
+When editing B, need to see the dependency chain: B -> A -> page.
+
+Since we start with B path, we have to look through the dep tree for an instance of B, then get the depender path. Then once we have the depender (A) path, do the same thing: look through dep tree for an instance of A.
+
+So, recursively search for a dependee's dependers until we hit a page, then rerender it.
