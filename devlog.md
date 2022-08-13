@@ -166,3 +166,12 @@ When editing B, need to see the dependency chain: B -> A -> page.
 Since we start with B path, we have to look through the dep tree for an instance of B, then get the depender path. Then once we have the depender (A) path, do the same thing: look through dep tree for an instance of A.
 
 So, recursively search for a dependee's dependers until we hit a page, then rerender it.
+
+
+## 2022.8.13
+
+For Docs:
+Need to note that the output `cayo-runtime.js`'s `render(cb)` callback function should look like `(node) => { return node; }`
+
+Does it need the function keyword? (Needs "this"? might)
+in codegen, the default cb is: `function (node) { return node; }`
