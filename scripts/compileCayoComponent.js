@@ -7,6 +7,11 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+
+// TODO: this needs to be turned into a script, bc we still need to compile the Cayo.svelte component at times
+// the current dist/index.js is actually a copy of an output from this func when it was used in the cli,
+// using lib/components/Cayo.svelte as the source
+
 export async function compileCayoComponent(config) {
   const source = await fs.readFile(path.resolve(__dirname, '../../components/cayo.svelte'), 'utf8');
   let filename = 'cayo.svelte';
