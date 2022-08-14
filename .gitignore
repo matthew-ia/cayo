@@ -1,6 +1,5 @@
 /node_modules/
 /tests/**/node_modules
-/dist/
 /test/**/dist/
 /tests/**/dist/
 /.vscode/

@@ -5,8 +5,18 @@
   "scripts": {
     "start": "node cayo dev --projectRoot test"
   },
+  "imports": {
+    "#cayo/*": "./lib/*",
+    "#cayo/component": "./lib/components/cayo.svelte"
+  },
   "bin": {
     "cayo": "cayo.js"
+  },
+  "svelte": "./dist/index.js",
+  "main": "./dist/index.js",
+  "exports": {
+    "./package.json": "./package.json",
+    "./component": "./dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +32,9 @@
     "@vitejs/plugin-legacy": "^1.6.2"
   },
   "dependencies": {
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@rollup/plugin-virtual": "^2.1.0",
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.11",
     "chalk": "^2.4.2",
     "chokidar": "^3.5.2",
@@ -30,8 +43,14 @@
     "fs-extra": "^10.0.0",
     "jsdom": "^18.0.0",
     "linkedom": "^0.13.0",
-    "svelte": "^3.37.0",
-    "svelte-preprocess": "^4.7.4",
+    "magic-string": "^0.26.2",
+    "precinct": "^9.0.0",
+    "rollup": "^2.70.1",
+    "rollup-plugin-hypothetical": "^2.1.1",
+    "rollup-plugin-import-css": "^3.0.3",
+    "rollup-plugin-svelte": "^7.1.0",
+    "svelte": "^3.46.2",
+    "svelte-preprocess": "^4.10.7",
     "vite": "^2.6.4",
     "yargs-parser": "^20.2.9",
     "zod": "^3.10.3"
