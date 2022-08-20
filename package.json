@@ -12,11 +12,10 @@
   "bin": {
     "cayo": "cayo.js"
   },
-  "svelte": "./dist/index.js",
-  "main": "./dist/index.js",
+  "svelte": "./dist/cayo.svelte.js",
   "exports": {
     "./package.json": "./package.json",
-    "./component": "./dist/index.js"
+    "./component": "./dist/cayo.svelte.js"
   },
   "repository": {
     "type": "git",
