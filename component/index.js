@@ -1,1 +1,0 @@
-export { default as default } from '../lib/components/cayo.svelte';
