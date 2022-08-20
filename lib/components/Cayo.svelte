@@ -1,8 +1,9 @@
 <script>
   export let src;
-  import { logger } from '../core/logger';
-  import chalk from 'chalk';
+  import { getWarnings } from './cayo-warnings.js';
 
+  // Save unserializable prop keys (during stringification)
+  // so we can report them later
   const badProps = [];
   function replacer(key, value) {
     const type = typeof value;
@@ -17,29 +18,19 @@
     return value;
   };
 
-  function getWarning(badPropKeys) {
-    let warning = '';
-    // Warning: unserializable props
-    if (badPropKeys.length > 0) {
-      let propsStr = '';
-      for (let i = 0; i < badPropKeys.length; i++) {
-        propsStr += `'${badPropKeys[i]}'`;
-        if (i+1 < badPropKeys.length) {
-          propsStr += `, `;
-        }
-      }
-      warning = `Unserializable props found: ${propsStr}.`;
-      logger.log.info(`${chalk.yellow(warning)} ${chalk.dim(`instance of ${src}`)}`, { timestamp: true, clear: true, });
-      warning += `\n\nCayo component props are stringified as JSON before being parsed again during runtime, so they must be serializable.\n`;
-    }
-
-    return warning;
+  const json = JSON.stringify({...$$restProps}, replacer);
+  const warnings = getWarnings(src, badProps);
+  const cayoInstanceData = {
+    'data-cayo-id': '',
+    'data-cayo-src': !warnings.invalidSrc ? `${src}` : '',  
+    'data-cayo-props': json,
+  };
+  if (warnings) {
+    cayoInstanceData['data-cayo-warn'] = JSON.stringify(warnings);
   }
 
-  const json = JSON.stringify({...$$restProps}, replacer);
-  const warning = getWarning(badProps);
 </script>
 
-<div data-cayo-src={src ? `${src}` : ''} data-cayo-props={json} data-cayo-warn={warning}>
+<div {...cayoInstanceData}>
   <slot/>
 </div>

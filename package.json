@@ -3,7 +3,8 @@
   "version": "0.9.10",
   "type": "module",
   "scripts": {
-    "start": "node cayo dev --projectRoot test"
+    "start": "node cayo dev --projectRoot test",
+    "compile": "node scripts/compileCayoComponent"
   },
   "imports": {
     "#cayo/*": "./lib/*",
