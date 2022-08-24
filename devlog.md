@@ -175,3 +175,6 @@ Need to note that the output `cayo-runtime.js`'s `render(cb)` callback function 
 
 Does it need the function keyword? (Needs "this"? might)
 in codegen, the default cb is: `function (node) { return node; }`
+
+## 2022.8.24 – Shared Entry Files
+Yeah this isn't going to work, because each entry file output actually needs to be a unique instance so it imports that uses the Cayo Runtime for that specific page (_its_ cayos are rendered).
