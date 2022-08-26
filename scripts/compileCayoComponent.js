@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { validateConfig, loadConfig } from '../lib/core/config.js';
 import { build } from '../lib/core/bundle.js';
-import { logger } from '../lib/core/logger.js';
+import logger from '../lib/core/logger.js';
 import chalk from 'chalk';
 import path from 'path';
 
