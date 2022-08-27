@@ -7,8 +7,7 @@
     "compile": "node scripts/compileCayoComponent"
   },
   "imports": {
-    "#cayo/*": "./lib/*",
-    "#cayo/component": "./lib/components/cayo.svelte"
+    "#lib/*": "./lib/*"
   },
   "bin": {
     "cayo": "cayo.js"
