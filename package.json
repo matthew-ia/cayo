@@ -7,7 +7,9 @@
     "compile": "node scripts/compileCayoComponent"
   },
   "imports": {
-    "#lib/*": "./lib/*"
+    "#lib/*": "./lib/*",
+    "#core/*": "./lib/core/*",
+    "#cli/*": "./lib/cli/*"
   },
   "bin": {
     "cayo": "cayo.js"
