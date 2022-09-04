@@ -18,23 +18,23 @@ The main purpose of Cayo is to be a tool that lets you use modern front-end tool
 
 ## Getting Started
 
-The easiest way to get started is by using the default cayo template. You can use [Planter](https://planter.dev) to create a new cayo project with that template:
+The easiest way to get started is by using the default cayo template. You can use [degit](https://github.com/Rich-Harris/degit) to create a new cayo project with that template:
 
 ```zsh
 # Create new project
-npx @planter/cli matthew-ia/cayo/template ./new-project
+npx degit matthew-ia/cayo/template ./my-project
 
 # Go into the new project and install npm packages
-cd new-project
+cd my-project
 npm i
 ```
 
-In your cayo project run:
+To run (develop) your project:
 ```zsh
 cayo dev
 ```
 
-Build your project:
+To build your project:
 ```zsh
 cayo build
 ```
@@ -136,6 +136,8 @@ For all options, read the [Configuration Reference](docs/config-reference.md).
 
 **ElderJS** is an opinionated static site generator and web framework built with SEO in mind. The origin story of ElderJS is quite similar to Cayo's: people needed to something tailored to their use-case, so they decided to make it themselves. ElderJS includes a lot of cool features like "build hooks", and is also zero-JS first!
 
-### Contributions
+---
 
-Since Cayo was built and designed specifically for use case at work, it probably won't be actively maintained nor will it take feature requests unless they generally expand upon it's customizability. Forking and building upon Cayo for your own use case is heavily encouraged!
+## Contributions
+
+Since Cayo was built and designed specifically for use case at work, it probably won't be actively maintained nor will it take pull requests unless they fix bugs or generally expand upon it's configurability. Forking and building upon Cayo for your own use case is heavily encouraged!
