@@ -10,7 +10,7 @@ The main purpose of Cayo is to be a tool that lets you use modern front-end tool
 
 **Cayo prerenders all of your components** (or just generically, Svelte "inputs", like a page), so your output is pre-baked HTML. But, if you want that Svelte reactivity, you can have it, with Cayo Components (the "islands"), which are bundled components that mount to the output HTML during client runtime. 
 
-**Cayo aims to be useful for simple static HTML sites, but doesn't actually care if your output really is a _page_.** You can think of it more like a Svelte-to-HTML generator—your output could be a valid HTML page, or it could just be an HTML fragment you intend to use in a unique workflow that has constraints (like me!).
+**Cayo aims to be useful for simple static HTML sites, but doesn't actually care if your output really is a _page_.** You can think of it more like a Svelte-to-HTML generator—your output could be a valid HTML page, or it could just be an HTML fragment you intend to use in a unique workflow that has constraints.
 
 **Cayo is built for that person who has constraints on their output**—someone who wants more control over their HTML generation workflow, and wants tools like Svelte and Vite at their disposal. All while not having to buy into the typical use of outputting an entire _website_, as Svelte and Vite are designed to be used to do.
 
@@ -47,39 +47,47 @@ These folders will be present in your project if you use the template. By defaul
 
 **Example**
 ```
-src
-  - pages
+src/
+  pages/
     - index.svelte
-  - components
-    - some.cayo.svelte
-  - __template.svelte
-  - entry.js
-public
-  - image.png
-  - favicon.ico
-  - p5.min.js
+  components/
+    some.cayo.svelte
+  __template.svelte
+  entry.js
+public/
+  image.png
+  favicon.ico
+  p5.min.js
 ```
 
 ### `src`
-Default: `/src`
-All of your source files should go in `/src`. This is where pages, components, styles, etc should go. These files will be watched during while running `cayo dev`, and used to build your project.
+All of your source files should go in `src`. This is where pages, components, styles, etc should go. These files will be watched during while running `cayo dev`, and used to build your project.
 
 ### Template File
 This is file is required and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with their respective markup. This file is a Svelte component, so you can also import other Svelte components or use rendering logic. For example, to render certain markup as output based the mode: `development` vs. `production` (i.e., `cayo dev` vs. `cayo build`).
 
 The template cayo placeholders:
-- `%cayo.body%` – the main content of a page. (Think of this like the <slot> of the Template Svelte component.)
-- `%cayo.script%` – the is where your [entry script](#entries) (JS) for a page will be imported. 
-- `%cayo.head%`
-- `%cayo.title%`
-- `%cayo.css%`    
+
+#### `%cayo.body%`
+The main content of a page. (Think of this like the <slot> of the Template Svelte component.)
+
+#### `%cayo.script%`
+This is where your [entry script](#entries) (JS) for a page will be imported. This is needed if a page is to render a Cayo Component, but otherwise is optional.
+
+#### `%cayo.css%`
+This is where CSS will be injected (as `<link src="<file>.css">` or `<style>...</style>` depending on your [CSS config option](docs/config-reference.md#cssinternal))
+
+#### `%cayo.title%`
+If you're using Cayo to [define dynamic page titles](), this is required. Otherwise you can define page titles with [`<svelte:head>`](https://svelte.dev/docs#template-syntax-svelte-head)
+
+#### `%cayo.head%`
+This is where Cayo will inject any other dependencies that need to go in the head, letting you define the order of _your_ stuff vs. Cayo stuff. E.g., this is where Vite's module stuff will go. 
 
 #### Example
-Technically all of these placeholders are optional, and don't have to be in any particular place. That means your template doesn't even have to actually be a valid HTML document at all—your output could be HTML fragments that you use in some unique workflow (other than treating them as web pages you'll load directly on a client).
+Technically all of these placeholders are optional, and don't have to be in any particular place.
 
-```html
+```svelte
 <!-- src/__template.svelte -->
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -95,14 +103,22 @@ Technically all of these placeholders are optional, and don't have to be in any 
     %cayo.script%
   </body>
 </html>
+```
+Your template doesn't even have to actually be a valid HTML document at all—your output could be HTML fragments. This is also a valid template file:
 
+```html
+<!-- src/__template.svelte -->
+<!-- No html, head, or body elements; that's okay! -->
+%cayo.script%
+%cayo.css%
+%cayo.body%
 ```
 
 ### Pages
 Default: `/src/pages`
 
 #### Entries
-
+E.g.: `/src/index.js`
 
 ### Components
 Default: `/src/pages`
@@ -122,11 +138,25 @@ export default {
 }
 ```
 
+For the extending Cayo with Vite plugins, Rollup plugins, or Svelte preprocessors, you can configure those options in the Cayo config. 
+
+By default, Cayo already internally uses a few plugins & preprocessors:
+- Svelte
+  - [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess) – the one preprocessor to rule them all. But really, this enables things like Sass, PostCSS, Pug, etc., all with zero config.
+- Rollup
+  - [`rollup-plugin-svelte`](https://github.com/sveltejs/rollup-plugin-svelte) – official plugin for Svelte
+  - [`rollup-plugin-import-css`](https://github.com/jleeson/rollup-plugin-import-css) – adds support for `import 'style.css' in JS source files
+  - [`@rollup/plugin-json`](https://github.com/rollup/plugins/tree/master/packages/json) – adds support for `import data from 'data.json'` in JS source files
+
+If you need to add _plugin/preprocessor options_ to any of these, you'll need to install them in your project and pass them as config options in `cayo.config.js`.
+
+Vite options will only be used during `cayo dev` for the Vite Server, and for `cayo build` (which is a specially configured run of Vite's build process).
+
 For all options, read the [Configuration Reference](docs/config-reference.md).
 
 ## Cayo & the Rest
 
-**Cayo** is a static HTML generator with islands of reactivity, file-based routing, and the power of Svelte & Vite. Cayo _is_ niche, and it's kinda meant to be! I built it for my use case, but intentionally made it configurable (and chose tools with good plugin ecosystems), so hopefully at least a few folks with similar needs can make use of it. Cayo borrows certain structural patterns from SvelteKit, some concepts like "island architecture" from Astro, and is powered by Svelte and Vite (and under the hood, Rollup too, independently of Vite). 
+**Cayo** is a static HTML generator, with islands of reactivity, file-based routing, and the power of Svelte & Vite. Cayo _is_ niche, and it's kinda meant to be! I built it for my use case, but intentionally made it configurable (and chose tools with good plugin ecosystems), so hopefully at least a few folks with similar needs can make use of it. Cayo borrows certain structural patterns from SvelteKit, some concepts like "island architecture" from Astro, and is powered by Svelte and Vite (and under the hood, Rollup too, independently of Vite). 
 
 **These other tools are _probably_ what you're looking for. It's recommended to look into these first. (But, if you have constraints they can't support, Cayo might be of help!)**
 
@@ -135,8 +165,6 @@ For all options, read the [Configuration Reference](docs/config-reference.md).
 **SvelteKit** is "a framework for building web applications of all sizes, with a beautiful development experience and flexible filesystem-based routing." Also has the power of Svelte & Vite.
 
 **ElderJS** is an opinionated static site generator and web framework built with SEO in mind. The origin story of ElderJS is quite similar to Cayo's: people needed to something tailored to their use-case, so they decided to make it themselves. ElderJS includes a lot of cool features like "build hooks", and is also zero-JS first!
-
----
 
 ## Contributions
 
