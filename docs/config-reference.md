@@ -1,6 +1,7 @@
 # Config Reference
 
 ## Config File
+
 Cayo supports having _no_ config, but using a `cayo.config.js` file in your project allows you to configure most of the things that cayo needs & expects, such as paths for pages, components, and even the template filename.
 
 ### Example
@@ -39,28 +40,33 @@ There are select options that Cayo passes to Svelte (via `rollup-plugin-svelte`)
 
 ### `projectRoot`
 - **Type**: `string`
-- **Default**: `' '`
+- **Default**: `'.'`
 
+The project root directory, where Cayo will look for the required project structure. Can be an absolute path or a directory relative to the current working directory. 
 
 ### `src`
 - **Type**: `string`
-- **Default**: `' '`
+- **Default**: `'src'`
 
+Specify the directory where your source files will be, relative to the [project root](#projectroot). This folder will be watched for changes during dev. 
 
 ### `pages`
 - **Type**: `string`
-- **Default**: `' '`
+- **Default**: `'pages'`
+
+Specify the directory where your page components will be, relative to `src`. These can also just be thought of as "inputs" for the HTML that is generated as output. 
 
 
 ### `components`
 - **Type**: `string`
-- **Default**: `' '`
+- **Default**: `'components'`
+
+Specify the directory where your Cayo Components will be, relative to `src`. Cayo will expect any `<name>.cayo.svelte` that is to be rendered on a page, to be in this directory. Other components are not required to be in this directory. 
 
 
 ### `publicDir`
 - **Type**: `string`
 - **Default**: `'public'`
-
 
 {% note %}
 **Note:** use this _instead_ of Vite's `base` option. We pass it to Vite, but also use it internally within Cayo processes.
@@ -116,7 +122,7 @@ There are a few options that Cayo needs to control in order to work, so changing
 - **Type**: `string`
 - **Default**: `'dist'`
 
-Specify the output directory (relative to [project root](#projectroot)).
+Specify the output directory, relative to the [project root](#projectroot).
 
 ### `build.assetsDir`
 - **Type**: `string`
@@ -154,4 +160,5 @@ By default this will be `development` as expected. But, in `cayo build`, by defa
 
 Useful for seeing more output when running `cayo`.
 
-## Advanced Config
+## Config Examples
+
