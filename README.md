@@ -165,7 +165,7 @@ export default {
 For all options, read the [Configuration Reference](docs/config-reference.md).
 
 ### Plugins & Preprocessors
-You can extend Cayo with Vite plugins, Rollup plugins, or Svelte preprocessors, but configuring those options in the Cayo config. 
+You can extend Cayo with Vite plugins, Rollup plugins, or Svelte preprocessors, by configuring those options in the Cayo config. 
 
 By default, Cayo already internally uses a few plugins & preprocessors:
 - Svelte preprocessors
@@ -177,7 +177,7 @@ By default, Cayo already internally uses a few plugins & preprocessors:
 
 If you need to add _plugin/preprocessor options_ to any of these, you'll need to install them in your project and pass them as config options in `cayo.config.js`.
 
-Vite options will only be used during `cayo dev` for the Vite Server, and for `cayo build` (which is a specially configured run of Vite's build process).
+More on [Svelte options](docs/config-reference.md#svelte-options) and [Vite options](docs/config-reference.md#vite-options) in the [Configuration Reference](docs/config-reference.md).
 
 ## Cayo Components
 
@@ -427,7 +427,7 @@ Page:
 <slot name="entry">
   <script src="index.js" data-cayo-entry />
 </slot>
-
+```
 
 ## Cayo & the Rest
 
