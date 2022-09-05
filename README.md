@@ -47,24 +47,23 @@ These folders will be present in your project if you use the template. By defaul
 **Example**
 ```
 src/
-  pages/
-    index.svelte
-  components/
-    some.cayo.svelte
-  __template.svelte
-  entry.js
+├ pages/
+│ └ index.svelte
+├ components/
+│ └ some.cayo.svelte
+├  __template.svelte
+└  entry.js
 public/
-  image.png
-  favicon.ico
-  p5.min.js
+├ image.png
+├ favicon.ico
+└ p5.min.js
 ```
 
 ### Source Directory
 All of your source files should go in `src`. This is where pages, components, styles, etc. should go. These files will be watched during while running `cayo dev`, and used to build your project.
-
-- `__template.svelte` is your page template.  
 - `pages` contains the pages, or "inputs" of your project (they don't have to be a true page)
-- 
+- `components` contains your Cayo Components, and can contain any other components
+- `__template.svelte` is your page template 
 
 ### Template File
 This is file is required and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with their respective markup. 
@@ -116,7 +115,7 @@ Your template doesn't even have to be a valid HTML document—your output could 
 
 ## Config
 
-Your project doesn't need a config file, but if you want to customize your setup, you can do so by creating a `cayo.config.js` file at your project's root.
+Cayo projects don't require a config file, but if you want to customize your setup, you can do so by creating a `cayo.config.js` file at your project's root.
 
 ```js
 // cayo.config.js
@@ -128,9 +127,9 @@ export default {
 For the extending Cayo with Vite plugins, Rollup plugins, or Svelte preprocessors, you can configure those options in the Cayo config. 
 
 By default, Cayo already internally uses a few plugins & preprocessors:
-- Svelte
+- Svelte preprocessors
   - [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess) – the one preprocessor to rule them all. But really, this enables things like Sass, PostCSS, Pug, etc., all with zero config.
-- Rollup
+- Rollup plugins
   - [`rollup-plugin-svelte`](https://github.com/sveltejs/rollup-plugin-svelte) – official plugin for Svelte
   - [`rollup-plugin-import-css`](https://github.com/jleeson/rollup-plugin-import-css) – adds support for `import 'style.css' in JS source files
   - [`@rollup/plugin-json`](https://github.com/rollup/plugins/tree/master/packages/json) – adds support for `import data from 'data.json'` in JS source files
@@ -149,15 +148,15 @@ Cayos are an opt-in feature, thus they require a few things:
 - to be rendered by _the_ `<Cayo>` component (an export of the cayo package)
 - to include the `.cayo` infix (e.g., `some.cayo.svelte`).
 
-### Example
+### How Cayos Work
 Assuming your project directory looks something like this:
 ```
 src/ 
-  components/
-    counter.cayo.svelte
-  pages/
-    index.svelte
-  __template.svelte
+├ components/
+│ └ counter.cayo.svelte
+├ pages/
+│ └ index.svelte
+└ __template.svelte
 ```
 
 And `counter.cayo.svelte` has some reactive code you want to run on the client:
@@ -173,7 +172,7 @@ And `counter.cayo.svelte` has some reactive code you want to run on the client:
 <button on:click={() => count++}>Increment</button>
 ```
 
-And index.svelte "registers" that Cayo component, like so:
+And `index.svelte` "registers" that Cayo component, like so:
 ```svelte
 <!-- src/pages/index.svelte -->
 <script>
@@ -187,14 +186,7 @@ And index.svelte "registers" that Cayo component, like so:
 </slot>
 ```
 
-```svelte
-<slot name="entry">
-  <script src="index.js" data-cayo-entry />
-</slot>
-```
-
-
-The resulting output will look like a placeholder for the component, which will be used as the target for that Svelte component to mount to:
+The resulting output will be a placeholder for the component. By default, this placeholder be used as the target for that Svelte component to mount to:
 ```html
 <!-- .planter/index.html -->
 
@@ -204,6 +196,22 @@ The resulting output will look like a placeholder for the component, which will 
 ```
 
 Cayo uses the [Svelte Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api) to then hydrate these components at runtime. All registered Cayos will have their hydration code dynamically built in a file called `cayo-runtime.js` which will be placed at the root of every input (page) directory, in the output. The code in `cayo-runtime.js` is what will actually mount the 
+
+### Props
+
+A Cayo can receive props that will be used during hydration. However, all props must be serializable, as the props are stringified during build time and parsed during runtime.
+
+Props that will work without issue:
+- Strings
+- Arrays
+- Objects (e.g., `{ key: 'value' }`, but again, no non-serializable values within)
+
+Common types that are non-serializable are:
+- functions
+- Sets
+- Maps
+
+If you need non-serializable props, like a function, consider defining them in an [entry](#entries), or refactoring the logic to be within the Cayo itself. 
 
 ## Entries
 
@@ -263,6 +271,16 @@ export default renderCayos(cb) {
   });
 
   return cayos;
+}
+```
+
+`renderCayos()` returns a object with all of the cayo instances. Each keyed object within it looks like the following:
+```js
+{
+  cayoId: {
+    target: // the target node for the instance
+    instance: // the Svelte component instance object
+  }
 }
 ```
 

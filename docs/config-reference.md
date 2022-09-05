@@ -61,7 +61,7 @@ Specify the directory where your page components will be, relative to `src`. The
 - **Type**: `string`
 - **Default**: `'components'`
 
-Specify the directory where your Cayo Components will be, relative to `src`. Cayo will expect any `<name>.cayo.svelte` that is to be rendered on a page, to be in this directory. Other components are not required to be in this directory. 
+Specify the directory where your Cayo Components will be, relative to `src`. Cayo will expect any `<name>.cayo.svelte` that is to be rendered on a page to be in this directory. Other components are not required to be in this directory, but can be. 
 
 
 ### `publicDir`
@@ -79,12 +79,13 @@ This is where your static assets will go, such as images, `favicon.ico`, and any
 You will be able to reference any of these assets with a leading `/` in your markup. 
 
 **For example:** assuming you haven't changed the default, and you have this in your project root:
+
 ```
 src/
-  pages/
-    index.svelte
+└ pages/
+  └ index.svelte
 public/
-  - some.png
+└ some.png
 ```
 
 ```svelte
