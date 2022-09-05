@@ -1,19 +1,19 @@
 # Cayo
 
-> Pronounced [ka-yo], meaning _little island_.
+> Pronounced [ka-yo], meaning _small island_ :desert_island:
 
 A static HTML generator for the small stuff. With islands of reactivity. Powered by Svelte and Vite. 
 
 ## Why Cayo?
 The main purpose of Cayo is to be a tool that lets you use modern front-end tooling (Svelte, Vite, file-based routing) to generate static HTML output, and having the option to use Svelte components that are reactive on the client.
 
-**Cayo prerenders all of your components** (or just generically, Svelte "inputs", like a page), so your output is pre-baked HTML. But, if you want that Svelte reactivity, you can have it, with Cayo Components (the "islands"), which are bundled components that mount to the output HTML during client runtime. 
+**Cayo prerenders your pages to HTML**. It enables the use of Svelte as a templating language for generating static content. Cayo doesn't have opinions about what your output should be, just that it's HTML. You can think of Cayo's primary function as being a Svelte-to-HTML generator.
 
-**Cayo aims to be useful for simple static HTML sites, but doesn't actually care if your output really is a _page_.** You can think of it more like a Svelte-to-HTML generator—your output could be a valid HTML page, or it could just be an HTML fragment you intend to use in a unique workflow that has constraints.
+**Cayo lets you define where you _do_ want reactivity, with Cayo Components**. If you want the Svelte reactivity, you can have it, with Cayo Components (or "cayos" a.k.a. the "islands of reactivity"). These are components that are individually bundled and will be mounted and run as a Svelte client-side component.
 
-**Cayo is built for that person who has constraints on their output**—someone who wants more control over their HTML generation workflow, and wants tools like Svelte and Vite at their disposal. All while not having to buy into the typical use of outputting an entire _website_, as Svelte and Vite are designed to be used to do.
+**Cayo is built for that person who has constraints on their output**—someone who needs control over their HTML generation workflow, and wants to use tools like Svelte and Vite. All while not having to buy into the typical use of creating an _entire website_, as frameworks are typically designed to be used.
 
-**Cayo is not a replacement for a fully-featured framework** like Astro or SvelteKit. Read more about [how Cayo differs](#cayo-&-the-rest) from similar tools.
+**Cayo is not a feature-rich web app framework** like Astro or SvelteKit. Read more about [how Cayo differs](#cayo-&-the-rest) from similar tools.
 
 ## Getting Started
 
@@ -38,7 +38,7 @@ To build your project:
 cayo build
 ```
 
-You can also look at the template in this repo for reference, in [/template](./template/). Learn about [configuring your project setup](#config).
+You can also take a look at the template before copying it—it's in this repo in [./template](./template/).
 
 ## Project Structure
 
@@ -60,25 +60,57 @@ public/
 ```
 
 ### Source Directory
-All of your source files should go in `src`. This is where pages, components, styles, etc. should go. These files will be watched during while running `cayo dev`, and used to build your project.
+Most of your projects files should go in `src`. This is where pages, components, styles, etc. should go. These files will be watched while running `cayo dev`, and used to build your project.
 - `pages` contains the pages, or "inputs" of your project (they don't have to be a true page)
 - `components` contains your Cayo Components, and can contain any other components
 - `__template.svelte` is your page template 
+
+### Pages
+Cayo uses a file-based routing system, meaning the file structure within the pages directory gets used to generate output files in the right structure. All pages are expected to be valid Svelte components. Since your outputs just become regular-old HTML files, there is no real "routing" going on here beyond the expected default of HTML files being served on a web server. Pages, or outputs, will be served at the path based on their name and directory structure within the pages directory. Cayo will expect all files with the `.svelte` extension in the pages directory to be a page. 
+
+#### Index Page
+A file named `index.svelte` at the root of the pages directory will map to `index.html` as expected, and be served at the root of as expected (`/`, `host/`).
+
+#### Nested Pages
+A nested page will be served at a nested URL based on it's own path, relative to the pages directory. In the output, every page other than `pages/index.svelte` gets mapped to an `index.html` in a relatively named directory. For example,  `nested/page.svelte` gets mapped to `<outDir>/nested/page/index.html`.
+
+A "portfolio site" example:
+1. Given a page named `pages/projects/project-1.svelte` 
+2. The page will be mapped to `<outDir>/projects/project-1/index.html` 
+3. Which would be served at `/projects/project-1`
+
+Because Cayo just uses each page's path to construct the output structure, you can also have nested index pages as expected:
+1. Given a page named `pages/projects/index.svelte`
+2. The page will be mapped to `<outDir>/projects/index.html`
+3. Which would be served at `/projects`
+
+This allows you to configure your site structure without needing to worry about defining routes programmatically, like you might do when using Svelte without SvelteKit. 
+
+To expand upon the portfolio example, your pages directory could look like this, and would be served at the expected routes:
+```
+pages
+├ projects
+│ ├ index.svelte      # /projects 
+│ ├ project-1.svelte  # /projects/project-1
+│ └ project-2.svelte  # /projects/project-2
+└ index.svelte        # / (home)
+```
 
 ### Template File
 This is file is required and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with their respective markup. 
 
 This file is a Svelte component, so you can also import other Svelte components or use rendering logic. For example, to render certain markup as output based the mode `development` vs. `production` (i.e., `cayo dev` vs. `cayo build`).
 
-**Note:** despite being a Svelte component, the template file does not support the `<slot>` element, because it is prerendered by itself before it is used to prerender page components. The placeholder `%cayo.body%` replaces the usage for `<slot>` in a template file.
+> **Note:** 
+> Despite being a Svelte component, the Template file does not support the `<slot>` element, because it is prerendered by itself before it is used to prerender page components. The placeholder `%cayo.body%` replaces the usage for `<slot>` in a template file.
 
 Template files support the following placeholders:
 
-- `%cayo.body%` – the content of a page. (Think of this as the `<slot>` of the Template Svelte component
+- `%cayo.body%` – the content of a page. Think of this as the `<slot>` of the Template Svelte component
 
 - `%cayo.script%` – where your [entry script](#entries) (JS) for a page will be imported. This is needed if a page is to render a Cayo Component, but otherwise is optional
 
-- `%cayo.css%` – where CSS will be injected (as `<link src="<file>.css">` or `<style>...</style>` depending on your [CSS config option](docs/config-reference.md#cssinternal))
+- `%cayo.css%` – where CSS will be injected (as `<link src="style.css">` or `<style>...</style>` depending on your [CSS config option](docs/config-reference.md#cssinternal))
 
 - `%cayo.title%` – if you're using Cayo to [define dynamic page titles](), this is required. Otherwise you can define page titles with [`<svelte:head>`](https://svelte.dev/docs#template-syntax-svelte-head)
 
@@ -124,11 +156,14 @@ export default {
 }
 ```
 
-For the extending Cayo with Vite plugins, Rollup plugins, or Svelte preprocessors, you can configure those options in the Cayo config. 
+For all options, read the [Configuration Reference](docs/config-reference.md).
+
+### Plugins & Preprocessors
+You can extend Cayo with Vite plugins, Rollup plugins, or Svelte preprocessors, but configuring those options in the Cayo config. 
 
 By default, Cayo already internally uses a few plugins & preprocessors:
 - Svelte preprocessors
-  - [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess) – the one preprocessor to rule them all. But really, this enables things like Sass, PostCSS, Pug, etc., all with zero config.
+  - [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess) – _one preprocessor to rule them all_. But really, this enables support for things like Sass, PostCSS, Pug, etc., all with zero config, right in your Svelte files. 
 - Rollup plugins
   - [`rollup-plugin-svelte`](https://github.com/sveltejs/rollup-plugin-svelte) – official plugin for Svelte
   - [`rollup-plugin-import-css`](https://github.com/jleeson/rollup-plugin-import-css) – adds support for `import 'style.css' in JS source files
@@ -138,14 +173,13 @@ If you need to add _plugin/preprocessor options_ to any of these, you'll need to
 
 Vite options will only be used during `cayo dev` for the Vite Server, and for `cayo build` (which is a specially configured run of Vite's build process).
 
-For all options, read the [Configuration Reference](docs/config-reference.md).
-
 ## Cayo Components
 
 Cayo Components, or Cayos, are Svelte components that are bundled into client friendly JS, and mount to the output HTML during client runtime. These work like having contained Svelte apps within your page, rather than your whole page being a Svelte app. 
 
 Cayos are an opt-in feature, thus they require a few things:
-- to be rendered by _the_ `<Cayo>` component (an export of the cayo package)
+- to be rendered by _the_ `<Cayo>` component
+  - this is an export of the cayo package, which you will need to import: `import Cayo from 'cayo/component'`
 - to include the `.cayo` infix (e.g., `some.cayo.svelte`).
 
 ### How Cayos Work
@@ -172,9 +206,9 @@ And `counter.cayo.svelte` has some reactive code you want to run on the client:
 <button on:click={() => count++}>Increment</button>
 ```
 
-And `index.svelte` "registers" that Cayo component, like so:
+And `page.svelte` "registers" that Cayo component, like so:
 ```svelte
-<!-- src/pages/index.svelte -->
+<!-- src/pages/page.svelte -->
 <script>
   import Cayo from 'cayo/component';
 </script>
@@ -235,8 +269,9 @@ Cayo generates a file for the client called `cayo-runtime.js`. This file has a d
 
 To use an entry file in a page:
 ```svelte
-<!-- src/pages/index.svelte -->
-<!-- ... -->
+<!-- src/pages/page.svelte -->
+
+<!-- ...other page stuff -->
 <!-- This looks kinda weird, but is valid Svelte code, and is how you assign an entry file to a page -->
 <slot name="entry">
   <script src="index.js" data-cayo-entry />
@@ -325,7 +360,7 @@ renderCayos(customPlaceholder);
 Say you want to render something in a Cayo before it gets hydrated, like a "loading" indicator. Using the same component from earlier, `counter.cayo.svelte`:
 
 ```svelte
-<!-- src/pages/index.svelte -->
+<!-- src/pages/page.svelte -->
 <script>
   import Cayo from 'cayo/component';
 </script>
@@ -352,6 +387,41 @@ renderCayos(replaceContents);
 ```
 
 **Note:** `getProps()` is also generated in `cayo-runtime.js`. It handles parsing the props as a string, to use the props to hydrate the Cayo instance.
+
+## Styles
+
+Since Vite has some [built-in CSS features](https://vitejs.dev/guide/features.html#css), things Sass and CSS Modules just work! Otherwise, [Svelte's component-scoped styles](https://svelte.dev/docs#component-format-style) is likely the best way to write styles while using Svelte. With the `svelte-preprocess` Svelte custom preprocessor, you get Sass and PostCSS support right in your Svelte files:
+
+```svelte
+<div class="sassy">I'm some <span>sassy</span> markup.</div>
+<!-- Use lang="scss" to indicate the style block should be preprocessed with Sass -->
+<style lang="scss">
+  $color: fuchsia;
+  .sassy {
+    color: $color;
+    span {
+      font-weight: bold;
+    }
+  }
+</style>
+```
+
+If you want to define global styles external to your Svelte files, you can do so the "Vite way", by importing the stylesheet into a page's entry file. Assuming you have a Sass file with all of your global styles: `src/styles/global.scss`.
+Entry:
+```js
+// src/index.js
+import 'styles/global.scss';
+// ...other entry stuff
+```
+Page:
+```svelte
+<!-- src/pages/page.svelte -->
+
+<!-- ...other page stuff -->
+<slot name="entry">
+  <script src="index.js" data-cayo-entry />
+</slot>
+
 
 ## Cayo & the Rest
 

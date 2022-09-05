@@ -68,9 +68,8 @@ Specify the directory where your Cayo Components will be, relative to `src`. Cay
 - **Type**: `string`
 - **Default**: `'public'`
 
-{% note %}
-**Note:** use this _instead_ of Vite's `base` option. We pass it to Vite, but also use it internally within Cayo processes.
-{% endnote %}
+> **Note**
+> Use this option _instead_ of Vite's `publicDir` option. We pass it to Vite, but also use it internally within Cayo processes.
 
 Specify the directory to be used as the public directory, which is used to serve static assets during development and copied into the `build.outDir` during build. 
 
@@ -99,9 +98,8 @@ Read about how the [public directory works in Vite](https://vitejs.dev/guide/ass
 - **Type**: `string`
 - **Default**: `'/'`
 
-{% note %}
-**Note:** use this _instead_ of Vite's `base` option. We pass it to Vite, but also use it internally within Cayo processes.
-{% endnote %}
+> **Note**
+> Use this option _instead_ of Vite's `base` option. We pass it to Vite, but also use it internally within Cayo processes.
 
 Base public path when served in development or production.
 
