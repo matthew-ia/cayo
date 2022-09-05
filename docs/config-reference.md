@@ -2,41 +2,34 @@
 
 ## Config File
 
-Cayo supports having _no_ config, but using a `cayo.config.js` file in your project allows you to configure most of the things that cayo needs & expects, such as paths for pages, components, and even the template filename.
+Cayo is not "zero config" but it does support having _no_ config file. Adding a `cayo.config.js` file to your project allows you to configure most of the things that Cayo needs & expects, such as paths for pages, components, and even the template filename.
+
+[Jump to list of options](#cayo-options). 
 
 ### Example
 ```js
 // cayo.config.js
 export default {
   // config options
+  pages: 'outputs', // default: 'pages'
+  components: 'cayos', // default: 'components'
+  build: {
+    outDir: 'build', // default: 'dist'
+  },
   svelte: {
     // svelte options, e.g., for defining preprocessors for svelte.preprocess
-
   },
-  // Vite options get consumed by the dev server
   vite: {
-    // Rollup options are also used during cayo build (passed to vite)
+    // vite options are consumed by the dev server
+    // Rollup options specifically are *also* used during cayo build (which uses vite build)
     rollupOptions: {
       // rollup options, like plugins
     }
   }
-
-
 }
 ```
 
-## Svelte Options
-
-There are select options that Cayo passes to Svelte (via `rollup-plugin-svelte`):
-- [preprocess](#sveltepreprocess)
-- [compilerOptions](#sveltecompileroptions)
-- [extensions](#svelteextensions)
-
-## Vite Options
-
-## Rollup Options
-
-## Config Options
+## Cayo Options
 
 ### `projectRoot`
 - **Type**: `string`
@@ -105,17 +98,9 @@ Base public path when served in development or production.
 
 Since this option is passed to Vite, read more about it in the [Vite docs](https://vitejs.dev/config/shared-options.html#base).
 
-### `svelte.preprocess`
-- **Type**: `<SveltePreprocessor> | Array<SveltePreprocessor>]`
-- **Default**: `[]`
-
-Passed to the Svelte Rollup plugin, but is appended to an array of Cayo's internally defined preprocessors, which is only [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess). [See plugin options](https://github.com/sveltejs/rollup-plugin-svelte#usage).
-
-### `svelte.compilerOptions`
-- **Type**: `object` _(of options)_
+### `svelte`
+- **Type**: `object`
 - **Default**: `{}`
-
-There are a few options that Cayo needs to control in order to work, so changing them will have no effect: `compilerOptions.generate` and `compilerOptions.hydratable`. All other options will be passed to the Svelte Rollup plugin. [See plugin options](https://github.com/sveltejs/rollup-plugin-svelte#usage).
 
 ### `build.outDir`
 - **Type**: `string`
@@ -158,6 +143,72 @@ By default this will be `development` as expected. But, in `cayo build`, by defa
 - **Default**: `false`
 
 Useful for seeing more output when running `cayo`.
+
+## Svelte Options
+
+There are select options that Cayo passes to Svelte (consumed by `rollup-plugin-svelte`):
+- [preprocess](#sveltepreprocess)
+- [compilerOptions](#sveltecompileroptions)
+<!-- TODO: - [extensions](#svelteextensions) -->
+
+Svelte options are passed via the Cayo config:
+```js
+// cayo.config.js
+export default {
+  svelte: {
+    preprocess: [
+      // define custom preprocessors for Svelte to use
+    ],
+    compilerOptions: {
+      // define compiler options for Svelte to use
+    }
+  }
+}
+```
+
+### `svelte.preprocess`
+- **Type**: `<SveltePreprocessor> | Array<SveltePreprocessor>]`
+- **Default**: `[]`
+
+Passed to the Svelte Rollup plugin, but is appended to an array of Cayo's internally defined preprocessors, which is only [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess). [See plugin options](https://github.com/sveltejs/rollup-plugin-svelte#usage).
+
+### `svelte.compilerOptions`
+- **Type**: `object` _(of options)_
+- **Default**: `{}`
+
+There are a few options that Cayo needs to control in order to work, so changing them will have no effect: `compilerOptions.generate` and `compilerOptions.hydratable`. All other options will be passed to the Svelte Rollup plugin. [See plugin options](https://github.com/sveltejs/rollup-plugin-svelte#usage).
+
+## Vite Options
+<!-- TODO: -->
+
+Not all Vite options are directly used by Cayo. Most of them are passed to the dev process, which uses `vite dev`. `vite.build.rollupOptions` is the only Vite-specific option passed during both `cayo dev` and `cayo build`. 
+
+> **Note**
+> Cayo shares some options with Vite, such as `publicDir` and `base` and `root` (as `projectRoot`). These should be defined at top level of your Cayo config, not in the `vite` option object, but will still be passed to Vite as needed.
+
+Vite options are passed via the Cayo config:
+```js
+// cayo.config.js
+export default {
+  vite: {
+    server: {
+      // server options, like port
+    }
+    build: {
+      // rollupOptions is the only passed vite.build option
+      rollupOptions: {
+      // define Rollup options to be used for dev and build, like plugins
+    },
+    // other Vite options...
+  }
+}
+```
+
+During `cayo dev`, Cayo defines a few Vite options internally, which cannot be overridden:
+- `configFile: false`
+
+## Rollup Options
+<!-- TODO: -->
 
 ## Config Examples
 

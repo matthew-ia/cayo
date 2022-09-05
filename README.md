@@ -1,19 +1,19 @@
-# Cayo
+# Cayo :desert_island:
 
-> Pronounced [ka-yo], meaning _small island_ :desert_island:
+> Pronounced [ka-yo], meaning _small island_
 
-A static HTML generator for the small stuff. With islands of reactivity. Powered by Svelte and Vite. 
+A static HTML generator for the small stuff, with islands of reactivity. Powered by Svelte and Vite. 
 
 ## Why Cayo?
 The main purpose of Cayo is to be a tool that lets you use modern front-end tooling (Svelte, Vite, file-based routing) to generate static HTML output, and having the option to use Svelte components that are reactive on the client.
 
-**Cayo prerenders your pages to HTML**. It enables the use of Svelte as a templating language for generating static content. Cayo doesn't have opinions about what your output should be, just that it's HTML. You can think of Cayo's primary function as being a Svelte-to-HTML generator.
+- **Cayo prerenders your pages to HTML**. It enables the use of Svelte as a templating language for generating static content. Cayo doesn't have opinions about what your output should be, just that it's HTML. You can think of Cayo's primary function as being a Svelte-to-HTML generator.
 
-**Cayo lets you define where you _do_ want reactivity, with Cayo Components**. If you want the Svelte reactivity, you can have it, with Cayo Components (or "cayos" a.k.a. the "islands of reactivity"). These are components that are individually bundled and will be mounted and run as a Svelte client-side component.
+- **Cayo lets you define where you _do_ want reactivity, with Cayo Components**. If you want the Svelte reactivity, you can have it, with Cayo Components (or "cayos" a.k.a. the "islands of reactivity"). These are components that are individually bundled and will be mounted and run as a Svelte client-side component.
 
-**Cayo is built for that person who has constraints on their output**—someone who needs control over their HTML generation workflow, and wants to use tools like Svelte and Vite. All while not having to buy into the typical use of creating an _entire website_, as frameworks are typically designed to be used.
+- **Cayo is built for that person who has constraints on their output**—someone who needs control over their HTML generation workflow, and wants to use tools like Svelte and Vite. All while not having to buy into the typical use of creating an _entire website_, as frameworks are typically designed to be used.
 
-**Cayo is not a feature-rich web app framework** like Astro or SvelteKit. Read more about [how Cayo differs](#cayo-&-the-rest) from similar tools.
+- **Cayo is not a feature-rich web app framework** like Astro or SvelteKit. Read more about [how Cayo differs](#cayo-&-the-rest) from similar tools.
 
 ## Getting Started
 
@@ -38,11 +38,17 @@ To build your project:
 cayo build
 ```
 
-You can also take a look at the template before copying it—it's in this repo in [./template](./template/).
+You can also add Cayo to an existing project:
+
+```zsh
+npm i -D cayo
+```
+
+It is recommended that you take a look at the [template](./template/), as there is some required project setup in order to run a cayo project. More on the required project structure below!
 
 ## Project Structure
 
-These folders will be present in your project if you use the template. By default, if your project doesn't have this structure it will not run. However, all of these directories and more can the can be customized with [configuration options](docs/config-reference.md).
+These folders will be present in your project if you use the template. By default, if your project doesn't have this structure it, `cayo` will not successfully run. However, all of these directories can be customized with [configuration options](docs/config-reference.md).
 
 **Example**
 ```
