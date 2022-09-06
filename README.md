@@ -26,20 +26,21 @@ npm i
 ```
 
 To run (develop) your project:
+
 ```zsh
 cayo dev
 ```
 
 To build your project:
+
 ```zsh
 cayo build
 ```
 
 
-You can also add Cayo to an existing project. It is recommended that you take a look at the [template](./template/), as there is some required project setup in order to run a cayo project. More on the required project structure below.
+You can also add Cayo to an existing project. It is recommended that you take a look at the [project structure docs](#project-structure) and the [template](./template/), as there is a required project structure for a Cayo project. 
 
 Install `cayo`:
-
 ```zsh
 npm i -D cayo
 ```
