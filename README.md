@@ -188,14 +188,17 @@ More on [Svelte options](docs/config-reference.md#svelte-options) and [Vite opti
 
 Cayo Components, or Cayos, are Svelte components that are bundled into client friendly JS, and mount to the output HTML during client runtime. These work like having contained Svelte apps within your page, rather than your whole page being a Svelte app. 
 
-Cayos are an opt-in feature, and require a few things:
-- "render" them by using _the_ `<Cayo>` component
-  - this is an export of the cayo package, which you will need to import: `import Cayo from 'cayo/component'`
-- to include the `.cayo` infix in the Cayo's filename (e.g., `some.cayo.svelte`)
+Cayos are an opt-in feature, and require a few things. You must:
+- "Register" them by using the built-in `<Cayo>` component
+  - You will need to import from the `cayo` package: `import Cayo from 'cayo/component'`
+- Include the `.cayo` infix in the Cayo's filename (e.g., `some.cayo.svelte`)
+- Call the `renderCayos()` function in an [entry](#entries) for the page(s) rendering the Cayo
 
-The `<Cayo>` component doesn't actually render your Cayos—instead it creates _placeholders_ for them, which are used to mount them to the page while running on the client.
+The `<Cayo>` component doesn't actually render your Cayos—instead it creates _placeholders_ for them, which are used to mount them to the page.
 
-The most basic usage of the `<Cayo>` component, assuming `components/counter.cayo.svelte` exists, and has a prop called `count`:
+The most basic usage of the `<Cayo>` component: 
+
+Assuming `components/counter.cayo.svelte` exists, and has a prop `count`:
 ```svelte
 <!-- <Cayo> can be rendered in a page or any other normal Svelte component -->
 <script>
@@ -241,7 +244,7 @@ And `page.svelte` "registers" that Cayo component, like so:
 </script>
 <!-- Say you want to start the count as 1 instead of 0, you can pass that value as a prop -->
 <Cayo src="counter.cayo.svelte" count={1} />
-<!-- This looks kinda weird, but is valid Svelte code, and how you add an entry to a page -->
+<!-- This looks kinda weird, but is valid Svelte code, and is how you add an entry to a page -->
 <slot name="entry">
   <script src="entry.js" data-cayo-entry />
 </slot>
@@ -253,10 +256,12 @@ The resulting output will be a placeholder for the component. By default, this p
 
 <!-- props are stringified, to be used during component hydration -->
 <!-- Cayo IDs are unique to every instance of that Cayo -->
-<div data-cayo-id="counter-<UUID>" data-cayo-props="{ count: 1 }"></div>
+<div data-cayo-id="counter-<UUID>" data-cayo-props="{count:1}"></div>
 ```
 
-Cayo uses the [Svelte Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api) to then hydrate these components at runtime. All registered Cayos will have their hydration code dynamically built in a file called `cayo-runtime.js` which will be placed at the root of every input (page) directory, in the output. The code in `cayo-runtime.js` is what will actually mount the 
+Cayo uses the [Svelte Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api) to then hydrate these components at runtime. All registered Cayos will have their hydration code dynamically built in a file called `cayo-runtime.js`. Each input (page) will have it's own `cayo-runtime.js` file in the output. The code in `cayo-runtime.js` includes the logic that will mount and hydrate these components. 
+
+[Entries](#entries) are where you actually will make use this generated cayo runtime code. 
 
 ### Props
 
@@ -272,7 +277,7 @@ Common types that are non-serializable are:
 - Sets
 - Maps
 
-If you need non-serializable props, like a function, consider defining them in an [entry](#entries), or refactoring the logic to be within the Cayo itself. 
+If you need non-serializable props, like a function, consider refactoring it to not be a prop, but initialized in an [entry](#entries), or refactoring the logic to be within the Cayo itself. 
 
 ## Entries
 
@@ -280,7 +285,7 @@ An entry serves two purposes:
 1. to be a specific page's JS (like the `main.js` to an `index.html`)
 2. to let you define when and where Cayos are to be rendered
 
-Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entry files per page, or use the same one for all of them. The name `entry.js` is used in the examples, but there are no limitations on the path or name, as long as it's in the `src` directory.
+Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entry files per page, or even use the same one for all pages. The name `entry.js` is used in the examples, but there are no limitations on the path or name, as long as it's in the `src` directory.
 
 An example of an entry that will render Cayos:
 ```js
@@ -292,7 +297,7 @@ renderCayos()
 
 The glaring question is: "where does `renderCayos` come from? It's not imported in the file?"
 
-Cayo generates a file for the client called `cayo-runtime.js`. This file has a default export that corresponds to `renderCayos`. Cayo prepends `import renderCayos from 'cayo-runtime.js'` when it processes your entry files for output. It will only prepend the `renderCayos` import at the head of your entry if there are Cayos registered on the page that is using that entry.
+Cayo generates a file for the client called `cayo-runtime.js`. This file has a default export that corresponds to `renderCayos`. Cayo prepends `import renderCayos from 'cayo-runtime.js'` when it processes your entry files for output. (It will only prepend the `renderCayos` import at the head of your entry if there are Cayos registered on the page that is using that entry.)
 
 To use an entry file in a page:
 ```svelte
@@ -303,17 +308,16 @@ To use an entry file in a page:
 <slot name="entry">
   <script src="entry.js" data-cayo-entry />
 </slot>
-
 ```
 **A few notes on the markup here:**
 
-- wrapping it in a `<slot>` is required
-    - this is because Svelte only allows one `<script>` at the root of a component
-    - the `<slot>` doesn't need to be named, it's just for readability here. But if you need to use `<slot>` normally in your page, you do need to make this a named slot (named anything, like "entry"). 
-- the attribute `data-cayo-entry` is required, and is the actual indicator that this script should be used as the entry.
-- the `src` attribute should point at JS file that is **relative to the [`src` directory](#source-directory)**, rather than relative to the page itself
+- Wrapping it in a `<slot>` is required
+    - This is because Svelte only allows one `<script>` at the root of a component. Using `<slot>` here is a bit of a hack, but is valid Svelte.
+    - The `<slot>` doesn't need to be named, it's just for readability here. But if you need to use `<slot>` normally in your page, you do need to make this a named slot (can be named anything). 
+- The `data-cayo-entry` attribute is required, and is the actual indicator that this script should be used as the entry.
+- The `src` attribute should point at JS file that is **relative to the [`src` directory](#source-directory)**, rather than relative to the page itself
 
-### `renderCayos`
+### renderCayos
 
 The code in `cayo-runtime.js` that is generated looks like:
 ```js
@@ -336,10 +340,12 @@ export default renderCayos(cb) {
 }
 ```
 
+
+#### Callback Argument
 `renderCayos()` returns a object with all of the cayo instances. Each keyed object within it looks like the following:
 ```js
 {
-  cayoId: {
+  <cayoId>: {
     target: // the target node for the instance
     instance: // the Svelte component instance object
   }
@@ -434,6 +440,7 @@ Since Vite has some [built-in CSS features](https://vitejs.dev/guide/features.ht
 ```
 
 If you want to define global styles external to your Svelte files, you can do so the "Vite way", by importing the stylesheet into a page's entry file. Assuming you have a Sass file with all of your global styles: `src/styles/global.scss`.
+
 Entry:
 ```js
 // src/index.js
