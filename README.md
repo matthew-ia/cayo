@@ -20,10 +20,7 @@ The main purpose of Cayo is to be a tool that lets you use modern front-end tool
 The easiest way to get started is by using the default cayo template. You can use [degit](https://github.com/Rich-Harris/degit) to create a new cayo project with that template:
 
 ```zsh
-# Create new project
 npx degit matthew-ia/cayo/template ./my-project
-
-# Go into the new project and install npm packages
 cd my-project
 npm i
 ```
@@ -38,13 +35,14 @@ To build your project:
 cayo build
 ```
 
-You can also add Cayo to an existing project:
+
+You can also add Cayo to an existing project. It is recommended that you take a look at the [template](./template/), as there is some required project setup in order to run a cayo project. More on the required project structure below.
+
+Install `cayo`:
 
 ```zsh
 npm i -D cayo
 ```
-
-It is recommended that you take a look at the [template](./template/), as there is some required project setup in order to run a cayo project. More on the required project structure below!
 
 ## Project Structure
 
@@ -94,8 +92,8 @@ This allows you to configure your site structure without needing to worry about 
 
 To expand upon the portfolio example, your pages directory could look like this, and would be served at the expected routes:
 ```
-pages
-├ projects
+pages/
+├ projects/
 │ ├ index.svelte      # /projects 
 │ ├ project-1.svelte  # /projects/project-1
 │ └ project-2.svelte  # /projects/project-2
@@ -103,11 +101,11 @@ pages
 ```
 
 ### Template File
-This is file is required and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with their respective markup. 
+A Template file is required, and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with the respective markup for each page.
 
-This file is a Svelte component, so you can also import other Svelte components or use rendering logic. For example, to render certain markup as output based the mode `development` vs. `production` (i.e., `cayo dev` vs. `cayo build`).
+This file is a Svelte component, so you can also import other Svelte components or use rendering logic. For example, you could render certain markup only for `development` and not `production` (i.e., during `cayo dev` vs. `cayo build`).
 
-> **Note:** 
+> **Note**<br>
 > Despite being a Svelte component, the Template file does not support the `<slot>` element, because it is prerendered by itself before it is used to prerender page components. The placeholder `%cayo.body%` replaces the usage for `<slot>` in a template file.
 
 Template files support the following placeholders:
