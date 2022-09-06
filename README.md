@@ -105,7 +105,7 @@ A Template file is required, and used to render all of your pages. The output wi
 
 This file is a Svelte component, so you can also import other Svelte components or use rendering logic. For example, you could render certain markup only for `development` and not `production` (i.e., during `cayo dev` vs. `cayo build`).
 
-> **Note**:
+> :information_source: **Note**
 > Despite being a Svelte component, the Template file does not support the `<slot>` element, because it is prerendered by itself before it is used to prerender page components. The placeholder `%cayo.body%` replaces the usage for `<slot>` in a template file.
 
 Template files support the following placeholders:
