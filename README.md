@@ -469,7 +469,3 @@ Page:
 - **SvelteKit** is a framework for building web applications of all sizes, with a beautiful development experience and flexible filesystem-based routing. Also has the power of Svelte & Vite.
 
 - **ElderJS** is an opinionated static site generator and web framework built with SEO in mind. The origin story of ElderJS is quite similar to Cayo's: a developer needed something tailored to their use case, so they decided to make it themselves. ElderJS includes a lot of cool features like "build hooks", and is also zero-JS first!
-
-## Contributions & Maintenance
-
-Since Cayo was built and designed specifically for a use case at my place of work, it probably won't be actively maintained nor will it take pull requests unless they fix bugs or generally expand upon it's configurability. Forking and building upon Cayo for your own use is heavily encouraged!
