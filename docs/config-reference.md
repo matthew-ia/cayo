@@ -96,11 +96,9 @@ Read about how the [public directory works in Vite](https://vitejs.dev/guide/ass
 
 Base public path when served in development or production.
 
-Since this option is passed to Vite, read more about it in the [Vite docs](https://vitejs.dev/config/shared-options.html#base).
+<!-- TODO: add more details -->
 
-### `svelte`
-- **Type**: `object`
-- **Default**: `{}`
+Since this option is passed to Vite, read more about it in the [Vite docs](https://vitejs.dev/config/shared-options.html#base).
 
 ### `build.outDir`
 - **Type**: `string`
@@ -178,7 +176,7 @@ export default {
 - **Type**: `<SveltePreprocessor> | Array<SveltePreprocessor>]`
 - **Default**: `[]`
 
-Passed to the Svelte Rollup plugin, but is appended to an array of Cayo's internally defined preprocessors, which is only [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess). [See plugin options](https://github.com/sveltejs/rollup-plugin-svelte#usage).
+Passed to the Svelte Rollup plugin, but is appended to an array of Cayo's internally defined preprocessors (which is only [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess)). [See plugin options](https://github.com/sveltejs/rollup-plugin-svelte#usage).
 
 ### `svelte.compilerOptions`
 - **Type**: `object` _(of options)_
