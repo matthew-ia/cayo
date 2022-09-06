@@ -124,11 +124,21 @@ This will only affect the component-scoped CSS you define in a Svelte component 
 
 ### `cayoPath`
 - **Type**: `string`
-- **Default**: `' '`
+- **Default**: `'.cayo'`
+
+Specify the Cayo output directory that is used for Cayo processes. Cayo outputs files into this folder, and it's contents are either served during `cayo dev` or used to build your project during `cayo build`. 
 
 ### `cayoComponentInfix`
 - **Type**: `string`
-- **Default**: `' '`
+- **Default**: `'cayo'`
+
+Specify the Cayo Component infix that is used to identify by Cayo's processes. By default, a Cayo looks like: `some.cayo.svelte`. If you changed this option's value to `fancy`, your Cayos would need to be named like `some.fancy.svelte`.
+
+### `templateName`
+- **Type**: `string`
+- **Default**: `'__template'`
+
+Specify the name of the template file. The extension, `.svelte` should not be included in this option's value. This is **_not_** a path; Cayo will always expect this filename to be at the root of the `src` directory (e.g., `src/__template.svelte`).
 
 ### `mode`
 - **Type**: `string | false`

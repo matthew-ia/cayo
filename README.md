@@ -101,7 +101,7 @@ pages/
 ```
 
 ### Template File
-A Template file is required, and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with the respective markup for each page.
+The Template file is required, and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with the respective markup for each page. Your template file should be at root of the `src` directory, and be named `__template.svelte`. You can change the expected name with [a config option](docs/config-reference.md#templateName).
 
 This file is a Svelte component, so you can also import other Svelte components or use rendering logic. For example, you could render certain markup only for `development` and not `production` (i.e., during `cayo dev` vs. `cayo build`).
 
@@ -139,15 +139,22 @@ Technically all of these placeholders are optional, and don't have to be in any 
 </html>
 ```
 
-Your template doesn't even have to be a valid HTML document—your output could be HTML fragments. This is also a valid template file:
+Your template doesn't even need to be a valid HTML document—you could be outputting HTML fragments! This is also a valid template file:
 
 ```html
 <!-- src/__template.svelte -->
 <!-- No html, head, or body elements... and that's okay! -->
+<div>something I want on every page</div>
 %cayo.script%
 %cayo.css%
 %cayo.body%
 ```
+
+## .cayo
+
+Once you run your project, you'll see directory named `.cayo` in your project's root. This directory is used for Cayo's internal output. Its contents are served during `cayo dev`, and used to build your project during `cayo build`. 
+
+Thi directory can be deleted at any time. Every time you run `cayo dev` or `cayo build` it will be recreated and updated as needed.
 
 ## Config
 
@@ -163,14 +170,14 @@ export default {
 For all options, read the [Configuration Reference](docs/config-reference.md).
 
 ### Plugins & Preprocessors
-You can extend Cayo with Vite plugins, Rollup plugins, or Svelte preprocessors, by configuring those options in the Cayo config. 
+You can extend Cayo with Vite plugins (and Rollup plugins), or Svelte preprocessors, by configuring respective options in the Cayo config. 
 
 By default, Cayo already internally uses a few plugins & preprocessors:
-- Svelte preprocessors
-  - [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess) – _one preprocessor to rule them all_. But really, this enables support for things like Sass, PostCSS, Pug, etc., all with zero config, right in your Svelte files. 
-- Rollup plugins
+- Svelte Preprocessors
+  - [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess) – _one preprocessor to rule them all_. This enables support for things like Sass, PostCSS, Pug, etc., all with zero config, right in your Svelte files. 
+- Rollup Plugins
   - [`rollup-plugin-svelte`](https://github.com/sveltejs/rollup-plugin-svelte) – official plugin for Svelte
-  - [`rollup-plugin-import-css`](https://github.com/jleeson/rollup-plugin-import-css) – adds support for `import 'style.css' in JS source files
+  - [`rollup-plugin-import-css`](https://github.com/jleeson/rollup-plugin-import-css) – adds support for `import 'style.css'` in JS source files
   - [`@rollup/plugin-json`](https://github.com/rollup/plugins/tree/master/packages/json) – adds support for `import data from 'data.json'` in JS source files
 
 If you need to add _plugin/preprocessor options_ to any of these, you'll need to install them in your project and pass them as config options in `cayo.config.js`.
@@ -181,10 +188,26 @@ More on [Svelte options](docs/config-reference.md#svelte-options) and [Vite opti
 
 Cayo Components, or Cayos, are Svelte components that are bundled into client friendly JS, and mount to the output HTML during client runtime. These work like having contained Svelte apps within your page, rather than your whole page being a Svelte app. 
 
-Cayos are an opt-in feature, thus they require a few things:
-- to be rendered by _the_ `<Cayo>` component
+Cayos are an opt-in feature, and require a few things:
+- "render" them by using _the_ `<Cayo>` component
   - this is an export of the cayo package, which you will need to import: `import Cayo from 'cayo/component'`
-- to include the `.cayo` infix (e.g., `some.cayo.svelte`).
+- to include the `.cayo` infix in the Cayo's filename (e.g., `some.cayo.svelte`)
+
+The `<Cayo>` component doesn't actually render your Cayos—instead it creates _placeholders_ for them, which are used to mount them to the page while running on the client.
+
+The most basic usage of the `<Cayo>` component, assuming `components/counter.cayo.svelte` exists, and has a prop called `count`:
+```svelte
+<!-- <Cayo> can be rendered in a page or any other normal Svelte component -->
+<script>
+  import Cayo from 'cayo/component';
+</script>
+<!-- Basic usage -->
+<Cayo src="counter.cayo.svelte" />
+<!-- Any additional props will be used to hydrate the Cayo on the client -->
+<Cayo src="counter.cayo.svelte" count={1} />
+```
+
+The `src` prop is the only required prop, and is used to identify which Cayo Component should be rendered later. The value of `src` needs to be the path of a Cayo, but must be relative to the components directory (e.g., `src/components` by default).
 
 ### How Cayos Work
 Assuming your project directory looks something like this:
@@ -217,10 +240,10 @@ And `page.svelte` "registers" that Cayo component, like so:
   import Cayo from 'cayo/component';
 </script>
 <!-- Say you want to start the count as 1 instead of 0, you can pass that value as a prop -->
-<Cayo src="counter.cayo.svelte" count={1}/>
-<!-- This looks kinda weird, but is valid Svelte code -->
+<Cayo src="counter.cayo.svelte" count={1} />
+<!-- This looks kinda weird, but is valid Svelte code, and how you add an entry to a page -->
 <slot name="entry">
-  <script src="index.js" data-cayo-entry />
+  <script src="entry.js" data-cayo-entry />
 </slot>
 ```
 
@@ -257,11 +280,11 @@ An entry serves two purposes:
 1. to be a specific page's JS (like the `main.js` to an `index.html`)
 2. to let you define when and where Cayos are to be rendered
 
-Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entry files per page, or use the same one for all of them. 
+Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entry files per page, or use the same one for all of them. The name `entry.js` is used in the examples, but there are no limitations on the path or name, as long as it's in the `src` directory.
 
 An example of an entry that will render Cayos:
 ```js
-// src/index.js
+// src/entry.js
 
 // When you want to render cayos
 renderCayos()
@@ -278,7 +301,7 @@ To use an entry file in a page:
 <!-- ...other page stuff -->
 <!-- This looks kinda weird, but is valid Svelte code, and is how you assign an entry file to a page -->
 <slot name="entry">
-  <script src="index.js" data-cayo-entry />
+  <script src="entry.js" data-cayo-entry />
 </slot>
 
 ```
