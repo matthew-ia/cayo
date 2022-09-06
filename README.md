@@ -2,7 +2,7 @@
 
 > Pronounced [ka-yo], meaning _small island_
 
-A static HTML generator for the small stuff, with islands of reactivity. Powered by Svelte and Vite. 
+A static HTML generator for the small stuff, with islands of reactivity. Powered by Svelte & Vite. 
 
 ## Why Cayo?
 The main purpose of Cayo is to be a tool that lets you use modern front-end tooling (Svelte, Vite, file-based routing) to generate static HTML output, and having the option to use Svelte components that are reactive on the client.
@@ -463,12 +463,12 @@ Page:
 
 **These other tools are _probably_ what you're looking for. It's recommended to look into these first. (But, if you have constraints they can't support, Cayo might be of help!)**
 
-**Astro** is a web framework for building fast, content-focused websites. Astro is the most similar to Cayo (in concept), and I recommend trying it out first before using Cayo.
+- **Astro** is a web framework for building fast, content-focused websites. Astro is the most similar to Cayo (in concept), and I recommend trying it out first before using Cayo.
 
-**SvelteKit** is a framework for building web applications of all sizes, with a beautiful development experience and flexible filesystem-based routing. Also has the power of Svelte & Vite.
+- **SvelteKit** is a framework for building web applications of all sizes, with a beautiful development experience and flexible filesystem-based routing. Also has the power of Svelte & Vite.
 
-**ElderJS** is an opinionated static site generator and web framework built with SEO in mind. The origin story of ElderJS is quite similar to Cayo's: a developer needed something tailored to their use case, so they decided to make it themselves. ElderJS includes a lot of cool features like "build hooks", and is also zero-JS first!
+- **ElderJS** is an opinionated static site generator and web framework built with SEO in mind. The origin story of ElderJS is quite similar to Cayo's: a developer needed something tailored to their use case, so they decided to make it themselves. ElderJS includes a lot of cool features like "build hooks", and is also zero-JS first!
 
-## Contributions
+## Contributions & Maintenance
 
 Since Cayo was built and designed specifically for a use case at my place of work, it probably won't be actively maintained nor will it take pull requests unless they fix bugs or generally expand upon it's configurability. Forking and building upon Cayo for your own use is heavily encouraged!
