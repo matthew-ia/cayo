@@ -443,7 +443,7 @@ If you want to define global styles external to your Svelte files, you can do so
 
 Entry:
 ```js
-// src/index.js
+// src/entry.js
 import 'styles/global.scss';
 // ...other entry stuff
 ```
@@ -453,7 +453,7 @@ Page:
 
 <!-- ...other page stuff -->
 <slot name="entry">
-  <script src="index.js" data-cayo-entry />
+  <script src="entry.js" data-cayo-entry />
 </slot>
 ```
 
