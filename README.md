@@ -423,7 +423,7 @@ renderCayos(replaceContents);
 
 ## Styles
 
-Since Vite has some [built-in CSS features](https://vitejs.dev/guide/features.html#css), things Sass and CSS Modules just work! Otherwise, [Svelte's component-scoped styles](https://svelte.dev/docs#component-format-style) is likely the best way to write styles while using Svelte. With the `svelte-preprocess` Svelte custom preprocessor, you get Sass and PostCSS support right in your Svelte files:
+Since Vite has some [built-in CSS features](https://vitejs.dev/guide/features.html#css), things like Sass just works! Otherwise, [Svelte's component-scoped styles](https://svelte.dev/docs#component-format-style) is likely the best way to write styles while using Svelte. With the `svelte-preprocess` Svelte custom preprocessor, you get Sass and PostCSS support right in your Svelte files:
 
 ```svelte
 <div class="sassy">I'm some <span>sassy</span> markup.</div>
