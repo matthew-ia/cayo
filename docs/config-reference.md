@@ -61,7 +61,7 @@ Specify the directory where your Cayo Components will be, relative to `src`. Cay
 - **Type**: `string`
 - **Default**: `'public'`
 
-> **Note**
+> **Note**<br>
 > Use this option _instead_ of Vite's `publicDir` option. We pass it to Vite, but also use it internally within Cayo processes.
 
 Specify the directory to be used as the public directory, which is used to serve static assets during development and copied into the `build.outDir` during build. 
@@ -91,7 +91,7 @@ Read about how the [public directory works in Vite](https://vitejs.dev/guide/ass
 - **Type**: `string`
 - **Default**: `'/'`
 
-> **Note**
+> **Note**<br>
 > Use this option _instead_ of Vite's `base` option. We pass it to Vite, but also use it internally within Cayo processes.
 
 Base public path when served in development or production.
@@ -183,7 +183,7 @@ There are a few options that Cayo needs to control in order to work, so changing
 
 Not all Vite options are directly used by Cayo. Most of them are passed to the dev process, which uses `vite dev`. `vite.build.rollupOptions` is the only Vite-specific option passed during both `cayo dev` and `cayo build`. 
 
-> **Note**
+> **Note**<br>
 > Cayo shares some options with Vite, such as `publicDir` and `base` and `root` (as `projectRoot`). These should be defined at top level of your Cayo config, not in the `vite` option object, but will still be passed to Vite as needed.
 
 Vite options are passed via the Cayo config:
