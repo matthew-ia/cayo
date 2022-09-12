@@ -37,7 +37,6 @@ To build your project:
 cayo build
 ```
 
-
 You can also add Cayo to an existing project. It is recommended that you take a look at the [project structure docs](#project-structure) and the [template](./template/), as there is a required project structure for a Cayo project. 
 
 Install `cayo`:
@@ -185,15 +184,24 @@ If you need to add _plugin/preprocessor options_ to any of these, you'll need to
 
 More on [Svelte options](docs/config-reference.md#svelte-options) and [Vite options](docs/config-reference.md#vite-options) in the [Configuration Reference](docs/config-reference.md).
 
+## Components
+
+By default, all components are prerendered. This means their lifecycle ends after they mount and finish one run cycle, and the UI state after the first cycle is rendered to static HTML. This also means that any JS you use within the component's 
+`<script>` element "compiles away" after it's used to render the component. These components are "server side rendered", but are done so locally within Cayo processes rather than on a production server.
+
+Because the JS doesn't get taken to the client, this allows you to run any JS you want in order to render content, even Node built-in packages, like `path` or `fs`, and access global variables like `process`. This can be helpful if you want to extend rendering conditions that are specific to your own project's setup or workflow.
+
+But, what if you _do_ want runtime reactivity within a component? Enter, [Cayo Components](#cayo-components).
+
 ## Cayo Components
 
 Cayo Components, or Cayos, are Svelte components that are bundled into client friendly JS, and mount to the output HTML during client runtime. These work like having contained Svelte apps within your page, rather than your whole page being a Svelte app. 
 
 Cayos are an opt-in feature, and require a few things. You must:
-- "Register" them by using the built-in `<Cayo>` component
+- _Register_ them by using the `<Cayo>` component
   - You will need to import from the `cayo` package: `import Cayo from 'cayo/component'`
-- Include the `.cayo` infix in the Cayo's filename (e.g., `some.cayo.svelte`)
-- Call the `renderCayos()` function in an [entry](#entries) for the page(s) rendering the Cayo
+- Include the `.cayo` infix in your Cayo's filename (e.g., `some.cayo.svelte`)
+- Call the `renderCayos()` function in an [entry](#entries) for the page rendering the Cayo
 
 The `<Cayo>` component doesn't actually render your Cayos—instead it creates _placeholders_ for them, which are used to mount them to the page.
 
@@ -205,6 +213,7 @@ Assuming `components/counter.cayo.svelte` exists, and has a prop `count`:
 <script>
   import Cayo from 'cayo/component';
 </script>
+<!-- Register your Cayo with the <Cayo> component -->
 <!-- Basic usage -->
 <Cayo src="counter.cayo.svelte" />
 <!-- Any additional props will be used to hydrate the Cayo on the client -->
@@ -237,7 +246,7 @@ And `counter.cayo.svelte` has some reactive code you want to run on the client:
 <button on:click={() => count++}>Increment</button>
 ```
 
-And `page.svelte` "registers" that Cayo component, like so:
+And `page.svelte` registers that Cayo component, like so:
 ```svelte
 <!-- src/pages/page.svelte -->
 <script>
@@ -262,7 +271,7 @@ The resulting output will be a placeholder for the component. By default, this p
 
 Cayo uses the [Svelte Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api) to then hydrate these components at runtime. All registered Cayos will have their hydration code dynamically built in a file called `cayo-runtime.js`. Each input (page) will have it's own `cayo-runtime.js` file in the output. The code in `cayo-runtime.js` includes the logic that will mount and hydrate these components. 
 
-[Entries](#entries) are where you actually will make use this generated cayo runtime code. 
+[Entries](#entries) are where you actually will make use of this generated cayo runtime code. 
 
 ### Props
 
