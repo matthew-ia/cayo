@@ -150,7 +150,7 @@ Your template doesn't even need to be a valid HTML document—you could be outpu
 %cayo.body%
 ```
 
-## .cayo
+### .cayo
 
 Once you run your project, you'll see directory named `.cayo` in your project's root. This directory is used for Cayo's internal output. Its contents are served during `cayo dev`, and used to build your project during `cayo build`. 
 
