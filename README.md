@@ -380,7 +380,7 @@ function cb(node) {
 
 A Cayo will always be rendered as a child of the target node is, per [Svelte's Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api).
 
-#### Example
+#### Callback Example
 Say you want to render the Cayos wrapped in a custom placeholder:
 ```js
 // src/index.js
@@ -398,7 +398,7 @@ function customPlaceholder(node) {
 renderCayos(customPlaceholder);
 ```
 
-#### Loading State Example
+#### Loading State Callback Example
 
 Say you want to render something in a Cayo before it gets hydrated, like a "loading" indicator. Using the same component from earlier, `counter.cayo.svelte`:
 
