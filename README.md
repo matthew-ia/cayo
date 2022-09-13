@@ -357,26 +357,15 @@ export default renderCayos(cb) {
 }
 ```
 
-#### Returns
-`renderCayos()` returns a object that stores all of the Cayo instances of a page. Each keyed object within it looks like the following:
-```js
-{
-  <cayoId>: {
-    target: // the target node for the instance
-    instance: // the Svelte component instance object
-  }
-}
-```
-
 #### Callback Argument
-`renderCayos()` takes one argument: `cb`, which is a callback that should returns the node to mount the component to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic as the callback. 
+`renderCayos()` takes one argument: `cb`, which is a callback that should return the node to mount the component to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic via the callback. 
 
 `cb` should be a function that matches this signature:
 ```js
 /**
  * Callback for renderCayos
  * 
- * @param {HTMLElement} node the placeholder node (the cayo instance placeholder <div>)
+ * @param {HTMLElement} node – the placeholder node (the cayo instance placeholder <div>)
  * @return {HTMLElement} the target node
  */
 function cb(node) {
@@ -389,23 +378,27 @@ function cb(node) {
 }
 ```
 
-A Cayo will always be rendered as a child of whatever the target node is, per [Svelte's Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api).
+A Cayo will always be rendered as a child of the target node is, per [Svelte's Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api).
 
-For example:
+#### Example
+Say you want to render the Cayos wrapped in a custom placeholder:
 ```js
 // src/index.js
 
 // "Where" you want to render cayos
 function customPlaceholder(node) {
-  const placeholder = document.createElement('span');
-  node.innerHTML = '';
+  // Say we want to 
+  //   1. use a <section> element as the wrapper instead of a <div>
+  //   2. use the Cayo ID as the element's id
+  //   3. use a custom class
+  node.outerHTML = `<section id="${node.dataset.cayoId}" class="custom-placeholder"></section>`;
   return node;
 }
 // "When" you want to render cayos
 renderCayos(customPlaceholder);
 ```
 
-#### Another Example
+#### Loading State Example
 
 Say you want to render something in a Cayo before it gets hydrated, like a "loading" indicator. Using the same component from earlier, `counter.cayo.svelte`:
 
@@ -437,6 +430,17 @@ renderCayos(replaceContents);
 ```
 
 **Note:** `getProps()` is also generated in `cayo-runtime.js`. It handles parsing the props as a string, to use the props to hydrate the Cayo instance.
+
+#### Return Cayos
+`renderCayos()` returns a object that stores all of the Cayo instances of a page. Each keyed object within it looks like the following:
+```js
+{
+  <cayoId>: {
+    target: // the target node for the instance
+    instance: // the Svelte component instance object
+  }
+}
+```
 
 ## Styles
 
