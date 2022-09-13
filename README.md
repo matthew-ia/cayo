@@ -357,10 +357,7 @@ export default renderCayos(cb) {
 }
 ```
 
-
-#### Callback Argument
-`renderCayos()` takes one argument: `cb`, which is a callback that should returns the node to mount the component to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic as the callback. 
-
+#### Returns
 `renderCayos()` returns a object that stores all of the Cayo instances of a page. Each keyed object within it looks like the following:
 ```js
 {
@@ -370,6 +367,9 @@ export default renderCayos(cb) {
   }
 }
 ```
+
+#### Callback Argument
+`renderCayos()` takes one argument: `cb`, which is a callback that should returns the node to mount the component to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic as the callback. 
 
 `cb` should be a function that matches this signature:
 ```js
