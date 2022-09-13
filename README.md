@@ -174,7 +174,7 @@ For all options, read the [Configuration Reference](docs/config-reference.md).
 ### Plugins & Preprocessors
 You can extend Cayo with Vite plugins, Rollup plugins, and Svelte preprocessors, by configuring respective options in the Cayo config. 
 
-By default, Cayo already internally uses a few plugins & preprocessors:
+By default, Cayo internally uses a few plugins & preprocessors:
 - Svelte Preprocessors
   - [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess) – _one preprocessor to rule them all_. This enables support for things like Sass, PostCSS, Pug, etc., all with zero config, right in your Svelte files. 
 - Rollup Plugins
@@ -182,21 +182,21 @@ By default, Cayo already internally uses a few plugins & preprocessors:
   - [`rollup-plugin-import-css`](https://github.com/jleeson/rollup-plugin-import-css) – adds support for `import 'style.css'` in JS source files
   - [`@rollup/plugin-json`](https://github.com/rollup/plugins/tree/master/packages/json) – adds support for `import data from 'data.json'` in JS source files
 
-If you need to add _plugin/preprocessor options_ to any of these, you'll need to install them in your project and pass them as config options in `cayo.config.js`.
+If you need to add _plugin/preprocessor options_ to these, you'll need to install the necessary packages locally, and import and use them as config options in `cayo.config.js`.
 
 More on [Svelte options](docs/config-reference.md#svelte-options) and [Vite options](docs/config-reference.md#vite-options) in the [Configuration Reference](docs/config-reference.md).
 
 > **Warning**<br>
-> Vite plugins will be passed to Cayo, but it's possible that certain plugins may break Cayo if they deal with handling the input differently than vanilla Vite or generate additional output files. Cayo acts like a plugin itself, by handling your source files and transforming them into files that vanilla Vite expects (e.g., the file-based router is similar to Vite multi-page plugins, which you wouldn't need anyway since Cayo does this).
+> Vite plugins will be passed to Cayo, but it's possible that certain plugins may break Cayo if they deal with handling the input differently than vanilla Vite or generate additional output files. Cayo acts like a plugin itself, by handling your source files and transforming them into files that vanilla Vite expects (e.g., the built-in "file-based router" is similar to Vite multi-page plugins).
 
 ## Components
 
 By default, all components are prerendered. This means their lifecycle ends after they mount and finish one run cycle, and the UI state after the first cycle is rendered to static HTML. This also means that any JS you use within the component's 
-`<script>` element "compiles away" after it's used to render the component. These components are "server side rendered", but are done so locally within Cayo processes rather than on a production server.
+`<script>` element "compiles away" after it's used to render the component. These components are essentially "server side rendered", but are done so locally within Cayo processes rather than on a production server.
 
-Because the JS doesn't get taken to the client, this allows you to run any JS you want in order to render content, even Node built-in packages, like `path` or `fs`, and access global variables like `process`. This can be helpful if you want to extend rendering conditions that are specific to your own project's setup or workflow.
+Because the JS doesn't get taken to the client, this allows you to use any JS you want in order to render content, even Node built-in packages, like `path` or `fs`, and access global Node variables like `process`. This can be helpful if you want to extend rendering conditions that are specific to your own project's setup or workflow.
 
-But, what if you _do_ want runtime reactivity within a component? Enter, [Cayo Components](#cayo-components).
+But, what if you _do_ want runtime reactivity within a component? Enter, Cayo Components.
 
 ## Cayo Components
 
@@ -210,7 +210,7 @@ Cayos are an opt-in feature, and require a few things. You must:
 
 The `<Cayo>` component doesn't actually render your Cayos—instead it creates _placeholders_ for them, which are used to mount them to the page.
 
-The most basic usage of the `<Cayo>` component: 
+### Basic Usage
 
 Assuming `components/counter.cayo.svelte` exists, and has a prop `count`:
 ```svelte
@@ -225,7 +225,7 @@ Assuming `components/counter.cayo.svelte` exists, and has a prop `count`:
 <Cayo src="counter.cayo.svelte" count={1} />
 ```
 
-The `src` prop is the only required prop, and is used to identify which Cayo Component should be rendered later. The value of `src` needs to be the path of a Cayo, but must be relative to the components directory (e.g., `src/components` by default).
+The `src` prop is the only required prop, and is used to identify which Cayo Component should be rendered later. The value of `src` needs to be the path of a Cayo, but must be relative to the components directory (e.g., `src/components` by default). For example: say your Cayo was at `components/nested/counter.cayo.svelte`, your usage would need to change to `<Cayo src="nested/counter.cayo.svelte" />`
 
 ### How Cayos Work
 Assuming your project directory looks something like this:
@@ -259,13 +259,14 @@ And `page.svelte` registers that Cayo component, like so:
 </script>
 <!-- Say you want to start the count as 1 instead of 0, you can pass that value as a prop -->
 <Cayo src="counter.cayo.svelte" count={1} />
-<!-- This looks kinda weird, but is valid Svelte code, and is how you add an entry to a page -->
+<!-- This looks kinda weird, but is valid Svelte code, 
+and is how you add an entry to a page -->
 <slot name="entry">
   <script src="entry.js" data-cayo-entry />
 </slot>
 ```
 
-The resulting output will be a placeholder for the component. By default, this placeholder be used as the target for that Svelte component to mount to:
+The resulting output will be a placeholder for the component. By default, this placeholder is used as the target for that Svelte component to mount to:
 ```html
 <!-- .planter/index.html -->
 
@@ -328,7 +329,8 @@ To use an entry file in a page:
 
 - Wrapping it in a `<slot>` is required
     - This is because Svelte only allows one `<script>` at the root of a component. Using `<slot>` here is a bit of a hack, but is valid Svelte.
-    - The `<slot>` doesn't need to be named, it's just for readability here. But if you need to use `<slot>` normally in your page, you do need to make this a named slot (can be named anything). 
+    - The `<slot>` doesn't need to be named, it's just for readability here. But if you need to use `<slot>` normally in your page, you do need to make this a named slot (can be named anything).
+    - In Cayo, pages aren't passed any children to render, so `<slot>` will be unused other than in this use case.
 - The `data-cayo-entry` attribute is required, and is the actual indicator that this script should be used as the entry.
 - The `src` attribute should point at JS file that is **relative to the [`src` directory](#source-directory)**, rather than relative to the page itself
 
@@ -357,7 +359,9 @@ export default renderCayos(cb) {
 
 
 #### Callback Argument
-`renderCayos()` returns a object with all of the cayo instances. Each keyed object within it looks like the following:
+`renderCayos()` takes one argument: `cb`, which is a callback that should returns the node to mount the component to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic as the callback. 
+
+`renderCayos()` returns a object that stores all of the Cayo instances of a page. Each keyed object within it looks like the following:
 ```js
 {
   <cayoId>: {
@@ -366,8 +370,6 @@ export default renderCayos(cb) {
   }
 }
 ```
-
-`renderCayos()` takes one argument: `cb`, which is a callback that should returns the node to mount the component to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic as the callback. 
 
 `cb` should be a function that matches this signature:
 ```js
@@ -383,7 +385,7 @@ function cb(node) {
   // or, use a different node that exists on the page
   // ...whatever you want!
 
-  // finally, return whatever node you want to use as the target
+  // finally, return the node you want to use as the target
 }
 ```
 
