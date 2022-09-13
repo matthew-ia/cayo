@@ -5,13 +5,13 @@
 A static HTML generator for the small stuff, with islands of reactivity. Powered by Svelte & Vite. 
 
 ## Why Cayo?
-The main purpose of Cayo is to be a tool that lets you use modern front-end tooling (Svelte, Vite, file-based routing) to generate static HTML output, and having the option to use Svelte components that are reactive on the client.
+The main purpose of Cayo is to be a tool that lets you use modern front-end tooling (Svelte, Vite, file-based routing) to generate static HTML output, and have the option to use Svelte components that are reactive on the client.
 
-- **Cayo prerenders your pages to HTML**. Essentially, it enables the use of Svelte for generating static content as if it's a templating language. You can think of Cayo's primary function as being a Svelte-to-HTML generator.
+- **[Cayo prerenders](#components) your pages to HTML**. Essentially, it enables the use of Svelte for generating static content as if it's a templating language. You can think of Cayo's primary function as being a Svelte-to-HTML generator.
 
-- **Cayo lets you define where you _do_ want reactivity, with Cayo Components**. If you want Svelte reactivity, you can have it, with Cayo Components (or "cayos" a.k.a. the "islands of reactivity"). These are components that are individually bundled and are mounted and run as a Svelte client-side component.
+- **Cayo lets you define where you _do_ want reactivity, with [Cayo Components](#cayo-components)**. If you want Svelte reactivity, you can have it, with Cayo Components (or "cayos" a.k.a. the "islands of reactivity"). These are components that are individually bundled and are mounted and run as a Svelte client-side component.
 
-- **Cayo is built for that person who has constraints on their output**—someone who needs control over their HTML generation workflow, and wants to use tools like Svelte and Vite. All while not having to buy into the typical use of creating an _entire website_, as frameworks are typically designed to be used.
+- **Cayo is built for that person who has constraints on their output**—someone who needs control over their HTML generation workflow, and wants to use tools like [Svelte](https://svelte.dev) and [Vite](https://vitejs.dev). All while not having to buy into the typical use of creating an _entire website_, as frameworks are typically designed to be used.
 
 - **Cayo is not a feature-rich web app framework** like Astro or SvelteKit. Read more about [how Cayo differs](#cayo--the-rest) from similar tools.
 
@@ -46,7 +46,7 @@ npm i -D cayo
 
 ## Project Structure
 
-These folders will be present in your project if you use the template. By default, if your project doesn't have this structure it, `cayo` will not successfully run. However, all of these directories can be customized with [configuration options](docs/config-reference.md).
+These folders will be present in your project if you use the template. By default, if your project doesn't have this directory structure, `cayo` will not successfully run. However, all of these directories can be customized with [configuration options](docs/config-reference.md).
 
 **Example**
 ```
@@ -65,30 +65,32 @@ public/
 
 ### Source Directory
 Most of your projects files should go in `src`. This is where pages, components, styles, etc. should go. These files will be watched while running `cayo dev`, and used to build your project.
-- `pages` contains the pages, or "inputs" of your project (they don't have to be a true page)
+- `pages` contains the pages, or "inputs" of your project 
 - `components` contains your Cayo Components, and can contain any other components
 - `__template.svelte` is your page template 
 
 ### Pages
-Cayo uses a file-based routing system, meaning the file structure within the pages directory gets used to generate output files in the right structure. All pages are expected to be valid Svelte components. Since your outputs just become regular-old HTML files, there is no real "routing" going on here beyond the expected default of HTML files being served on a web server. Pages, or outputs, will be served at the path based on their name and directory structure within the pages directory. Cayo will expect all files with the `.svelte` extension in the pages directory to be a page. 
+Cayo uses a file-based routing system, meaning the file structure within the pages directory gets used to generate output files. All pages are expected to be valid Svelte components. Since your outputs just become regular-old HTML files, there is no real "routing" going on here beyond the expected default of HTML files being served on a web server. Pages, or outputs, will be served at the path based on their name and directory structure within the pages directory. Cayo will expect all files with the `.svelte` extension in the pages directory to be a page.
 
 #### Index Page
-A file named `index.svelte` at the root of the pages directory will map to `index.html` as expected, and be served at the root of as expected (`/`, `host/`).
+A file named `index.svelte` at the root of the pages directory will map to `index.html` as expected, and be served at the host root (`/`, `<host-domain>/`).
 
 #### Nested Pages
-A nested page will be served at a nested URL based on it's own path, relative to the pages directory. In the output, every page other than `pages/index.svelte` gets mapped to an `index.html` in a relatively named directory. For example,  `nested/page.svelte` gets mapped to `<outDir>/nested/page/index.html`.
+A nested page will be served at a nested URL based on it's own path, relative to the pages directory. In the output, every page gets mapped to an `index.html` in a relatively named directory. For example,  `nested/page.svelte` gets mapped to `<outDir>/nested/page/index.html`.
 
 A "portfolio site" example:
 1. Given a page named `pages/projects/project-1.svelte` 
 2. The page will be mapped to `<outDir>/projects/project-1/index.html` 
 3. Which would be served at `/projects/project-1`
 
-Because Cayo just uses each page's path to construct the output structure, you can also have nested index pages as expected:
+<!-- TODO: support nested index pages 
+Cayo _also_ allows you to explicitly define nested index pages:
 1. Given a page named `pages/projects/index.svelte`
 2. The page will be mapped to `<outDir>/projects/index.html`
 3. Which would be served at `/projects`
+-->
 
-This allows you to configure your site structure without needing to worry about defining routes programmatically, like you might do when using Svelte without SvelteKit. 
+This allows you to configure your site structure without needing to worry about defining routes programmatically, which you might need to do if you were using Svelte without Cayo or another tool like SvelteKit.
 
 To expand upon the portfolio example, your pages directory could look like this, and would be served at the expected routes:
 ```
@@ -101,12 +103,12 @@ pages/
 ```
 
 ### Template File
-The Template file is required, and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with the respective markup for each page. Your template file should be at root of the `src` directory, and be named `__template.svelte`. You can change the expected name with [a config option](docs/config-reference.md#templateName).
+The Template file is required, and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with the respective markup for each page. Your template file should be at root of the `src` directory, and be named `__template.svelte`. You can change the expected name with [with the Cayo Config](docs/config-reference.md#templateName).
 
-This file is a Svelte component, so you can also import other Svelte components or use rendering logic. For example, you could render certain markup only for `development` and not `production` (i.e., during `cayo dev` vs. `cayo build`).
+This file is a Svelte component, so you can also import other Svelte components or add rendering logic. For example, you could render certain markup only for `development`, but not `production` (i.e., during `cayo dev` vs. `cayo build`).
 
 > **Note**<br>
-> Despite being a Svelte component, the Template file does not support the `<slot>` element, because it is prerendered by itself before it is used to prerender page components. The placeholder `%cayo.body%` replaces the usage for `<slot>` in a template file.
+> Despite being a Svelte component, the Template file does not support the `<slot>` element, because it itself is prerendered _before_ it is used to prerender page components. The placeholder `%cayo.body%` replaces the basic usage for `<slot>`.
 
 Template files support the following placeholders:
 
@@ -121,7 +123,7 @@ Template files support the following placeholders:
 - `%cayo.head%` – `<link>` and `<script>` elements needed by a page, plus any `<svelte:head>` content
 
 #### Example
-Technically all of these placeholders are optional, and don't have to be in any particular place.
+Technically all of these placeholders are optional, and don't have to be in any particular place within the markup.
 
 ```svelte
 <!-- src/__template.svelte -->
@@ -154,7 +156,7 @@ Your template doesn't even need to be a valid HTML document—you could be outpu
 
 Once you run your project, you'll see directory named `.cayo` in your project's root. This directory is used for Cayo's internal output. Its contents are served during `cayo dev`, and used to build your project during `cayo build`. 
 
-Thi directory can be deleted at any time. Every time you run `cayo dev` or `cayo build` it will be recreated and updated as needed.
+This directory can be deleted at any time. Every time you run `cayo dev` or `cayo build` it will be recreated and updated as needed.
 
 ## Config
 
@@ -170,7 +172,7 @@ export default {
 For all options, read the [Configuration Reference](docs/config-reference.md).
 
 ### Plugins & Preprocessors
-You can extend Cayo with Vite plugins (and Rollup plugins), or Svelte preprocessors, by configuring respective options in the Cayo config. 
+You can extend Cayo with Vite plugins, Rollup plugins, and Svelte preprocessors, by configuring respective options in the Cayo config. 
 
 By default, Cayo already internally uses a few plugins & preprocessors:
 - Svelte Preprocessors
@@ -183,6 +185,9 @@ By default, Cayo already internally uses a few plugins & preprocessors:
 If you need to add _plugin/preprocessor options_ to any of these, you'll need to install them in your project and pass them as config options in `cayo.config.js`.
 
 More on [Svelte options](docs/config-reference.md#svelte-options) and [Vite options](docs/config-reference.md#vite-options) in the [Configuration Reference](docs/config-reference.md).
+
+> **Warning**<br>
+> Vite plugins will be passed to Cayo, but it's possible that certain plugins may break Cayo if they deal with handling the input differently than vanilla Vite or generate additional output files. Cayo acts like a plugin itself, by handling your source files and transforming them into files that vanilla Vite expects (e.g., the file-based router is similar to Vite multi-page plugins, which you wouldn't need anyway since Cayo does this).
 
 ## Components
 
@@ -473,8 +478,8 @@ Page:
 
 **These other tools are _probably_ what you're looking for. It's recommended to look into these first. (But, if you have constraints they can't support, Cayo might be of help!)**
 
-- **Astro** is a web framework for building fast, content-focused websites. Astro is the most similar to Cayo (in concept), and I recommend trying it out first before using Cayo.
+- **[Astro](https://astro.build/)** is a web framework for building fast, content-focused websites. Astro is the most similar to Cayo (in concept), and I recommend trying it out first before using Cayo.
 
-- **SvelteKit** is a framework for building web applications of all sizes, with a beautiful development experience and flexible filesystem-based routing. Also has the power of Svelte & Vite.
+- **[SvelteKit](https://kit.svelte.dev/)** is a framework for building web applications of all sizes, with a beautiful development experience and flexible filesystem-based routing. Also has the power of Svelte & Vite.
 
-- **ElderJS** is an opinionated static site generator and web framework built with SEO in mind. The origin story of ElderJS is quite similar to Cayo's: a developer needed something tailored to their use case, so they decided to make it themselves. ElderJS includes a lot of cool features like "build hooks", and is also zero-JS first!
+- **[ElderJS](https://elderguide.com/tech/elderjs/)** is an opinionated static site generator and web framework built with SEO in mind. The origin story of ElderJS is quite similar to Cayo's: some developers needed something tailored to their use case, so they decided to make it themselves. ElderJS includes a lot of cool features like "build hooks", SEO as a priority, and is also zero-JS first!
