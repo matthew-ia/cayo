@@ -204,9 +204,9 @@ Cayo Components, or Cayos, are Svelte components that are bundled into client fr
 
 Cayos are an opt-in feature, and require a few things. You must:
 - _Register_ them by using the `<Cayo>` component
-  - You will need to import from the `cayo` package: `import Cayo from 'cayo/component'`
+  - You will need to import from the `cayo` package: `import { Cayo } from 'cayo'`
 - Include the `.cayo` infix in your Cayo's filename (e.g., `some.cayo.svelte`)
-- Call the `renderCayos()` function in an [entry](#entries) for the page rendering the Cayo
+- Use the [Render Hook](#render-hook) in an [entry](#entries) for the page rendering the Cayo
 
 The `<Cayo>` component doesn't actually render your Cayos—instead it creates _placeholders_ for them, which are used to mount them to the page.
 
@@ -216,7 +216,7 @@ Assuming `components/counter.cayo.svelte` exists, and has a prop `count`:
 ```svelte
 <!-- <Cayo> can be rendered in a page or any other normal Svelte component -->
 <script>
-  import Cayo from 'cayo/component';
+  import { Cayo } from 'cayo';
 </script>
 <!-- Register your Cayo with the <Cayo> component -->
 <!-- Basic usage -->
@@ -255,15 +255,12 @@ And `page.svelte` registers that Cayo component, like so:
 ```svelte
 <!-- src/pages/page.svelte -->
 <script>
-  import Cayo from 'cayo/component';
+  import { Cayo, Entry } from 'cayo';
 </script>
 <!-- Say you want to start the count as 1 instead of 0, you can pass that value as a prop -->
 <Cayo src="counter.cayo.svelte" count={1} />
-<!-- This looks kinda weird, but is valid Svelte code, 
-and is how you add an entry to a page -->
-<slot name="entry">
-  <script src="entry.js" data-cayo-entry />
-</slot>
+<!-- Declare the entry -->
+<Entry src="entry.js" />
 ```
 
 The resulting output will be a placeholder for the component. By default, this placeholder is used as the target for that Svelte component to mount to:
@@ -301,7 +298,21 @@ An entry serves two purposes:
 1. to be a specific page's JS (like the `main.js` to an `index.html`)
 2. to let you define when and where Cayos are to be rendered
 
-Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entry files per page, or even use the same one for all pages. The name `entry.js` is used in the examples, but there are no limitations on the path or name, as long as it's in the `src` directory.
+Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entry files per page, or even use the same one for all pages.
+
+Adding an entry to a page:
+```svelte
+<!-- src/pages/page.svelte -->
+<script>
+  import { Entry } from 'cayo';
+</script>
+<!-- ...other page stuff -->
+<Entry src="entry.js" />
+```
+
+Using the `<Entry>` component tells Cayo to use that file as the page's entry. The `src` attribute should point at JS file that is **relative to the [`src` directory](#source-directory)**, rather than relative to the page itself.
+
+Note: the name `entry.js` is used in the examples, but there are no limitations on the path or name, as long as it's in the `src` directory.
 
 An example of an entry that will render Cayos:
 ```js
@@ -311,32 +322,13 @@ An example of an entry that will render Cayos:
 renderCayos()
 ```
 
-The glaring question is: "where does `renderCayos` come from? It's not imported in the file?"
+A glaring question here may be: "where does `renderCayos` come from? It's not imported in the file?" `renderCayos` is the [Render Hook](#render-hook), which is some Cayo magic. As long as it is called in an Entry file, pages using that Entry will have its Cayos rendered. Calling `renderCayos` can be thought of as "render Cayos now", wherever it is in your entry's logic.
 
-Cayo generates a file for the client called `cayo-runtime.js`. This file has a default export that corresponds to `renderCayos`. Cayo prepends `import renderCayos from 'cayo-runtime.js'` when it processes your entry files for output. (It will only prepend the `renderCayos` import at the head of your entry if there are Cayos registered on the page that is using that entry.)
+### Render Hook
 
-To use an entry file in a page:
-```svelte
-<!-- src/pages/page.svelte -->
+The Render Hook is a function named `renderCayos` that allows you to define when and how your Cayos should be rendered. You do not need to import the function; when Cayo sees this function being called in an Entry file, it will handle resolving the import for the hook.
 
-<!-- ...other page stuff -->
-<!-- This looks kinda weird, but is valid Svelte code, and is how you assign an entry file to a page -->
-<slot name="entry">
-  <script src="entry.js" data-cayo-entry />
-</slot>
-```
-**A few notes on the markup here:**
-
-- Wrapping it in a `<slot>` is required
-    - This is because Svelte only allows one `<script>` at the root of a component. Using `<slot>` here is a bit of a hack, but is valid Svelte.
-    - The `<slot>` doesn't need to be named, it's just for readability here. But if you need to use `<slot>` normally in your page, you do need to make this a named slot (can be named anything).
-    - In Cayo, pages aren't passed any children to render, so `<slot>` will be unused other than in this use case.
-- The `data-cayo-entry` attribute is required, and is the actual indicator that this script should be used as the entry.
-- The `src` attribute should point at JS file that is **relative to the [`src` directory](#source-directory)**, rather than relative to the page itself
-
-### renderCayos
-
-The code in `cayo-runtime.js` that is generated looks like:
+The generated hook function looks something like this in `cayo-runtime.js` files:
 ```js
 // cayo-runtime.js
 export default renderCayos(cb) {
@@ -360,9 +352,9 @@ export default renderCayos(cb) {
 **Note:** `getProps()` is also generated in `cayo-runtime.js`. It handles parsing the props as a string, to use the props to hydrate the Cayo instance.
 
 #### Callback Argument
-`renderCayos()` takes one argument: `cb`, which is a callback that should return the node to mount the component to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic via the callback. 
+The Render Hook takes one argument, a callback: `renderCayos(callback)`. The callback should return the node that the component should be mounted to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic via the callback. 
 
-`cb` should be a function that matches this signature:
+The callback argument should be a function that matches this signature:
 ```js
 /**
  * Callback for renderCayos
@@ -401,25 +393,22 @@ renderCayos(customPlaceholder);
 ```
 
 #### Loading State Callback Example
-
 Say you want to render something in a Cayo before it gets hydrated, like a "loading" indicator. Using the same component from earlier, `counter.cayo.svelte`:
 
 ```svelte
 <!-- src/pages/page.svelte -->
 <script>
-  import Cayo from 'cayo/component';
+  import { Cayo, Entry } from 'cayo';
 </script>
 <Cayo src="counter.cayo.svelte">
   <!-- This will render inside the placeholder because the <Cayo> component renders a <slot> -->
   Loading counter...
 </Cayo>
-<slot name="entry">
-  <script src="index.js" data-cayo-entry />
-</slot>
+<Entry src="entry.js" />
 ```
 
 ```js
-// src/index.js
+// src/entry.js
 
 // "Where" you want to render cayos
 // Also, do something to the target node before the component is mounted
@@ -432,13 +421,22 @@ renderCayos(replaceContents);
 ```
 
 #### Return Cayos
-`renderCayos()` returns a object that stores all of the Cayo instances of a page. Each keyed object within it looks like the following:
+The Render Hook returns a object that stores all of the Cayo instances of a page. Each keyed object within it looks like the following:
 ```js
 {
   <cayoId>: {
     target: // the target node for the instance
     instance: // the Svelte component instance object
   }
+}
+```
+Example:
+```js
+let cayos = renderCayos();
+for (const [key, cayo] of Object.entries(cayos)) {
+  // Do something with the cayo targets or instances
+  console.log(key, cayo.target);
+  console.log(key, cayo.instance);
 }
 ```
 
