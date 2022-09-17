@@ -326,7 +326,7 @@ Using the Render Hook in an entry:
 renderCayos()
 ```
 
-It is indeed just that simple! But, a glaring question here may be: "where does `renderCayos` come from? It's not imported in the file?" **_Cayo magic_!** (Cayo adds an import for `renderCayos` in your entries as it processes your files.) 
+It is indeed just that simple! But, a glaring question here may be: "where does `renderCayos` come from? It's not imported in the file?" The answer: _Cayo magic_! (Cayo adds an import for `renderCayos` in your entries as it processes your files.) 
 
 As long as it is called in an entry, pages using that entry have its Cayos rendered. Calling `renderCayos` can be thought of as "render Cayos now", wherever it is in your entry's logic.
 
