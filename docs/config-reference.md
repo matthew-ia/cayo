@@ -2,17 +2,17 @@
 
 ## Config File
 
-Cayo is not "zero config" but it does support having _no_ config file. Adding a `cayo.config.js` file to your project allows you to configure most of the things that Cayo needs & expects, such as paths for pages, components, and even the template filename.
+Cayo is not "zero config" because it does require a particular [project structure](../README.md#project-structure), but it does support having _no config file_. However, adding a `cayo.config.js` file to your project allows you to configure most of the things that Cayo needs & expects, such as paths for pages, components, and even the template filename.
 
 ### Example
 ```js
 // cayo.config.js
 export default {
   // config options
-  pages: 'outputs', // default: 'pages'
+  pages: 'outputs',    // default: 'pages'
   components: 'cayos', // default: 'components'
   build: {
-    outDir: 'build', // default: 'dist'
+    outDir: 'build',   // default: 'dist'
   },
   svelte: {
     // Svelte options, e.g., for defining preprocessors for svelte.preprocess
