@@ -298,7 +298,7 @@ An entry serves two purposes:
 1. to be a specific page's JS (like the `main.js` to an `index.html`)
 2. to let you define when and where Cayos are to be rendered
 
-Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entry files per page, or even use the same one for all pages.
+Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entries per page, or even use the same file for all pages.
 
 Adding an entry to a page:
 ```svelte
@@ -314,7 +314,11 @@ Using the `<Entry>` component tells Cayo to use that file as the page's entry. T
 
 Note: the name `entry.js` is used in the examples, but there are no limitations on the path or name, as long as it's in the `src` directory.
 
-An example of an entry that will render Cayos:
+### Render Hook
+
+The Render Hook is a function named `renderCayos` that allows you to define when and how your Cayos should be rendered. You do not need to import the function; when Cayo sees this function being called in an entry, it will handle resolving the import for the hook.
+
+An example of an entry using the Render Hook:
 ```js
 // src/entry.js
 
@@ -322,11 +326,9 @@ An example of an entry that will render Cayos:
 renderCayos()
 ```
 
-A glaring question here may be: "where does `renderCayos` come from? It's not imported in the file?" `renderCayos` is the [Render Hook](#render-hook), which is some Cayo magic. As long as it is called in an Entry file, pages using that Entry will have its Cayos rendered. Calling `renderCayos` can be thought of as "render Cayos now", wherever it is in your entry's logic.
+A glaring question here may be: "where does `renderCayos` come from? It's not imported in the file?" **_Cayo magic_!** (Cayo adds an import for `renderCayos` in your entries as it processes your files.) 
 
-### Render Hook
-
-The Render Hook is a function named `renderCayos` that allows you to define when and how your Cayos should be rendered. You do not need to import the function; when Cayo sees this function being called in an Entry file, it will handle resolving the import for the hook.
+As long as it is called in an entry, pages using that entry have its Cayos rendered. Calling `renderCayos` can be thought of as "render Cayos now", wherever it is in your entry's logic.
 
 The generated hook function looks something like this in `cayo-runtime.js` files:
 ```js
