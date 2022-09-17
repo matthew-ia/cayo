@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "node cayo dev --projectRoot test",
-    "compile": "node scripts/compileCayoComponent"
+    "build": "node scripts/build"
   },
   "imports": {
     "#lib/*": "./lib/*",
@@ -14,10 +14,12 @@
   "bin": {
     "cayo": "cayo.js"
   },
-  "svelte": "./dist/cayo.svelte.js",
+  "svelte": "./dist/index.js",
   "exports": {
-    "./package.json": "./package.json",
-    "./component": "./dist/cayo.svelte.js"
+    ".": {
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "repository": {
     "type": "git",
