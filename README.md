@@ -330,30 +330,7 @@ It is indeed just that simple! But, a glaring question here may be: "where does 
 
 As long as it is called in an entry, pages using that entry will have its Cayos rendered. Calling `renderCayos` can be thought of as telling the page to "render Cayos now", wherever it is in your entry's logic.
 
-The generated hook function looks something like this in `cayo-runtime.js` files:
-```js
-// cayo-runtime.js
-export default renderCayos(cb) {
-  var target = cb ? cb : (node) => node;
-  let cayos = {};
-  // Code that adds cayo instances to the `cayos` object
-  // Example, based on counter.cayo.svelte from earlier
-  // 'counter-f00b4r' is a generated unique identifier for the instance
-  cayos['counter-f00b4r'] = {};
-  cayos['counter-f00b4r'].target = document.querySelector('[data-cayo-id="counter-f00b4r"]');
-  cayos['counter-f00b4r'].instance = new ${componentName}({
-    target: target(cayos['counter-f00b4r'].target),
-    hydrate: true,
-    props: getProps(cayos['counter-f00b4r'].target),
-  });
-
-  return cayos;
-}
-```
-
-**Note:** `getProps()` is also generated in `cayo-runtime.js`. It handles parsing the props as a string, to use the props to hydrate the Cayo instance.
-
-#### Callback Argument
+#### Callback
 The Render Hook takes one argument, a callback: `renderCayos(callback)`. The callback should return the node that the component should be mounted to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic via the callback. 
 
 The callback argument should be a function that matches this signature:
@@ -394,7 +371,7 @@ function customPlaceholder(node) {
 renderCayos(customPlaceholder);
 ```
 
-#### Loading State Callback Example
+#### Callback Example: Loading State 
 Say you want to render something in a Cayo before it gets hydrated, like a "loading" indicator. Using the same component from earlier, `counter.cayo.svelte`:
 
 ```svelte
@@ -434,7 +411,8 @@ The Render Hook returns a object that stores all of the Cayo instances of a page
 ```
 Example:
 ```js
-let cayos = renderCayos();
+// src/entry.js
+const cayos = renderCayos();
 for (const [key, cayo] of Object.entries(cayos)) {
   // Do something with the cayo targets or instances
   console.log(key, cayo.target);
