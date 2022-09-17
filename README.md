@@ -316,7 +316,7 @@ Note: the name `entry.js` is used in the examples, but there are no limitations 
 
 ### Render Hook
 
-The Render Hook is a function named `renderCayos` that allows you to define when and how your Cayos should be rendered. You do not need to import the function; when Cayo sees this function being called in an entry, it will handle resolving the import for the hook.
+The Render Hook is a function named `renderCayos` that allows you to define when and how your Cayos should be rendered. You do not need to import the function; just call it from an entry, and Cayo will see this and handle resolving the necessary import.
 
 An example of an entry using the Render Hook:
 ```js
