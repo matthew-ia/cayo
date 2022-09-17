@@ -286,7 +286,7 @@ Props that will work without issue:
 - Objects (e.g., `{ key: 'value' }`, but again, no non-serializable values within)
 
 Common types that are non-serializable are:
-- functions
+- Functions
 - Sets
 - Maps
 
