@@ -365,7 +365,7 @@ It is indeed just that simple! But, a glaring question here may be: "where does 
 As long as it is called in an entry, pages using that entry will have its Cayos rendered. Calling `renderCayos` can be thought of as telling the page to "render Cayos now", wherever it is in your entry's logic.
 
 #### Callback
-The Render Hook takes one argument, a callback: `renderCayos(callback)`. The callback should return the node that the component should be mounted to—the target node. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic via the callback. 
+The Render Hook takes one argument, a callback: `renderCayos(callback<Function>)`. The callback should return the the target node—the node that the component should be mounted to. By default, the placeholder will be the target node, so the component will be mounted as child of `<div data-cayo-id="...">`. If you wanted to wrap it in a custom placeholder, you could do so by passing that logic via the callback. 
 
 The callback argument should be a function that matches this signature:
 ```js
