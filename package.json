@@ -40,6 +40,7 @@
     "fs-extra": "^10.0.0",
     "jsdom": "^18.0.0",
     "precinct": "^9.0.0",
+    "prettier": "^2.7.1",
     "rollup": "^2.70.1",
     "rollup-plugin-import-css": "^3.0.3",
     "rollup-plugin-svelte": "^7.1.0",
