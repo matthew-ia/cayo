@@ -397,7 +397,7 @@ function customPlaceholder(node) {
   // Say we want to 
   //   1. use a <section> element as the wrapper instead of a <div>
   //   2. use the Cayo ID as the element's id
-  //   3. use a custom class
+  //   3. use a custom class '.custom-placeholder'
   node.outerHTML = `<section id="${node.dataset.cayoId}" class="custom-placeholder"></section>`;
   return node;
 }
@@ -423,13 +423,13 @@ Say you want to render something in a Cayo before it gets hydrated, like a "load
 ```js
 // src/entry.js
 
-// "Where" you want to render cayos
+// "Where" you want to render Cayos
 // Also, do something to the target node before the component is mounted
 function replaceContents(node) {
   node.innerHTML = '';
   return node;
 }
-// "When" you want to render cayos
+// "When" you want to render Cayos
 renderCayos(replaceContents);
 ```
 
