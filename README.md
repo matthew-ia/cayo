@@ -90,7 +90,7 @@ To link to a page, just use the expected URL path:
 This works because, in the output, every page gets mapped to an `index.html` in a respectively named directory.  For example,  `pages/page.svelte` gets mapped to `<outDir>/page/index.html`.
 
 #### Index Page
-A file named `index.svelte` at the root of the pages directory will map to `<outDir>/index.html` as expected (and served at the root: `<host>/`).
+A file named `index.svelte` at the root of the pages directory will map to `<outDir>/index.html` and be served at the root (`<host>/`).
 
 ```shell
 pages/
