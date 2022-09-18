@@ -293,9 +293,11 @@ export default {
 ```
 
 ### Conditional Config
-Cayo doesn't have built-in features to support a conditional config, for example, if you want different options for `cayo dev` vs. `cayo build`. However, you can set up your development environment to support this yourself. Here's an example that the NODE_ENV variable to swap configs when running `cayo`:
+Cayo doesn't have built-in features to support a conditional config. E.g., say you different config options for `cayo dev` and `cayo build`. 
 
-1. Define scripts that set the environment while running `cayo dev` and `cayo build`
+However, you can set up your dev environment to support this yourself. Here's an example that uses the `NODE_ENV` environment variable to swap configs when running `cayo`:
+
+**Define scripts that set the environment while running `cayo dev` and `cayo build`**
 
 `package.json`:
 ```json
@@ -305,7 +307,7 @@ Cayo doesn't have built-in features to support a conditional config, for example
 }
 ```
 
-2. Add conditions in your Cayo config based on the value of NODE_ENV
+**Add conditions in your Cayo config based on the value of NODE_ENV**
 
 `cayo.config.js`:
 ```js
@@ -323,7 +325,9 @@ if (process.env.NODE_ENV === 'development') {
 export default config;
 ```
 
-Now when you run `npm run dev` it will run `cayo dev` but also set `NODE_ENV` to `'development'`. 
+Now when you run `npm run dev`:
+- `cayo dev` will run but also set `NODE_ENV` to `'development'`
+- the dev config will be used
 
 With this scripts setup, you could also use `process.env.NODE_ENV` in your components. Say you wanted to have a conditional [Template](../README.md#template-file):
 
