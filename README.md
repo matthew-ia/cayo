@@ -137,7 +137,7 @@ pages/
 In this example, `projects.svelte` will be mapped to `<outDir>/projects/index.html`, which is served at `/projects` (so, by default, it's effectively the index for that route).
 
 ### Template File
-The Template file is required, and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with the respective markup for each page. Your template file should be at root of the `src` directory, and be named `__template.svelte`. You can change the expected name with [with the Cayo Config](docs/config-reference.md#templateName).
+The Template file is required, and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with the respective markup for each page. Your template file should be at root of the `src` directory, and be named `__template.svelte`. You can change the expected name with [with the config](docs/config-reference.md#templateName).
 
 This file is a Svelte component, so you can also import other Svelte components or add rendering logic. For example, you could render certain markup only for `development`, but not `production` (i.e., during `cayo dev` vs. `cayo build`).
 
