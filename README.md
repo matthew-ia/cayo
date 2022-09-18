@@ -329,8 +329,8 @@ If you need non-serializable props, like a function, consider refactoring it to 
 ## Entries
 
 An entry serves two purposes: 
-1. to be a specific page's JS (like the `main.js` to an `index.html`)
-2. to let you define when and where Cayos are to be rendered
+1. Be the main JavaScript file for a page
+2. Let you define when and where Cayos are to be rendered
 
 Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entries per page, or even use the same file for all pages.
 
@@ -350,13 +350,13 @@ Note: the name `entry.js` is used in the examples, but there are no limitations 
 
 ### Render Hook
 
-The Render Hook is a function named `renderCayos` that allows you to define when and how your Cayos should be rendered. You do not need to import the function; just call it from an entry, and Cayo will see this and handle resolving the necessary import.
+The Render Hook is a function named `renderCayos` that allows you to define when and how your Cayos should be rendered. You do not need to import the function—just call it from an entry, and Cayo will see this and handle the necessary import.
 
 Using the Render Hook in an entry:
 ```js
 // src/entry.js
 
-// When you want to render cayos
+// "When" you want to render Cayos
 renderCayos()
 ```
 
@@ -371,6 +371,7 @@ The callback argument should be a function that matches this signature:
 ```js
 /**
  * Callback for renderCayos
+ * "How" you want to render Cayos
  * 
  * @param {HTMLElement} node – the placeholder node (the cayo instance placeholder <div>)
  * @return {HTMLElement} the target node
