@@ -150,9 +150,11 @@ Template files support the following placeholders:
 
 - `%cayo.script%` – where your [entry](#entries) for a page will be imported. This is needed if a page is to render a Cayo Component, but is otherwise optional
 
-- `%cayo.css%` – where CSS will be injected (as `<link src="style.css">` or `<style>...</style>` depending on your [CSS config option](docs/config-reference.md#cssinternal))
+- `%cayo.css%` – where CSS will be added (as `<link src="style.css">` or `<style>...</style>` depending on your [CSS config option](docs/config-reference.md#cssinternal))
 
+<!-- TODO: support page title function
 - `%cayo.title%` – if you're using Cayo to [define dynamic page titles](), this is required. Otherwise you can define page titles with [`<svelte:head>`](https://svelte.dev/docs#template-syntax-svelte-head)
+-->
 
 - `%cayo.head%` – `<link>` and `<script>` elements needed by a page, plus any `<svelte:head>` content
 
