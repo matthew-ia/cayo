@@ -245,20 +245,21 @@ The `<Cayo>` component doesn't actually render your Cayos—instead it creates _
 
 ### Basic Usage
 
-Assuming `components/counter.cayo.svelte` exists, and has a prop `count`:
+Let's assume a the component `components/counter.cayo.svelte` exists in your project, and has a prop `count`:
 ```svelte
-<!-- <Cayo> can be rendered in a page or any other normal Svelte component -->
+<!-- Register your Cayo with the <Cayo> component -->
 <script>
   import { Cayo } from 'cayo';
 </script>
-<!-- Register your Cayo with the <Cayo> component -->
 <!-- Basic usage -->
 <Cayo src="counter.cayo.svelte" />
 <!-- Any additional props will be used to hydrate the Cayo on the client -->
 <Cayo src="counter.cayo.svelte" count={1} />
 ```
 
-The `src` prop is the only required prop, and is used to identify which Cayo Component should be rendered later. The value of `src` needs to be the path of a Cayo, but must be relative to the components directory (e.g., `src/components` by default). For example: say your Cayo was at `components/nested/counter.cayo.svelte`, your usage would need to change to `<Cayo src="nested/counter.cayo.svelte" />`
+The `src` prop is the only required prop, and is used to identify which Cayo Component should be rendered later. The value of `src` needs to be the path of a Cayo, but must be relative to the components directory (e.g., `src/components` by default). For example, say your Cayo was `components/nested/counter.cayo.svelte`, your usage would need to change to `<Cayo src="nested/counter.cayo.svelte" />`.
+
+The `<Cayo>` component can be rendered on a page or any other Svelte component except other Cayos.
 
 ### How Cayos Work
 Assuming your project directory looks something like this:
