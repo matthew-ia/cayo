@@ -77,21 +77,28 @@ Pages, or outputs, will be served at the path based on their name and directory 
 For example, `page.svelte` will be served at `/page`:
 ```shell
 pages/
-├ index.svelte  # /
 ├ about.svelte  # /about
 └ page.svelte   # /page
 ```
 
-To link to other pages, just use the expected URL path:
+#### Links
+To link to a page, just use the expected URL path:
 ```html
 <a href="/page">Link to Page</a>
 ```
 
+This works because, in the output, every page gets mapped to an `index.html` in a respectively named directory.  For example,  `pages/page.svelte` gets mapped to `<outDir>/page/index.html`.
+
 #### Index Page
-A file named `index.svelte` at the root of the pages directory will map to `index.html` as expected, and be served at the root (`<host>/`).
+A file named `index.svelte` at the root of the pages directory will map to `<outDir>/index.html` as expected (and served at the root: `<host>/`).
+
+```shell
+pages/
+└ index.svelte  # /
+```
 
 #### Nested Pages
-A nested page will be served at a nested URL based on it's own path, relative to the pages directory. In the output, every page gets mapped to an `index.html` in a relatively named directory. For example,  `nested/page.svelte` gets mapped to `<outDir>/nested/page/index.html`.
+A nested page will be served at a nested URL based on it's own path, relative to the pages directory.
 
 A "portfolio site" example:
 1. Given a page named `pages/projects/project-1.svelte` 
