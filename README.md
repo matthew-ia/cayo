@@ -157,7 +157,7 @@ Template files support the following placeholders:
 - `%cayo.head%` – `<link>` and `<script>` elements needed by a page, plus any `<svelte:head>` content
 
 #### Example
-Technically all of these placeholders are optional, and don't have to be in any particular place within the markup.
+Technically all of the placeholders are optional, and don't have to be in any particular place within your markup.
 
 ```svelte
 <!-- src/__template.svelte -->
@@ -225,8 +225,7 @@ More on [Svelte options](docs/config-reference.md#svelte-options), [Vite options
 
 ## Components
 
-By default, all components are prerendered. This means their lifecycle ends after they mount and finish one run cycle, and the UI state after the first cycle is rendered to static HTML. This also means that any JS you use within the component's 
-`<script>` element "compiles away" after it's used to render the component. These components are essentially "server side rendered", but are done so locally within Cayo processes rather than on a production server.
+By default, all components are prerendered. This means their lifecycle ends after they finish one run cycle, and the UI state after the first cycle is rendered to static HTML. This also means that any JS you use within the component's `<script>` element "compiles away" after it's used to render the component. These components are essentially "server side rendered", but are done so locally within Cayo processes rather than on a production server.
 
 Because the JS doesn't get taken to the client, this allows you to use any JS you want in order to render content, even Node built-in packages, like `path` or `fs`, and access global Node variables like `process`. This can be helpful if you want to extend rendering conditions that are specific to your own project's setup or workflow.
 
@@ -234,15 +233,15 @@ But, what if you _do_ want runtime reactivity within a component? Enter, Cayo Co
 
 ## Cayo Components
 
-Cayo Components, or Cayos, are Svelte components that are bundled into client friendly JS, and mount to the output HTML during client runtime. These work like having contained Svelte apps within your page, rather than your whole page being a Svelte app. 
+Cayo Components, or Cayos, are Svelte components that are bundled into client-friendly JavaScript, and mount to the output HTML during client runtime. These work like having contained Svelte apps within your page, rather than your whole page being a Svelte app. 
 
-Cayos are an opt-in feature, and require a few things. You must:
+Cayos require a few things. You must:
 - _Register_ them by using the `<Cayo>` component
   - You will need to import from the `cayo` package: `import { Cayo } from 'cayo'`
 - Include the `.cayo` infix in your Cayo's filename (e.g., `some.cayo.svelte`)
-- Use the [Render Hook](#render-hook) in an [entry](#entries) for the page rendering the Cayo
+- Use the [Render Hook](#render-hook) in an [entry](#entries) to render them on a page during runtime
 
-The `<Cayo>` component doesn't actually render your Cayos—instead it creates _placeholders_ for them, which are used to mount them to the page.
+The `<Cayo>` component doesn't actually render your Cayos—instead it creates _placeholders_ for them, which are used by the Render Hook to mount them to the page.
 
 ### Basic Usage
 
