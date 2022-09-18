@@ -392,7 +392,7 @@ Say you want to render the Cayos wrapped in a custom placeholder:
 ```js
 // src/index.js
 
-// "Where" you want to render cayos
+// "Where" you want to render Cayos
 function customPlaceholder(node) {
   // Say we want to 
   //   1. use a <section> element as the wrapper instead of a <div>
@@ -401,7 +401,7 @@ function customPlaceholder(node) {
   node.outerHTML = `<section id="${node.dataset.cayoId}" class="custom-placeholder"></section>`;
   return node;
 }
-// "When" you want to render cayos
+// "When" you want to render Cayos
 renderCayos(customPlaceholder);
 ```
 
