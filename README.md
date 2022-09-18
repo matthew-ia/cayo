@@ -5,15 +5,15 @@
 A static HTML generator for the small stuff, with islands of reactivity. Powered by Svelte & Vite. 
 
 ## Why Cayo?
-The main purpose of Cayo is to be a tool that lets you use modern front-end tooling (Svelte, Vite, file-based routing) to generate static HTML output, and have the option to use Svelte components that are reactive on the client.
+The main purpose of Cayo is to be a tool that lets you use modern front-end tooling (Svelte, Vite, file-based routing) to generate static HTML output, and have the option of using Svelte components that are reactive on the client.
 
 - **[Cayo prerenders](#components) your pages to HTML**. Essentially, it enables the use of Svelte for generating static content as if it's a templating language. You can think of Cayo's primary function as being a Svelte-to-HTML generator.
 
-- **Cayo lets you define where you _do_ want reactivity, with [Cayo Components](#cayo-components)**. If you want Svelte reactivity, you can have it, with Cayo Components (or "cayos" a.k.a. the "islands of reactivity"). These are components that are individually bundled and are mounted and run as a Svelte client-side component.
+- **Cayo lets you define where you _do_ want reactivity, with [Cayo Components](#cayo-components)**. If you want Svelte reactivity, you can have it—with Cayo Components (or "cayos" a.k.a. the "islands of reactivity"). These are components that are individually bundled and run as Svelte client-side components.
 
 - **Cayo is built for that person who has constraints on their output**—someone who needs control over their HTML generation workflow, and wants to use tools like [Svelte](https://svelte.dev) and [Vite](https://vitejs.dev). All while not having to buy into the typical use of creating an _entire website_, as frameworks are typically designed to be used.
 
-- **Cayo is not a feature-rich web app framework** like Astro or SvelteKit. Read more about [how Cayo differs](#cayo--the-rest) from similar tools.
+- **Cayo is _not_ a feature-rich web app framework** like Astro or SvelteKit. Read more about [how Cayo differs](#cayo--the-rest) from similar tools.
 
 ## Getting Started
 
@@ -70,7 +70,17 @@ Most of your projects files should go in `src`. This is where pages, components,
 - `__template.svelte` is your page template 
 
 ### Pages
-Cayo uses a file-based routing system, meaning the file structure within the pages directory gets used to generate output files. All pages are expected to be valid Svelte components. Since your outputs just become regular-old HTML files, there is no real "routing" going on here beyond the expected default of HTML files being served on a web server. Pages, or outputs, will be served at the path based on their name and directory structure within the pages directory. Cayo will expect all files with the `.svelte` extension in the pages directory to be a page.
+Cayo uses a file-based routing system, meaning the file structure within the pages directory gets used to generate output files. All pages are expected to be valid Svelte components. Since your outputs just become regular old HTML files, there is no real "routing" going on here beyond the expected default of HTML files being served on a web server. 
+
+Pages, or outputs, will be served at the path based on their name and directory structure within the pages directory. Cayo will expect all files with the `.svelte` extension in the pages directory to be a page.
+
+For example, `page.svelte` will be served at `/page`:
+```shell
+pages/
+├ index.svelte  # /
+├ about.svelte  # /about
+└ page.svelte   # /page
+```
 
 #### Index Page
 A file named `index.svelte` at the root of the pages directory will map to `index.html` as expected, and be served at the host root (`/`, `<host-domain>/`).
@@ -93,7 +103,7 @@ Cayo _also_ allows you to explicitly define nested index pages:
 This allows you to configure your site structure without needing to worry about defining routes programmatically, which you might need to do if you were using Svelte without Cayo or another tool like SvelteKit.
 
 To expand upon the portfolio example, your pages directory could look like this, and would be served at the expected routes:
-```
+```shell
 pages/
 ├ projects/
 │ ├ index.svelte      # /projects 
