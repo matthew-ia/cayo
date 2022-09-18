@@ -148,7 +148,7 @@ Template files support the following placeholders:
 
 - `%cayo.body%` – the content of a page. Think of this as the `<slot>` of the Template Svelte component
 
-- `%cayo.script%` – where your [entry script](#entries) (JS) for a page will be imported. This is needed if a page is to render a Cayo Component, but otherwise is optional
+- `%cayo.script%` – where your [entry](#entries) for a page will be imported. This is needed if a page is to render a Cayo Component, but is otherwise optional
 
 - `%cayo.css%` – where CSS will be injected (as `<link src="style.css">` or `<style>...</style>` depending on your [CSS config option](docs/config-reference.md#cssinternal))
 
