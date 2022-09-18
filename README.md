@@ -82,8 +82,13 @@ pages/
 └ page.svelte   # /page
 ```
 
+To link to other pages, just use the expected URL path:
+```html
+<a href="/page">Link to Page</a>
+```
+
 #### Index Page
-A file named `index.svelte` at the root of the pages directory will map to `index.html` as expected, and be served at the host root (`/`, `<host-domain>/`).
+A file named `index.svelte` at the root of the pages directory will map to `index.html` as expected, and be served at the root (`<host>/`).
 
 #### Nested Pages
 A nested page will be served at a nested URL based on it's own path, relative to the pages directory. In the output, every page gets mapped to an `index.html` in a relatively named directory. For example,  `nested/page.svelte` gets mapped to `<outDir>/nested/page/index.html`.
