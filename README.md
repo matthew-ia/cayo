@@ -371,7 +371,6 @@ The callback argument should be a function that matches the following signature:
 ```js
 /**
  * Callback for renderCayos
- * "How" you want to render Cayos
  * 
  * @param {HTMLElement} node – the placeholder node (the cayo instance placeholder <div>)
  * @return {HTMLElement} the target node
@@ -386,7 +385,7 @@ function cb(node) {
 }
 ```
 
-A Cayo will always be rendered as a child of the target node is, per [Svelte's Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api).
+A Cayo will always be rendered as a child of the target node, per [Svelte's Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api).
 
 #### Callback Example
 Say you want to render the Cayos wrapped in a custom placeholder:
