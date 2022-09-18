@@ -152,9 +152,7 @@ Template files support the following placeholders:
 
 - `%cayo.css%` – where CSS will be added (as `<link src="style.css">` or `<style>...</style>` depending on your [CSS config option](docs/config-reference.md#cssinternal))
 
-<!-- TODO: support page title function
-- `%cayo.title%` – if you're using Cayo to [define dynamic page titles](), this is required. Otherwise you can define page titles with [`<svelte:head>`](https://svelte.dev/docs#template-syntax-svelte-head)
--->
+- `%cayo.title%` – add a default title to the page only if one is not already set on a specific page (via [`<svelte:head>`](https://svelte.dev/docs#template-syntax-svelte-head) or other some other method). The default title will be generated using the page's filename (e.g., `page.svelte` will have the title `Page`). This placeholder is optional
 
 - `%cayo.head%` – `<link>` and `<script>` elements needed by a page, plus any `<svelte:head>` content
 
