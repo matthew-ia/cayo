@@ -184,7 +184,7 @@ By default, Cayo internally uses a few plugins & preprocessors:
 
 If you need to add _plugin/preprocessor options_ to these, you'll need to install the necessary packages locally, and import and use them as config options in `cayo.config.js`.
 
-More on [Svelte options](docs/config-reference.md#svelte-options) and [Vite options](docs/config-reference.md#vite-options) in the [Configuration Reference](docs/config-reference.md).
+More on [Svelte options](docs/config-reference.md#svelte-options), [Vite options](docs/config-reference.md#vite-options), and [Rollup options](docs/config-reference.md#rollup-options) in the [Configuration Reference](docs/config-reference.md).
 
 > **Warning**<br>
 > Vite plugins will be passed to Cayo, but it's possible that certain plugins may break Cayo if they deal with handling the input differently than vanilla Vite or generate additional output files. Cayo acts like a plugin itself, by handling your source files and transforming them into files that vanilla Vite expects (e.g., the built-in "file-based router" is similar to Vite multi-page plugins).

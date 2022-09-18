@@ -181,7 +181,7 @@ Useful for seeing more output when running `cayo`.
 
 ## Svelte Options
 
-There are select options that Cayo passes to Svelte (consumed by `rollup-plugin-svelte`):
+There are a few options that Cayo passes to Svelte (consumed by `rollup-plugin-svelte`):
 - [preprocess](#sveltepreprocess)
 - [compilerOptions](#sveltecompileroptions)
 <!-- TODO: - [extensions](#svelteextensions) -->
@@ -204,7 +204,7 @@ export default {
 ---
 
 ### svelte.preprocess
-- **Type**: `<SveltePreprocessor> | Array<SveltePreprocessor>]`
+- **Type**: `<SveltePreprocessor> | Array<SveltePreprocessor>`
 - **Default**: `[]`
 
 Passed to the Svelte Rollup plugin, but is appended to an array of Cayo's internally defined preprocessors (which is only [`svelte-preprocess`](https://github.com/sveltejs/svelte-preprocess)). [See plugin options](https://github.com/sveltejs/rollup-plugin-svelte#usage).
@@ -220,12 +220,11 @@ There are a few options that Cayo needs to control in order to work, so changing
 ---
 
 ## Vite Options
-<!-- TODO: -->
 
 Not all Vite options are directly used by Cayo. Most of them are passed to the dev process, which uses `vite dev`. `vite.build.rollupOptions` is the only Vite-specific option passed during both `cayo dev` and `cayo build`. 
 
 > **Note**<br>
-> Cayo shares some options with Vite, such as `publicDir` and `base` and `root` (as `projectRoot`). These should be defined at top level of your Cayo config, not in the `vite` option object, but will still be passed to Vite as needed.
+> Cayo shares some options with Vite, such as `publicDir` and `base` and `root` (as `projectRoot`). These should be defined at top level of your Cayo config, not in the `vite` option object, but will be passed to Vite as needed.
 
 Vite options are passed via the Cayo config:
 ```js
@@ -249,7 +248,93 @@ During `cayo dev`, Cayo defines a few Vite options internally, which cannot be o
 - `configFile: false`
 
 ## Rollup Options
-<!-- TODO: -->
 
-## Config Examples
-<!-- TODO: -->
+Options for Rollup should be passed to Cayo via the `vite.build.rollupOptions` object. The only Rollup config option that Cayo uses internally is `vite.build.rollupOptions.plugins`, but the entire `rollupOptions` object is passed to Vite while running the dev server and during build.
+
+## More Config Examples
+
+### Customize `svelte-preprocess`
+To add options to Svelte Preprocess, install `svelte-preprocess` locally, and then pass the preprocessor(s) in your Cayo config with options:
+```js
+// cayo.config.js
+import sveltePreprocess from 'svelte-preprocess';
+export default {
+  svelte {
+    preprocess: [
+      sveltePreprocess({
+        // Learn more about the options you can pass here:
+        // https://github.com/sveltejs/svelte-preprocess/blob/main/docs/preprocessing.md
+        markupTagName: 'content',
+        replace: [['Jane', 'Cool'], ['Doe', 'Cat']]
+      }),
+    ],
+  }
+}
+```
+
+### Add `mdsvex`
+Adding other Svelte preprocessors works similar to how it would in any other Vite + Svelte project. 
+
+For example, let's refactor mdsvex's own docs example for [customizing extensions](https://mdsvex.pngwn.io/docs#extensions).
+
+To import markdown files as components, add `.md` to both the Svelte compiler and mdsvex extensions: 
+```js
+// cayo.config.js
+import { mdsvex } from "mdsvex";
+export default {
+  // Putting these options inside the svelte option object is the only difference
+  svelte: { 
+    extensions: ['.svelte', '.svx', '.md'],
+    preprocess: [
+      mdsvex({ extensions: ['.svx', '.md'] }),
+    ],
+  }
+}
+```
+
+### Conditional Config
+Cayo doesn't have built-in features to support a conditional config, for example, if you want different options for `cayo dev` vs. `cayo build`. However, you can set up your development environment to support this yourself. Here's an example that the NODE_ENV variable to swap configs when running `cayo`:
+
+1. Define scripts that set the environment while running `cayo dev` and `cayo build`
+
+`package.json`:
+```json
+"scripts": {
+  "dev": "export NODE_ENV=development && cayo dev",
+  "build": "export NODE_ENV=production && cayo build"
+}
+```
+
+2. Add conditions in your Cayo config based on the value of NODE_ENV
+
+`cayo.config.js`:
+```js
+let config;
+if (process.env.NODE_ENV === 'development') {
+  config = {
+    // development options for `cayo dev`
+  }
+} else if (process.env.NODE_ENV === 'production') {
+  config = {
+    // production options for `cayo build`
+  }
+}
+
+export default config;
+```
+
+Now when you run `npm run dev` it will run `cayo dev` but also set `NODE_ENV` to `'development'`. 
+
+With this scripts setup, you could also use `process.env.NODE_ENV` in your components. Say you wanted to have a conditional [Template](../README.md#template-file):
+
+`__template.svelte`:
+```svelte
+{#if process.env.NODE_ENV === 'development'}
+  <div class="dev">
+    I'm running in development mode
+  </div>
+  %cayo.body%
+{:else}
+  %cayo.body%
+{/if}
+```
