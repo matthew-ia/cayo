@@ -139,7 +139,7 @@ In this example, `projects.svelte` will be mapped to `<outDir>/projects/index.ht
 ### Template File
 The Template file is required, and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with the respective markup for each page. Your template file should be at root of the `src` directory, and be named `__template.svelte`. You can change the expected name with [with the config](docs/config-reference.md#templateName).
 
-This file is a Svelte component, so you can also import other Svelte components or add rendering logic. For example, you could render different markup wrapping your pages for `development` and `production` (see [config example](docs//config-reference.md#conditional-config)).
+This file is a Svelte component, so you can also import other Svelte components or add rendering logic. For example, you could render different markup wrapping your pages depending on the environment mode like `'development'` or `'production'` (see [config example](docs//config-reference.md#conditional-config)).
 
 > **Note**<br>
 > Despite being a Svelte component, the Template file does not support the `<slot>` element, because it itself is prerendered _before_ it is used to prerender page components. The placeholder `%cayo.body%` replaces the basic usage for `<slot>`.
