@@ -118,11 +118,23 @@ To expand upon the portfolio example, your pages directory could look like this,
 ```shell
 pages/
 ├ projects/
-│ ├ index.svelte      # /projects 
 │ ├ project-1.svelte  # /projects/project-1
 │ └ project-2.svelte  # /projects/project-2
 └ index.svelte        # / (home)
 ```
+
+#### What about nested index pages?
+Nested index pages are not supported by Cayo in the same way `pages/index.svelte` works. However, you can still define nested index pages via the normal file-based routing expectations. For example:
+```shell
+pages/
+├ projects/
+│ ├ project-1.svelte  # /projects/project-1
+│ └ project-2.svelte  # /projects/project-2
+├ projects.svelte     # /projects
+└ index.svelte        # / (home)
+```
+
+In this example, `projects.svelte` will be mapped to `<outDir>/projects/index.html`, which is served at `/projects` (so, by default, it's effectively the index for that route).
 
 ### Template File
 The Template file is required, and used to render all of your pages. The output will match this file's markup, but replace the cayo placeholders with the respective markup for each page. Your template file should be at root of the `src` directory, and be named `__template.svelte`. You can change the expected name with [with the Cayo Config](docs/config-reference.md#templateName).
