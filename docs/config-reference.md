@@ -29,6 +29,8 @@ export default {
 }
 ```
 
+Check out [more config examples](#more-examples).
+
 ## Cayo Options
 
 ### projectRoot
@@ -251,7 +253,7 @@ During `cayo dev`, Cayo defines a few Vite options internally, which cannot be o
 
 Options for Rollup should be passed to Cayo via the `vite.build.rollupOptions` object. The only Rollup config option that Cayo uses internally is `vite.build.rollupOptions.plugins`, but the entire `rollupOptions` object is passed to Vite while running the dev server and during build.
 
-## More Config Examples
+## More Examples
 
 ### Customize `svelte-preprocess`
 To add options to Svelte Preprocess, install `svelte-preprocess` locally, and then pass the preprocessor(s) in your Cayo config with options:
@@ -271,6 +273,7 @@ export default {
   }
 }
 ```
+---
 
 ### Add `mdsvex`
 Adding other Svelte preprocessors works similar to how it would in any other Vite + Svelte project. 
@@ -291,6 +294,8 @@ export default {
   }
 }
 ```
+
+---
 
 ### Conditional Config
 Cayo doesn't have built-in features to support a conditional config. E.g., say you different config options for `cayo dev` and `cayo build`. 
