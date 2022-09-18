@@ -201,6 +201,8 @@ export default {
 }
 ```
 
+---
+
 ### svelte.preprocess
 - **Type**: `<SveltePreprocessor> | Array<SveltePreprocessor>]`
 - **Default**: `[]`
