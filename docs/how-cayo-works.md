@@ -1,7 +1,6 @@
 # How Cayo Works
 
-A few explanations of how things work within Cayo. This isn't needed to be known in order to use Cayo, but it can be helpful if you're curious.
-
+Some additional explanation of how things work within Cayo. This isn't need-to-know info in order to use Cayo, but if you're curious...
 
 ## Render Hook
 
