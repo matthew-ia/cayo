@@ -177,6 +177,8 @@ Useful for seeing more output when running `cayo`.
 > **Note**<br>
 > This option is experimental and may be removed in the future.
 
+---
+
 ## Svelte Options
 
 There are select options that Cayo passes to Svelte (consumed by `rollup-plugin-svelte`):
@@ -212,6 +214,8 @@ Passed to the Svelte Rollup plugin, but is appended to an array of Cayo's intern
 - **Default**: `{}`
 
 There are a few options that Cayo needs to control in order to work, so changing them will have no effect: `compilerOptions.generate` and `compilerOptions.hydratable`. All other options will be passed to the Svelte Rollup plugin. [See plugin options](https://github.com/sveltejs/rollup-plugin-svelte#usage).
+
+---
 
 ## Vite Options
 <!-- TODO: -->
