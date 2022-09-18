@@ -245,7 +245,7 @@ The `<Cayo>` component doesn't actually render your Cayos—instead it creates _
 
 ### Basic Usage
 
-Let's assume a the component `components/counter.cayo.svelte` exists in your project, and has a prop `count`:
+Let's assume the component `components/counter.cayo.svelte` exists in your project, and has a prop `count`:
 ```svelte
 <!-- Register your Cayo with the <Cayo> component -->
 <script>
@@ -306,9 +306,9 @@ The resulting output will be a placeholder for the component. By default, this p
 <div data-cayo-id="counter-<UUID>" data-cayo-props="{count:1}"></div>
 ```
 
-Cayo uses the [Svelte Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api) to then hydrate these components at runtime. All registered Cayos will have their hydration code dynamically built in a file called `cayo-runtime.js`. Each input (page) will have it's own `cayo-runtime.js` file in the output. The code in `cayo-runtime.js` includes the logic that will mount and hydrate these components. 
+Cayo uses the [Svelte Client-side component API](https://svelte.dev/docs#run-time-client-side-component-api) to then hydrate these components at runtime. All registered Cayos will have their hydration code dynamically generated in a file called `cayo-runtime.js`. Each input (page) will have it's own `cayo-runtime.js` file in the output. The code in `cayo-runtime.js` includes the logic that will mount and hydrate these components. 
 
-[Entries](#entries) are where you actually will make use of this generated cayo runtime code. 
+[Entries](#entries) are where you will actually make use of this generated cayo runtime code. 
 
 ### Props
 
