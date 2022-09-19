@@ -11,7 +11,7 @@ The main purpose of Cayo is to be a tool that lets you use modern front-end tool
 
 - **Cayo lets you define where you _do_ want reactivity, with [Cayo Components](#cayo-components)**. If you want Svelte reactivity, you can have it—with Cayo Components (or "cayos" a.k.a. the "islands of reactivity"). These are components that are individually bundled and run as Svelte client-side components.
 
-- **Cayo is built for that person who has constraints on their output**—someone who needs control over their HTML generation workflow, and wants to use tools like [Svelte](https://svelte.dev) and [Vite](https://vitejs.dev). All while not having to buy into the typical use of creating an _entire website_, as frameworks are typically designed to be used.
+- **Cayo is built for that person who has constraints on their output**—someone who needs control over their HTML generation workflow, and wants to use tools like [Svelte](https://svelte.dev) and [Vite](https://vitejs.dev). All while not having to buy into the typical use case of creating an _entire website_, as frameworks are typically designed to be used.
 
 - **Cayo is _not_ a feature-rich web app framework** like Astro or SvelteKit. Read more about [how Cayo differs](#cayo--the-rest) from similar tools.
 
