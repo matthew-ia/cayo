@@ -1,6 +1,6 @@
 <script>
   import { Cayo, Entry } from 'cayo';
-  const heading = '🏝 Cayo Project';
+  const heading = '🏝 Cayo';
 </script>
 
 <h1>{heading}</h1>
@@ -10,6 +10,6 @@
 <style>
   h1 {
     text-align: center;
-    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
 </style>
