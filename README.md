@@ -394,7 +394,7 @@ Say you want to render the Cayos wrapped in a custom placeholder:
 
 // "Where" you want to render Cayos
 function customPlaceholder(node) {
-  // Say we want to 
+  // Say you want to 
   //   1. use a <section> element as the wrapper instead of a <div>
   //   2. use the Cayo ID as the element's id
   //   3. use a custom class '.custom-placeholder'
@@ -456,7 +456,7 @@ for (const [key, cayo] of Object.entries(cayos)) {
 
 ## Styles
 
-Since Vite has some [built-in CSS features](https://vitejs.dev/guide/features.html#css), things like Sass just work! Otherwise, [Svelte's component-scoped styles](https://svelte.dev/docs#component-format-style) are likely the best way to write styles while using Svelte. With the `svelte-preprocess` Svelte custom preprocessor, you get Sass and PostCSS support right in your Svelte files:
+Since Vite has some [built-in CSS features](https://vitejs.dev/guide/features.html#css), things like Sass just work! Otherwise, [Svelte's component-scoped styles](https://svelte.dev/docs#component-format-style) are likely the best way to write styles while using Svelte. With the `svelte-preprocess` custom preprocessor, you get Sass and PostCSS support right in your Svelte files:
 
 ```svelte
 <div class="sassy">I'm some <span>sassy</span> markup.</div>
@@ -472,12 +472,14 @@ Since Vite has some [built-in CSS features](https://vitejs.dev/guide/features.ht
 </style>
 ```
 
-If you want to define global styles external to your Svelte files, you can do so the "Vite way", by importing the stylesheet into a page's entry file. Assuming you have a Sass file with all of your global styles: `src/styles/global.scss`.
+If you want to define global styles external to your Svelte files, you can do so the "Vite way", by importing the stylesheet into a page's entry file. 
+
+Say you have a Sass file with all of your global styles, `src/styles/global.scss`:
 
 Entry:
 ```js
 // src/entry.js
-import 'styles/global.scss';
+import './styles/global.scss';
 // ...other entry stuff
 ```
 Page:
@@ -494,7 +496,7 @@ Page:
 
 **Cayo** is a static HTML generator, with islands of reactivity, file-based routing, and the power of Svelte & Vite. Cayo _is_ niche, and it's kinda meant to be! I built it for my use case, but intentionally made it configurable (and chose tools with good plugin ecosystems), so hopefully at least a few folks with similar needs can make use of it. Cayo borrows certain structural patterns from SvelteKit, some concepts like "island architecture" from Astro, and is powered by Svelte and Vite (and under the hood, Rollup too, independently of Vite). 
 
-**These other tools are _probably_ what you're looking for. It's recommended to check out these first.** But, if you have constraints they can't support, Cayo might be of help!
+**These other tools are _probably_ what you're looking for. It's recommended to check out these first.** But, if you have constraints they can't support, or want something you can more easily hack, Cayo might be of help!
 
 - **[Astro](https://astro.build/)** is a web framework for building fast, content-focused websites. Astro is the most similar to Cayo (in concept), and I recommend trying it out first before using Cayo.
 
