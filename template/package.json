@@ -1,28 +1,9 @@
 {
-  "name": "test-cayo",
-  "version": "1.0.0",
-  "description": "",
   "type": "module",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "cayo dev",
+    "build": "cayo build"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
-    "@rollup/plugin-image": "^2.1.1",
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.31",
-    "cayo": "file:../cayo",
-    "mdsvex": "^0.10.6",
-    "sass": "^1.54.4",
-    "svelte-preprocess": "^4.10.7",
-    "vite": "^2.6.14"
-  },
-  "dependencies": {
-    "chalk": "^5.0.1",
-    "date-fns": "^2.29.2"
   }
 }
