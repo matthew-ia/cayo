@@ -3,5 +3,8 @@
   "scripts": {
     "dev": "cayo dev",
     "build": "cayo build"
+  },
+  "devDependencies": {
+    "cayo": "^1.0.0"
   }
 }
