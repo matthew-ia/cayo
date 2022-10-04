@@ -64,10 +64,12 @@ public/
 ```
 
 ### Source Directory
-Most of your projects files should go in `src`. This is where pages, components, styles, etc. should go. These files will be watched while running `cayo dev`, and used to build your project.
+Most of your project files, such as pages, cayos, styles, etc. should go in `src`.
 - `pages` contains the pages, or "inputs" of your project 
 - `components` contains your Cayo Components, and can contain any other components
-- `__template.svelte` is your page template 
+- `__template.svelte` is your page template
+
+Note: `cayo` watches and builds from the project root, but certain paths are expected as relative to the source directory rather than the root, e.g., cayos and pages. Read the config reference for more information.
 
 ### Pages
 Cayo uses a file-based routing system, meaning the file structure within the pages directory gets used to generate output files. All pages are expected to be valid Svelte components. Since your outputs just become regular old HTML files, there is no real "routing" going on here beyond the expected default of HTML files being served on a web server. 
