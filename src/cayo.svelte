@@ -28,9 +28,14 @@
   if (warnings) {
     cayoInstanceData['data-cayo-warn'] = JSON.stringify(warnings);
   }
-
 </script>
-
-<div {...cayoInstanceData}>
+<div 
+  data-cayo-id={cayoInstanceData['data-cayo-id']}
+  data-cayo-src={cayoInstanceData['data-cayo-src']}
+  data-cayo-props={cayoInstanceData['data-cayo-props']}
+  data-cayo-warn={cayoInstanceData['data-cayo-warn']}
+>
   <slot/>
 </div>
+
+

@@ -37,7 +37,7 @@ Check out [more config examples](#more-examples).
 - **Type**: `string`
 - **Default**: `'.'`
 
-The project root directory, where Cayo will look for the required project structure. Can be an absolute path or a directory relative to the current working directory. 
+The project root directory, where Cayo will look for the required project structure. Can be an absolute path or a directory relative to the current working directory. This folder will be watched for changes during dev.
 
 ---
 
@@ -45,7 +45,7 @@ The project root directory, where Cayo will look for the required project struct
 - **Type**: `string`
 - **Default**: `'src'`
 
-Specify the directory where your source files will be, relative to the [project root](#projectroot). This folder will be watched for changes during dev. 
+Specify the directory where your source files will be, relative to the [project root](#projectroot).
 
 ---
 
