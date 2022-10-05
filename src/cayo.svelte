@@ -28,8 +28,6 @@
   if (warnings) {
     cayoInstanceData['data-cayo-warn'] = JSON.stringify(warnings);
   }
-
-  delete cayoInstanceData['class'];
 </script>
 <div 
   data-cayo-id={cayoInstanceData['data-cayo-id']}

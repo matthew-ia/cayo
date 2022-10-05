@@ -1,4 +1,4 @@
-import { create_ssr_component, compute_rest_props, spread, escape_object } from 'svelte/internal';
+import { create_ssr_component, compute_rest_props, add_attribute } from 'svelte/internal';
 
 function getWarnings(src, badProps) {
   const warnings = {};
@@ -70,17 +70,11 @@ const Cayo = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 		cayoInstanceData['data-cayo-warn'] = JSON.stringify(warnings);
 	}
 
-	delete cayoInstanceData['class'];
 	if ($$props.src === void 0 && $$bindings.src && src !== void 0) $$bindings.src(src);
 
-	return `<div${spread([escape_object(cayoInstanceData)], {})}>
+	return `<div${add_attribute("data-cayo-id", cayoInstanceData['data-cayo-id'], 0)}${add_attribute("data-cayo-src", cayoInstanceData['data-cayo-src'], 0)}${add_attribute("data-cayo-props", cayoInstanceData['data-cayo-props'], 0)}${add_attribute("data-cayo-warn", cayoInstanceData['data-cayo-warn'], 0)}>
   ${slots.default ? slots.default({}) : ``}
-</div>
-
-<!-- data-cayo-id={cayoInstanceData['data-cayo-id']}
-data-cayo-src={cayoInstanceData['data-cayo-src']}
-data-cayo-props={cayoInstanceData['data-cayo-props']}
-data-cayo-warn={cayoInstanceData['data-cayo-warn']} -->`;
+</div>`;
 });
 
 export { Cayo as default };
