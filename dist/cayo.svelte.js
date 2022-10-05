@@ -70,11 +70,17 @@ const Cayo = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 		cayoInstanceData['data-cayo-warn'] = JSON.stringify(warnings);
 	}
 
+	delete cayoInstanceData['class'];
 	if ($$props.src === void 0 && $$bindings.src && src !== void 0) $$bindings.src(src);
 
 	return `<div${spread([escape_object(cayoInstanceData)], {})}>
   ${slots.default ? slots.default({}) : ``}
-</div>`;
+</div>
+
+<!-- data-cayo-id={cayoInstanceData['data-cayo-id']}
+data-cayo-src={cayoInstanceData['data-cayo-src']}
+data-cayo-props={cayoInstanceData['data-cayo-props']}
+data-cayo-warn={cayoInstanceData['data-cayo-warn']} -->`;
 });
 
 export { Cayo as default };
