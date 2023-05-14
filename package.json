@@ -1,6 +1,6 @@
 {
   "name": "cayo",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "start": "node cayo dev --projectRoot test",
