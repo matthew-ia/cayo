@@ -18,23 +18,24 @@
     return value;
   };
 
-  const json = JSON.stringify({...$$restProps}, replacer);
+  // const props = toSource({...$$restProps})
+  const props = JSON.stringify({...$$restProps}, replacer);
   const warnings = getWarnings(src, badProps);
   const cayoInstanceData = {
-    'data-cayo-id': '',
     'data-cayo-src': !warnings.invalidSrc ? `${src}` : '',  
-    'data-cayo-props': json,
+    'data-cayo-id': '', // will get set during prerender process based on the src
   };
   if (warnings) {
     cayoInstanceData['data-cayo-warn'] = JSON.stringify(warnings);
   }
 </script>
+
 <div 
   data-cayo-id={cayoInstanceData['data-cayo-id']}
   data-cayo-src={cayoInstanceData['data-cayo-src']}
-  data-cayo-props={cayoInstanceData['data-cayo-props']}
   data-cayo-warn={cayoInstanceData['data-cayo-warn']}
 >
+  {@html `<script data-cayo-props type="application/json">${props}</script>`}
   <slot/>
 </div>
 
