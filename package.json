@@ -1,6 +1,6 @@
 {
   "name": "cayo",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "scripts": {
     "start": "node cayo dev --projectRoot test",
@@ -44,7 +44,7 @@
     "rollup-plugin-svelte": "^7.1.0",
     "svelte": "^3.49.0",
     "tosource": "^2.0.0-alpha.3",
-    "vite": "^3.1.2",
+    "vite": "^4.3.9",
     "yargs-parser": "^20.2.9",
     "zod": "^3.10.3"
   }
