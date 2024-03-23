@@ -1,6 +1,7 @@
 <script>
   import { getWarnings } from './cayo-warnings.js';
   export let src;
+  export let attributes;
 
   // Save unserializable prop keys (during stringification)
   // so we can report them later
@@ -34,7 +35,7 @@
   data-cayo-id={cayoInstanceData['data-cayo-id']}
   data-cayo-src={cayoInstanceData['data-cayo-src']}
   data-cayo-warn={cayoInstanceData['data-cayo-warn']}
-  {...$$restProps}
+  {...attributes}
 >
   {@html `<script data-cayo-props type="application/json">${props}</script>`}
   <slot/>
