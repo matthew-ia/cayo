@@ -1,4 +1,4 @@
-import { create_ssr_component, compute_rest_props, spread, escape_attribute_value, escape_object } from 'svelte/internal';
+import { create_ssr_component, compute_rest_props, spread, escape_object, escape_attribute_value } from 'svelte/internal';
 
 function getWarnings(src, badProps) {
   const warnings = {};
@@ -79,6 +79,7 @@ const Cayo = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 
 	return `<div${spread(
 		[
+			escape_object(attributes),
 			{
 				"data-cayo-id": escape_attribute_value(cayoInstanceData['data-cayo-id'])
 			},
@@ -87,8 +88,7 @@ const Cayo = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 			},
 			{
 				"data-cayo-warn": escape_attribute_value(cayoInstanceData['data-cayo-warn'])
-			},
-			escape_object(attributes)
+			}
 		],
 		{}
 	)}>
