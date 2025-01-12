@@ -5,6 +5,6 @@
     "build": "cayo build"
   },
   "devDependencies": {
-    "cayo": "^1.2.1"
+    "cayo": "^1.3.0"
   }
 }
