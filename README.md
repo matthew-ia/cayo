@@ -143,20 +143,23 @@ The Template file is required, and used to render all of your pages. The output 
 
 This file is a Svelte component, so you can also import other Svelte components or add rendering logic. For example, you could render different markup wrapping your pages depending on the environment mode like `'development'` or `'production'` (see [config example](docs//config-reference.md#conditional-config)).
 
+> **Deprecation Notice**<br>
+> The `%cayo.*%` placeholder syntax is deprecated as of v1.4.0. Please migrate to the new `<template cayo="...">` syntax. The old syntax will continue to work for backward compatibility but may break in future Svelte versions. See [migration guide](#template-placeholder-migration) below.
+
 > **Note**<br>
-> Despite being a Svelte component, the Template file does not support the `<slot>` element, because it itself is prerendered _before_ it is used to prerender page components. The placeholder `%cayo.body%` replaces the basic usage for `<slot>`.
+> Despite being a Svelte component, the Template file does not support the `<slot>` element, because it itself is prerendered _before_ it is used to prerender page components. The placeholder `<template cayo="body">` replaces the basic usage for `<slot>`.
 
 Template files support the following placeholders:
 
-- `%cayo.body%` – the content of a page. Think of this as the `<slot>` of the Template Svelte component
+- `<template cayo="body">` – the content of a page. Think of this as the `<slot>` of the Template Svelte component
 
-- `%cayo.script%` – where your [entry](#entries) for a page will be imported. This is needed if a page is to render a Cayo Component, but is otherwise optional
+- `<template cayo="script">` – where your [entry](#entries) for a page will be imported. This is needed if a page is to render a Cayo Component, but is otherwise optional
 
-- `%cayo.css%` – where CSS will be added (as `<link src="style.css">` or `<style>...</style>` depending on your [CSS config option](docs/config-reference.md#cssinternal))
+- `<template cayo="css">` – where CSS will be added (as `<link src="style.css">` or `<style>...</style>` depending on your [CSS config option](docs/config-reference.md#cssinternal))
 
-- `%cayo.title%` – add a default title to the page only if one is not already set on a specific page (via [`<svelte:head>`](https://svelte.dev/docs#template-syntax-svelte-head) or other some other method). The default title will be generated using the page's filename (e.g., `page.svelte` will have the title `Page`). This placeholder is optional
+- `<template cayo="title">` – add a default title to the page only if one is not already set on a specific page (via [`<svelte:head>`](https://svelte.dev/docs#template-syntax-svelte-head) or other some other method). The default title will be generated using the page's filename (e.g., `page.svelte` will have the title `Page`). This placeholder is optional
 
-- `%cayo.head%` – `<link>` and `<script>` elements needed by a page, plus any `<svelte:head>` content
+- `<template cayo="head">` – `<link>` and `<script>` elements needed by a page, plus any `<svelte:head>` content
 
 #### Example
 Technically all of the placeholders are optional, and don't have to be in any particular place within your markup.
@@ -166,13 +169,13 @@ Technically all of the placeholders are optional, and don't have to be in any pa
 <!DOCTYPE html>
 <html>
   <head>
-    %cayo.head%
-    %cayo.title%
-    %cayo.css%    
+    <template cayo="head"></template>
+    <template cayo="title"></template>
+    <template cayo="css"></template>    
   </head>
   <body>
-    %cayo.body%
-    %cayo.script%
+    <template cayo="body"></template>
+    <template cayo="script"></template>
   </body>
 </html>
 ```
@@ -183,10 +186,34 @@ Your template doesn't even need to be a valid HTML document—you could be outpu
 <!-- src/__template.svelte -->
 <!-- No html, head, or body elements... and that's okay! -->
 <div>something I want on every page</div>
-%cayo.script%
+<template cayo="script"></template>
+<template cayo="css"></template>
+<template cayo="body"></template>
+```
+
+#### Template Placeholder Migration
+
+If you're upgrading from an older version that used `%cayo.*%` syntax, here's how to migrate to the new `<template cayo="...">` syntax:
+
+**Old syntax (deprecated):**
+```html
+%cayo.title%
+%cayo.head%
 %cayo.css%
 %cayo.body%
+%cayo.script%
 ```
+
+**New syntax (recommended):**
+```html
+<template cayo="title"></template>
+<template cayo="head"></template>
+<template cayo="css"></template>
+<template cayo="body"></template>
+<template cayo="script"></template>
+```
+
+The new template syntax supports content inside the tags (which will be replaced), while the old syntax only supported exact placeholder matching. Both syntaxes will continue to work, but the old syntax is deprecated and may break in future Svelte versions.
 
 ### .cayo
 
