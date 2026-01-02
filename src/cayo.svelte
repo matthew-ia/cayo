@@ -2,6 +2,7 @@
   import { getWarnings } from './cayo-warnings.js';
   export let src;
   export let attributes;
+  export let children; // Svelte 5 children prop instead of slots
 
   // Save unserializable prop keys (during stringification)
   // so we can report them later
@@ -19,7 +20,7 @@
     return value;
   };
 
-  // const props = toSource({...$$restProps})
+  // Use legacy $$restProps for compatibility with SSR compilation
   const props = JSON.stringify({...$$restProps}, replacer);
   const warnings = getWarnings(src, badProps);
   const cayoInstanceData = {
@@ -38,7 +39,7 @@
   data-cayo-warn={cayoInstanceData['data-cayo-warn']}
 >
   {@html `<script data-cayo-props type="application/json">${props}</script>`}
-  <slot/>
+  <slot></slot>
 </div>
 
 
