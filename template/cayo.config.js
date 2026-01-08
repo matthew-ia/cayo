@@ -1,3 +1,11 @@
+import { cayoPreprocess } from 'cayo/build';
+
 export default {
-  // options...
+  svelte: {
+    preprocess: [
+      cayoPreprocess(),
+      // Add other preprocessors here as needed
+    ]
+  }
+  // Add other options as needed...
 }
