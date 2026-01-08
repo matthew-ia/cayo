@@ -275,6 +275,39 @@ export default {
 ```
 ---
 
+### Enable Cayo Preprocessors  
+To use enhanced Cayo features like imported components instead of string paths in `<Cayo>` components, add the `cayoPreprocess` preprocessors:
+
+```js
+// cayo.config.js
+import { cayoPreprocess } from 'cayo/build';
+
+export default {
+  svelte: {
+    preprocess: [
+      cayoPreprocess(),
+      // other preprocessors...
+    ],
+  }
+}
+```
+
+This enables the improved component syntax:
+```svelte
+<!-- Instead of string paths -->
+<Cayo src="counter.cayo.svelte" />
+
+<!-- You can use imported components -->
+<script>
+  import Counter from '$components/counter.cayo.svelte';
+</script>
+<Cayo component={Counter} />
+```
+
+This preprocessor provides enhanced Cayo functionality. The component preprocessor provides better developer experience with IDE support, auto-completion, and build-time error checking.
+
+---
+
 ### Add `mdsvex`
 Adding other Svelte preprocessors works similar to how it would in any other Vite + Svelte project. 
 
