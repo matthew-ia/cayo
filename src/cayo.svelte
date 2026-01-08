@@ -1,7 +1,24 @@
 <script>
   import { getWarnings } from './cayo-warnings.js';
-  export let src;
+  export let src = undefined;
+  export let component = undefined; // New prop for component objects
   export let attributes;
+
+  // Determine the actual source path
+  let actualSrc;
+  if (src) {
+    // Traditional string src prop
+    actualSrc = src;
+  } else if (component && component.__cayoPath) {
+    // Component object with extracted path
+    actualSrc = component.__cayoPath;
+  } else if (typeof component === 'string') {
+    // Component passed as string directly
+    actualSrc = component;
+  } else {
+    // Fallback error case
+    actualSrc = '';
+  }
 
   // Save unserializable prop keys (during stringification)
   // so we can report them later
@@ -21,9 +38,9 @@
 
   // const props = toSource({...$$restProps})
   const props = JSON.stringify({...$$restProps}, replacer);
-  const warnings = getWarnings(src, badProps);
+  const warnings = getWarnings(actualSrc, badProps);
   const cayoInstanceData = {
-    'data-cayo-src': !warnings.invalidSrc ? `${src}` : '',  
+    'data-cayo-src': !warnings.invalidSrc ? `${actualSrc}` : '',  
     'data-cayo-id': '', // will get set during prerender process based on the src
   };
   if (warnings) {

@@ -36,6 +36,8 @@ function generateIndex(modules) {
   for (const m of modules) {
     js += `export { default as ${m[0]} } from '${m[1]}';\n`;
   }
+  // Add preprocessor exports
+  js += `export { cayoPreprocess } from '../lib/preprocessors/index.js';\n`;
   return { code: js };
 }
 

@@ -213,7 +213,7 @@ Cayo supports the following placeholder syntaxes:
 %cayo.script%
 ```
 
-The HTML comment syntax is reliable since Svelte always preserves comments during SSR compilation. The `%cayo.*%` syntax is deprecated but still supported for backward compatibility.
+The HTML comment syntax is reliable since Cayo configures Svelte to preserve comments during SSR compilation. The `%cayo.*%` syntax is deprecated but still supported for backward compatibility.
 
 ### .cayo
 
@@ -252,6 +252,39 @@ More on [Svelte options](docs/config-reference.md#svelte-options), [Vite options
 > **Warning**<br>
 > Vite plugins will be passed to Cayo, but it's possible that certain plugins may break Cayo if they deal with handling the input differently than vanilla Vite or generate additional output files. Cayo acts like a plugin itself, by handling your source files and transforming them into files that vanilla Vite expects (e.g., the built-in "file-based router" is similar to Vite multi-page plugins).
 
+### Cayo Preprocessors
+
+To use the improved `component` prop syntax with Cayo components (instead of just string paths), you need to configure the `cayoPreprocess` preprocessors:
+
+```js
+// cayo.config.js
+import { cayoPreprocess } from 'cayo/build';
+
+export default {
+  svelte: {
+    preprocess: [
+      cayoPreprocess(),
+      // ...other preprocessors
+    ]
+  }
+}
+```
+
+This preprocessor enhances Cayo's functionality by transforming imported component objects into the appropriate paths that Cayo can resolve. It enables the following syntax:
+
+```svelte
+<!-- Before: String-based approach -->
+<Cayo src="counter.cayo.svelte" />
+
+<!-- After: Component-based approach (with preprocessor) -->
+<script>
+  import Counter from '$components/counter.cayo.svelte';
+</script>
+<Cayo component={Counter} />
+```
+
+The component preprocessor automatically handles alias resolution (like `$components/`) and provides better developer experience with IDE support, auto-completion, and build-time error checking. Additional preprocessors may be added in the future.
+
 ## Components
 
 By default, all components are prerendered. This means their lifecycle ends after they finish one run cycle, and the UI state after the first cycle is rendered to static HTML. This also means that any JS you use within the component's `<script>` element "compiles away" after it's used to render the component. These components are essentially "server side rendered", but are done so locally within Cayo processes rather than on a production server.
@@ -275,6 +308,25 @@ The `<Cayo>` component doesn't actually render your Cayos—instead it creates _
 ### Basic Usage
 
 Let's assume the component `components/counter.cayo.svelte` exists in your project, and has a prop `count`:
+
+#### Component object syntax (recommended):
+```svelte
+<!-- Register your Cayo with the imported component -->
+<script>
+  import { Cayo } from 'cayo';
+  import Counter from '$components/counter.cayo.svelte';
+</script>
+<!-- Basic usage -->
+<Cayo component={Counter} />
+<!-- Any additional props will be used to hydrate the Cayo on the client -->
+<Cayo component={Counter} count={1} />
+```
+
+When using the `component` prop, you can import your Cayo components directly. This provides better developer experience with auto-completion and build-time error checking.
+
+> **Note:** To use the `component` prop syntax, you must configure `cayoPreprocess` in your `cayo.config.js`. See [Cayo Preprocessors](#cayo-preprocessors) for setup instructions.
+
+#### String path syntax (classic):
 ```svelte
 <!-- Register your Cayo with the <Cayo> component -->
 <script>
@@ -286,7 +338,7 @@ Let's assume the component `components/counter.cayo.svelte` exists in your proje
 <Cayo src="counter.cayo.svelte" count={1} />
 ```
 
-The `src` prop is the only required prop, and is used to identify which Cayo Component should be rendered later. The value of `src` needs to be the path of a Cayo, but must be relative to the components directory (e.g., `src/components` by default). For example, say your Cayo was `components/nested/counter.cayo.svelte`, your usage would need to change to `<Cayo src="nested/counter.cayo.svelte" />`.
+The `src` prop is used to identify which Cayo Component should be rendered later. The value of `src` needs to be the path of a Cayo, but must be relative to the components directory (e.g., `src/components` by default). For example, say your Cayo was `components/nested/counter.cayo.svelte`, your usage would need to change to `<Cayo src="nested/counter.cayo.svelte" />`.
 
 The `<Cayo>` component can be rendered on a page or any other Svelte component except other Cayos.
 
@@ -319,11 +371,12 @@ And `page.svelte` registers that Cayo component, like so:
 <!-- src/pages/page.svelte -->
 <script>
   import { Cayo, Entry } from 'cayo';
+  import Counter from '../components/counter.cayo.svelte';
 </script>
 <!-- Say you want to start the count as 1 instead of 0, you can pass that value as a prop -->
-<Cayo src="counter.cayo.svelte" count={1} />
+<Cayo component={Counter} count={1} />
 <!-- Declare the entry -->
-<Entry src="entry.js" />
+<Entry />
 ```
 
 The resulting output will be a placeholder for the component. By default, this placeholder is used as the target for that Svelte component to mount to:
@@ -363,19 +416,37 @@ An entry serves two purposes:
 
 Since not every page will necessarily need Cayos, including an entry file at all is optional. You can define different entries per page, or even use the same file for all pages.
 
-Adding an entry to a page:
+### Default Entry File
+
+By default, the `<Entry>` component looks for `entry.js` in your `src` directory:
+
 ```svelte
 <!-- src/pages/page.svelte -->
 <script>
   import { Entry } from 'cayo';
 </script>
 <!-- ...other page stuff -->
-<Entry src="entry.js" />
+<Entry />
 ```
 
-Using the `<Entry>` component tells Cayo to use that file as the page's entry. The `src` attribute should point at JS file that is **relative to the [`src` directory](#source-directory)**, rather than relative to the page itself.
+This will use `src/entry.js` as the entry file for the page.
 
-Note: the name `entry.js` is used in the examples, but there are no limitations on the path or name, as long as it's in the `src` directory.
+### Custom Entry Files
+
+You can specify a different entry file using the `src` prop:
+
+```svelte
+<!-- src/pages/page.svelte -->
+<script>
+  import { Entry } from 'cayo';
+</script>
+<!-- ...other page stuff -->
+<Entry src="main.js" />
+```
+
+The `src` attribute should point at a JS file that is **relative to the [`src` directory](#source-directory)**, rather than relative to the page itself.
+
+Note: You can use any filename and path structure you want within the `src` directory.
 
 ### Render Hook
 
@@ -446,7 +517,7 @@ Say you want to render something in a Cayo before it gets hydrated, like a "load
   <!-- This will render inside the placeholder because the <Cayo> component renders a <slot> -->
   Loading counter...
 </Cayo>
-<Entry src="entry.js" />
+<Entry />
 ```
 
 ```js
@@ -516,9 +587,7 @@ Page:
 <!-- src/pages/page.svelte -->
 
 <!-- ...other page stuff -->
-<slot name="entry">
-  <script src="entry.js" data-cayo-entry />
-</slot>
+<Entry />
 ```
 
 ## Cayo & the Rest
