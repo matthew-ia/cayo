@@ -258,7 +258,7 @@ To use the improved `component` prop syntax with Cayo components (instead of jus
 
 ```js
 // cayo.config.js
-import { cayoPreprocess } from 'cayo/build';
+import { cayoPreprocess } from 'cayo';
 
 export default {
   svelte: {
