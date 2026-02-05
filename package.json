@@ -1,7 +1,8 @@
 {
   "name": "cayo",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "type": "module",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "start": "node cayo dev --projectRoot test",
     "build": "node scripts/build"
@@ -15,6 +16,7 @@
   "svelte": "./dist/index.js",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
