@@ -1,10 +1,12 @@
+import path from 'path';
+
 /**
  * Svelte preprocessor that transforms Cayo component imports
  * from object references to string paths
  */
 export function cayoComponentPreprocessor() {
   return {
-    markup({ content }) {
+    markup({ content, filename }) {
       // Find all <Cayo component={...}> usages in the markup
       const cayoImports = new Set();
       const cayoUsageRe = /<Cayo\b[^>]*?\bcomponent=\{(\w+)\}/g; // <Cayo component={Counter} />
@@ -34,7 +36,13 @@ export function cayoComponentPreprocessor() {
         const importMatch = importRe.exec(strippedCode);
         if (importMatch) {
           const fullImport = importMatch[1];
-          const importSource = importMatch[2];
+          let importSource = importMatch[2];
+          // Resolve relative paths to absolute so the path stays correct regardless
+          // of which file ultimately consumes this component (e.g. a kit component
+          // used in a consumer project).
+          if (importSource.startsWith('./') || importSource.startsWith('../')) {
+            importSource = path.resolve(path.dirname(filename), importSource);
+          }
           code = code.replace(
             fullImport,
             `${fullImport}\n${cayoImport}.__cayoPath = '${importSource}';`
