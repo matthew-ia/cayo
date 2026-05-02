@@ -10,7 +10,6 @@ Cayo is not "zero config" because it does require a particular [project structur
 export default {
   // config options
   pages: 'outputs',    // default: 'pages'
-  components: 'cayos', // default: 'components'
   build: {
     outDir: 'build',   // default: 'dist'
   },
@@ -57,11 +56,13 @@ Specify the directory where your page components will be, relative to `src`. The
 
 ---
 
-### components
+### components *(soft deprecated)*
 - **Type**: `string`
 - **Default**: `'components'`
 
-Specify the directory where your Cayo Components will be, relative to `src`. Cayo will expect any `<name>.cayo.svelte` that is to be rendered on a page to be in this directory. Other components are not required to be in this directory, but can be. 
+> **Soft deprecated**: The only remaining use of this option is as the base directory for the legacy `<Cayo src="..." />` string syntax. If you are using `<Cayo component={Some} />` (recommended), this option has no effect and can be safely removed from your config.
+>
+> Cayo components referenced via the `component` prop can be imported from any location — local files, path aliases, or npm packages — with no directory restriction.
 
 ---
 

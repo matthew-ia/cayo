@@ -4,20 +4,36 @@
  */
 export function cayoComponentPreprocessor() {
   return {
-    script({ content, attributes }) {
-      // Only process if the script contains .cayo.svelte imports
-      if (!content.includes('.cayo.svelte')) return;
-      
-      // Transform: import Component from '$components/Component.cayo.svelte' or './components/Component.cayo.svelte'
-      // Into: import Component from '...'; Component.__cayoPath = 'Component.cayo.svelte';
-      const transformedContent = content.replace(
-        /import\s+(\w+)\s+from\s+['"]([^'"]*\/)?([^\/'"]+\.cayo\.svelte)['"]\s*;/g,
-        (match, varName, pathPrefix, filename) => {
-          return `${match}\n  if (${varName}) ${varName}.__cayoPath = '${filename}';`;
+    markup({ content }) {
+      // Find all <Cayo component={VarName} usages in the markup
+      const cayoVarNames = new Set();
+      const cayoUsageRe = /<Cayo\b[^>]*?\bcomponent=\{(\w+)\}/g;
+      let match;
+      while ((match = cayoUsageRe.exec(content)) !== null) {
+        cayoVarNames.add(match[1]);
+      }
+
+      if (cayoVarNames.size === 0) return;
+
+      // For each used VarName, find its import statement and inject __cayoPath
+      let code = content;
+      for (const varName of cayoVarNames) {
+        const importRe = new RegExp(
+          `(import\\s+${varName}\\s+from\\s+['"](.+?)['"]\\s*;)`,
+          's'
+        );
+        const importMatch = importRe.exec(code);
+        if (importMatch) {
+          const fullImport = importMatch[1];
+          const importSource = importMatch[2];
+          code = code.replace(
+            fullImport,
+            `${fullImport}\n${varName}.__cayoPath = '${importSource}';`
+          );
         }
-      );
-      
-      return transformedContent !== content ? { code: transformedContent } : null;
+      }
+
+      return code !== content ? { code } : null;
     }
   };
 }
