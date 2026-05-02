@@ -5,30 +5,39 @@
 export function cayoComponentPreprocessor() {
   return {
     markup({ content }) {
-      // Find all <Cayo component={VarName} usages in the markup
-      const cayoVarNames = new Set();
-      const cayoUsageRe = /<Cayo\b[^>]*?\bcomponent=\{(\w+)\}/g;
+      // Find all <Cayo component={...}> usages in the markup
+      const cayoImports = new Set();
+      const cayoUsageRe = /<Cayo\b[^>]*?\bcomponent=\{(\w+)\}/g; // <Cayo component={Counter} />
       let match;
       while ((match = cayoUsageRe.exec(content)) !== null) {
-        cayoVarNames.add(match[1]);
+        cayoImports.add(match[1]);
       }
 
-      if (cayoVarNames.size === 0) return;
+      if (cayoImports.size === 0) return;
 
-      // For each used VarName, find its import statement and inject __cayoPath
+      // For each import binding used as a Cayo prop, find its import statement and inject __cayoPath.
+      // Strip comments from script blocks before searching so commented-out imports are not matched.
       let code = content;
-      for (const varName of cayoVarNames) {
+      const scriptRe = /(<script[\s\S]*?>)([\s\S]*?)(<\/script>)/g;
+      const strippedCode = content.replace(scriptRe, (_, open, body, close) => {
+        const stripped = body
+          .replace(/\/\*[\s\S]*?\*\//g, '')   // block comments /* ... */
+          .replace(/^\s*\/\/.*$/mg, '');        // line comments //
+        return `${open}${stripped}${close}`;
+      });
+
+      for (const cayoImport of cayoImports) {
         const importRe = new RegExp(
-          `(import\\s+${varName}\\s+from\\s+['"](.+?)['"]\\s*;)`,
+          `(import\\s+${cayoImport}\\s+from\\s+['"](.+?)['"]\\s*;)`, // import Counter from './Counter.svelte';
           's'
         );
-        const importMatch = importRe.exec(code);
+        const importMatch = importRe.exec(strippedCode);
         if (importMatch) {
           const fullImport = importMatch[1];
           const importSource = importMatch[2];
           code = code.replace(
             fullImport,
-            `${fullImport}\n${varName}.__cayoPath = '${importSource}';`
+            `${fullImport}\n${cayoImport}.__cayoPath = '${importSource}';`
           );
         }
       }
