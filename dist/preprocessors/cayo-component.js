@@ -29,23 +29,46 @@ export function cayoComponentPreprocessor() {
       });
 
       for (const cayoImport of cayoImports) {
-        const importRe = new RegExp(
-          `(import\\s+${cayoImport}\\s+from\\s+['"](.+?)['"]\\s*;)`, // import Counter from './Counter.svelte';
-          's'
-        );
-        const importMatch = importRe.exec(strippedCode);
+        // Try all common import forms. Semicolon is optional.
+        // 1. Default:   import X from '...'
+        // 2. Named:     import { X } from '...'  (incl. aliased: { Foo as X })
+        // 3. Namespace: import * as X from '...'
+        const importPatterns = [
+          { re: new RegExp(`(import\\s+${cayoImport}\\s+from\\s+['"](.+?)['"]\\s*;?)`, 's'), named: false },
+          { re: new RegExp(`(import\\s*\\{[^}]*\\b${cayoImport}\\b[^}]*\\}\\s*from\\s+['"](.+?)['"]\\s*;?)`, 's'), named: true },
+          { re: new RegExp(`(import\\s*\\*\\s+as\\s+${cayoImport}\\s+from\\s+['"](.+?)['"]\\s*;?)`, 's'), named: false },
+        ];
+        let importMatch = null;
+        let isNamedImport = false;
+        for (const { re, named } of importPatterns) {
+          importMatch = re.exec(strippedCode);
+          if (importMatch) { isNamedImport = named; break; }
+        }
         if (importMatch) {
           const fullImport = importMatch[1];
           let importSource = importMatch[2];
-          // Resolve relative paths to absolute so the path stays correct regardless
-          // of which file ultimately consumes this component (e.g. a kit component
-          // used in a consumer project).
+
           if (importSource.startsWith('./') || importSource.startsWith('../')) {
+            // Relative — resolve to absolute using the current file's directory.
             importSource = path.resolve(path.dirname(filename), importSource);
+          } else if (isNamedImport) {
+            // Named import from a barrel — encode as JSON so cayos.js can generate
+            // a synthetic entry that re-exports the specific component as default.
+            // Handle aliasing: `import { FooCayo as Foo }` → export name is `FooCayo`.
+            const bracesMatch = fullImport.match(/\{([^}]*)\}/);
+            let exportName = cayoImport;
+            if (bracesMatch) {
+              const aliasRe = new RegExp(`(\\w+)\\s+as\\s+${cayoImport}\\b`);
+              const aliasMatch = aliasRe.exec(bracesMatch[1]);
+              if (aliasMatch) exportName = aliasMatch[1];
+            }
+            importSource = JSON.stringify({ from: importSource, named: exportName });
           }
+
+          const escapedSource = importSource.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
           code = code.replace(
             fullImport,
-            `${fullImport}\n${cayoImport}.__cayoPath = '${importSource}';`
+            `${fullImport}\n${cayoImport}.__cayoPath = '${escapedSource}';`
           );
         }
       }
@@ -54,3 +77,4 @@ export function cayoComponentPreprocessor() {
     }
   };
 }
+
