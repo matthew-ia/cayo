@@ -54,7 +54,7 @@ src/
 ├ pages/
 │ └ index.svelte
 ├ components/
-│ └ some.cayo.svelte
+│ └ some.svelte
 ├  __template.svelte
 └  entry.js
 public/
@@ -66,7 +66,7 @@ public/
 ### Source Directory
 Most of your project files, such as pages, cayos, styles, etc. should go in `src`.
 - `pages` contains the pages, or "inputs" of your project 
-- `components` contains your Cayo Components, and can contain any other components
+- `components` contains any components, static or Cayos (the `components` config option is soft deprecated — it is only used as the base directory for the legacy `<Cayo src="..." />` syntax; the recommended `<Cayo component={Some} />` syntax has no directory restriction)
 - `__template.svelte` is your page template
 
 Note: `cayo` watches and builds from the project root, but certain paths are expected as relative to the source directory rather than the root, e.g., cayos and pages. Read the config reference for more information.
@@ -270,7 +270,7 @@ export default {
 }
 ```
 
-This preprocessor enhances Cayo's functionality by transforming imported component objects into the appropriate paths that Cayo can resolve. It enables the following syntax:
+This preprocessor enhances Cayo's functionality by transforming imported component objects into the appropriate paths that Cayo can resolve. It enables the following syntax, and supports components from local files, npm packages, or any path your bundler can resolve:
 
 ```svelte
 <!-- Before: String-based approach -->
@@ -278,12 +278,15 @@ This preprocessor enhances Cayo's functionality by transforming imported compone
 
 <!-- After: Component-based approach (with preprocessor) -->
 <script>
-  import Counter from '$components/counter.cayo.svelte';
+  import Counter from './components/counter.svelte';
+  // or from an npm package:
+  import Widget from 'my-package/Widget.svelte';
 </script>
 <Cayo component={Counter} />
+<Cayo component={Widget} />
 ```
 
-The component preprocessor automatically handles alias resolution (like `$components/`) and provides better developer experience with IDE support, auto-completion, and build-time error checking. Additional preprocessors may be added in the future.
+The component preprocessor detects any `.svelte` component used as a `<Cayo component={...} />` prop — no `.cayo` infix required. It provides better developer experience with IDE support, auto-completion, and build-time error checking. Additional preprocessors may be added in the future.
 
 ## Components
 
@@ -300,21 +303,24 @@ Cayo Components, or Cayos, are Svelte components that are bundled into client-fr
 Cayos require a few things. You must:
 - _Register_ them by using the `<Cayo>` component
   - You will need to import from the `cayo` package: `import { Cayo } from 'cayo'`
-- Include the `.cayo` infix in your Cayo's filename (e.g., `some.cayo.svelte`)
 - Use the [Render Hook](#render-hook) in an [entry](#entries) to render them on a page during runtime
+
+The `.cayo` infix in the filename (e.g., `some.cayo.svelte`) is optional and conventional — any `.svelte` component can be used as a Cayo.
 
 The `<Cayo>` component doesn't actually render your Cayos—instead it creates _placeholders_ for them, which are used by the Render Hook to mount them to the page.
 
 ### Basic Usage
 
-Let's assume the component `components/counter.cayo.svelte` exists in your project, and has a prop `count`:
+Let's assume the component `components/counter.svelte` exists in your project, and has a prop `count`:
 
 #### Component object syntax (recommended):
 ```svelte
 <!-- Register your Cayo with the imported component -->
 <script>
   import { Cayo } from 'cayo';
-  import Counter from '$components/counter.cayo.svelte';
+  import Counter from './components/counter.svelte';
+  // Or from an npm package:
+  // import Counter from 'my-package/Counter.svelte';
 </script>
 <!-- Basic usage -->
 <Cayo component={Counter} />
@@ -322,7 +328,7 @@ Let's assume the component `components/counter.cayo.svelte` exists in your proje
 <Cayo component={Counter} count={1} />
 ```
 
-When using the `component` prop, you can import your Cayo components directly. This provides better developer experience with auto-completion and build-time error checking.
+When using the `component` prop, you can import your Cayo components from any location — local relative paths, path aliases, or npm packages. This provides better developer experience with auto-completion and build-time error checking.
 
 > **Note:** To use the `component` prop syntax, you must configure `cayoPreprocess` in your `cayo.config.js`. See [Cayo Preprocessors](#cayo-preprocessors) for setup instructions.
 
@@ -338,7 +344,7 @@ When using the `component` prop, you can import your Cayo components directly. T
 <Cayo src="counter.cayo.svelte" count={1} />
 ```
 
-The `src` prop is used to identify which Cayo Component should be rendered later. The value of `src` needs to be the path of a Cayo, but must be relative to the components directory (e.g., `src/components` by default). For example, say your Cayo was `components/nested/counter.cayo.svelte`, your usage would need to change to `<Cayo src="nested/counter.cayo.svelte" />`.
+The `src` prop resolves paths relative to `config.components` (`src/components` by default). It only supports local components in that directory. For components outside that directory — including npm packages — use the `component` prop instead. The `component` prop syntax is recommended for all new usage.
 
 The `<Cayo>` component can be rendered on a page or any other Svelte component except other Cayos.
 
@@ -347,15 +353,15 @@ Assuming your project directory looks something like this:
 ```
 src/ 
 ├ components/
-│ └ counter.cayo.svelte
+│ └ counter.svelte
 ├ pages/
 │ └ index.svelte
 └ __template.svelte
 ```
 
-And `counter.cayo.svelte` has some reactive code you want to run on the client:
+And `counter.svelte` has some reactive code you want to run on the client:
 ```svelte
-<!-- src/components/counter.cayo.svelte -->
+<!-- src/components/counter.svelte -->
 <script>
   export let count = 0;
 </script>
@@ -371,7 +377,7 @@ And `page.svelte` registers that Cayo component, like so:
 <!-- src/pages/page.svelte -->
 <script>
   import { Cayo, Entry } from 'cayo';
-  import Counter from '../components/counter.cayo.svelte';
+  import Counter from '../components/counter.svelte';
 </script>
 <!-- Say you want to start the count as 1 instead of 0, you can pass that value as a prop -->
 <Cayo component={Counter} count={1} />

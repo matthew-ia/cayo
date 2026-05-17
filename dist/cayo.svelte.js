@@ -53,8 +53,18 @@ const Cayo = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 		// Traditional string src prop
 		actualSrc = src;
 	} else if (component && component.__cayoPath) {
-		// Component object with extracted path
-		actualSrc = component.__cayoPath;
+		// Component object with extracted path.
+		// __cayoPath may be a JSON string for named imports: {"from":"pkg","named":"X"}
+		let cayoPath = component.__cayoPath;
+
+		try {
+			const parsed = JSON.parse(cayoPath);
+			if (parsed?.from) cayoPath = parsed.from;
+		} catch {
+			
+		}
+
+		actualSrc = cayoPath;
 	} else if (typeof component === 'string') {
 		// Component passed as string directly
 		actualSrc = component;
@@ -82,8 +92,13 @@ const Cayo = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 
 	const warnings = getWarnings(actualSrc, badProps);
 
+	// For data-cayo-src, use the raw __cayoPath (may be JSON) so prerender.js has full info.
+	const rawCayoSrc = component && component.__cayoPath
+	? component.__cayoPath
+	: actualSrc;
+
 	const cayoInstanceData = {
-		'data-cayo-src': !warnings.invalidSrc ? `${actualSrc}` : '',
+		'data-cayo-src': !warnings.invalidSrc ? `${rawCayoSrc}` : '',
 		'data-cayo-id': '', // will get set during prerender process based on the src
 		
 	};
